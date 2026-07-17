@@ -1,0 +1,39 @@
+server:
+  port: 4301
+
+spring:
+  application:
+    name: donation-platform-server
+
+  config:
+    import: optional:classpath:application-local.yaml
+
+  datasource:
+    url: jdbc:postgresql://localhost:5436/donation_platform
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: true
+
+jwt:
+  secret: ${JWT_SECRET:donation-platform-dev-secret-key-must-be-at-least-32-bytes-long}
+  access-token-expiration-ms: 1800000
+  refresh-token-expiration-ms: 604800000
+  issuer: donation-platform
+
+aws:
+  s3:
+    access-key: ${AWS_ACCESS_KEY_ID:}
+    secret-key: ${AWS_SECRET_ACCESS_KEY:}
+    bucket: ${AWS_S3_BUCKET_NAME:}
+    region: ${AWS_S3_REGION:ap-northeast-2}
+    prefix: ${AWS_S3_PREFIX:donation-platform}
+    presign-expires-seconds: 300

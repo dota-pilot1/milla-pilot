@@ -1,0 +1,15 @@
+export const common = {
+  brand: "DonationPlatform",
+  tagline: "Donation item group-buying funding system.",
+  description: "Donation item registration, pooled funding, group purchasing, and delivery tracking features are coming soon.",
+  loading: "Loading...",
+  confirm: "Confirm",
+  cancel: "Cancel",
+  save: "Save",
+  delete: "Delete",
+  edit: "Edit",
+  close: "Close",
+  search: "Search",
+  language: "Language",
+  theme: "Theme",
+};

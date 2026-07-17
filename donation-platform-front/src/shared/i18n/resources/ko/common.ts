@@ -1,0 +1,15 @@
+export const common = {
+  brand: "DonationPlatform",
+  tagline: "후원 물품 공동구매 펀딩 시스템입니다.",
+  description: "후원 물품 등록, 공동 모금, 통합 구매, 배송 추적 기능이 추가될 예정입니다.",
+  loading: "처리 중...",
+  confirm: "확인",
+  cancel: "취소",
+  save: "저장",
+  delete: "삭제",
+  edit: "편집",
+  close: "닫기",
+  search: "검색",
+  language: "언어",
+  theme: "테마",
+};
