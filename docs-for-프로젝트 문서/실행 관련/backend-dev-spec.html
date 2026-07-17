@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DonationPlatform 백엔드 개발 스펙 조사 및 적절성</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f8fb;
+        --paper: #ffffff;
+        --text: #111827;
+        --muted: #667085;
+        --line: #d8e0eb;
+        --soft: #f1f5f9;
+        --green: #047857;
+        --green-soft: #ecfdf5;
+        --blue: #1d4ed8;
+        --blue-soft: #eff6ff;
+        --amber: #b45309;
+        --amber-soft: #fffbeb;
+        --red: #b42318;
+        --red-soft: #fef3f2;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        color: var(--text);
+        background: var(--bg);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.65;
+      }
+
+      main {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 40px 24px 72px;
+      }
+
+      header, section {
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: var(--paper);
+        box-shadow: 0 16px 42px rgba(15, 23, 42, 0.05);
+      }
+
+      header { padding: 30px; }
+      section { margin-top: 18px; padding: 24px; }
+
+      h1, h2, h3, p { margin-top: 0; }
+      h1 { margin-bottom: 10px; font-size: 32px; line-height: 1.25; letter-spacing: 0; }
+      h2 { margin-bottom: 12px; font-size: 22px; letter-spacing: 0; }
+      h3 { margin-bottom: 8px; font-size: 16px; }
+      p { margin-bottom: 12px; }
+
+      code, pre {
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      }
+
+      code {
+        padding: 2px 5px;
+        border-radius: 6px;
+        color: #0f172a;
+        background: var(--soft);
+        font-size: 0.92em;
+      }
+
+      pre {
+        overflow-x: auto;
+        margin: 12px 0 0;
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        color: #1f2937;
+        background: #f8fafc;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      ul, ol { margin: 0; padding-left: 22px; }
+      li + li { margin-top: 8px; }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        font-size: 14px;
+      }
+
+      th, td {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        color: #475467;
+        background: #f8fafc;
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      tr:last-child td { border-bottom: 0; }
+
+      .lead {
+        max-width: 860px;
+        margin-bottom: 0;
+        color: var(--muted);
+        font-size: 16px;
+      }
+
+      .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 18px;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 0 10px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: #344054;
+        background: #fff;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .card {
+        min-height: 122px;
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #fff;
+      }
+
+      .card strong { display: block; margin-bottom: 8px; }
+      .card span { display: block; color: var(--muted); font-size: 14px; }
+
+      .callout, .warning, .danger, .note {
+        margin-top: 14px;
+        padding: 14px 16px;
+        border-radius: 12px;
+        font-size: 14px;
+      }
+
+      .callout { border: 1px solid #bbf7d0; color: #065f46; background: var(--green-soft); }
+      .warning { border: 1px solid #fed7aa; color: #92400e; background: var(--amber-soft); }
+      .danger { border: 1px solid #fecdca; color: var(--red); background: var(--red-soft); }
+      .note { border: 1px solid #bfdbfe; color: var(--blue); background: var(--blue-soft); }
+
+      @media (max-width: 860px) {
+        main { padding: 24px 14px 52px; }
+        header, section { border-radius: 14px; }
+        .grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="meta">
+          <span class="pill">Backend Spec</span>
+          <span class="pill">Spring Boot 4</span>
+          <span class="pill">Java 21</span>
+          <span class="pill">PostgreSQL</span>
+        </div>
+        <h1>백엔드 개발 스펙 조사 및 적절성</h1>
+        <p class="lead">
+          DonationPlatform 백엔드는 후원 물품 공동구매 펀딩 시스템의 인증, 메뉴, 권한, 시설, 후원 물품, 업로드 API를 담당한다.
+          현재 구조는 단일 Spring Boot 애플리케이션이며, 1차 MVP 기준으로는 충분히 합리적이다.
+        </p>
+      </header>
+
+      <section>
+        <h2>기본 스펙</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>항목</th>
+              <th>현재 스펙</th>
+              <th>적절성 판단</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>프로젝트</td>
+              <td><code>donation-platform-server</code></td>
+              <td>프론트와 관리자 앱이 함께 쓰는 중앙 API 서버로 적절하다.</td>
+            </tr>
+            <tr>
+              <td>언어/런타임</td>
+              <td>Java 21 toolchain</td>
+              <td>LTS 버전이라 장기 유지에 적합하다.</td>
+            </tr>
+            <tr>
+              <td>프레임워크</td>
+              <td>Spring Boot 4.0.5</td>
+              <td>최신 스택이다. 단, 라이브러리 호환성 이슈가 생기면 3.x LTS 계열 검토 여지는 있다.</td>
+            </tr>
+            <tr>
+              <td>DB</td>
+              <td>PostgreSQL, host port <code>5436</code></td>
+              <td>결제/후원/정산성 데이터에는 RDB가 맞다.</td>
+            </tr>
+            <tr>
+              <td>ORM</td>
+              <td>Spring Data JPA, Hibernate</td>
+              <td>CRUD 중심 MVP에는 생산성이 높다. 복잡한 통계/정산 쿼리는 별도 query 전략이 필요하다.</td>
+            </tr>
+            <tr>
+              <td>인증</td>
+              <td>Spring Security, JWT access/refresh token</td>
+              <td>웹과 Tauri 앱이 같이 쓰기 좋다. refresh token 저장/폐기 정책은 운영 전에 강화해야 한다.</td>
+            </tr>
+            <tr>
+              <td>API 문서</td>
+              <td>springdoc-openapi 2.8.8</td>
+              <td>Swagger UI 기반 협업에 적합하다.</td>
+            </tr>
+            <tr>
+              <td>파일 업로드</td>
+              <td>AWS SDK S3, presigned URL</td>
+              <td>증빙/영수증 업로드까지 확장하기 좋다. 초기에는 환경 변수 누락에 주의한다.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>현재 패키지 구조</h2>
+        <pre><code>com.cj.donationplatform
+├─ auth
+│  ├─ domain
+│  ├─ infrastructure
+│  ├─ jwt
+│  └─ security
+├─ common
+│  ├─ exception
+│  ├─ response
+│  └─ upload
+├─ config
+├─ facility
+│  ├─ application
+│  ├─ domain
+│  ├─ infrastructure
+│  └─ presentation
+├─ donation_item
+│  ├─ application
+│  ├─ domain
+│  ├─ infrastructure
+│  └─ presentation
+├─ menu / role / permission / permission_category / site_settings / user
+│  ├─ application
+│  ├─ domain
+│  ├─ infrastructure
+│  └─ presentation</code></pre>
+        <div class="callout">
+          도메인별 패키지 안에 <code>presentation</code>, <code>application</code>, <code>domain</code>, <code>infrastructure</code>를 두는 구조는
+          MVP 이후 기능 확장에도 무난하다.
+        </div>
+      </section>
+
+      <section>
+        <h2>주요 모듈 평가</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>모듈</th>
+              <th>역할</th>
+              <th>적절성</th>
+              <th>보강 포인트</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>auth</code>, <code>user</code></td>
+              <td>로그인, 회원가입, JWT, 사용자 관리</td>
+              <td>웹/Tauri 공통 인증 기반으로 적절하다.</td>
+              <td>역할별 접근 제어 테스트를 추가한다.</td>
+            </tr>
+            <tr>
+              <td><code>role</code>, <code>permission</code></td>
+              <td>RBAC 관리</td>
+              <td>시설 관리자/플랫폼 관리자/후원자 구분에 필요하다.</td>
+              <td>역할 코드와 메뉴 권한 매핑 기준을 문서와 시더에 계속 맞춘다.</td>
+            </tr>
+            <tr>
+              <td><code>menu</code></td>
+              <td>DB 기반 메뉴 관리</td>
+              <td>초기 운영형 프로젝트에는 유연하다.</td>
+              <td>웹 메뉴와 Tauri 메뉴를 테이블 또는 menuType으로 분리하는 설계가 필요하다.</td>
+            </tr>
+            <tr>
+              <td><code>facility</code></td>
+              <td>후원 대상 시설 관리</td>
+              <td>1차 MVP의 첫 핵심 도메인이다.</td>
+              <td>시설 공개 여부, 승인 상태, 담당자 매핑을 강화한다.</td>
+            </tr>
+            <tr>
+              <td><code>donation_item</code></td>
+              <td>시설별 필요 물품 관리</td>
+              <td>후원하기 페이지와 직접 연결되는 핵심 도메인이다.</td>
+              <td>목표 금액/수량, 달성률, 상태 전이를 엄격히 관리한다.</td>
+            </tr>
+            <tr>
+              <td><code>common/upload</code></td>
+              <td>S3 presigned URL 발급</td>
+              <td>증빙 자료 업로드에 적합하다.</td>
+              <td>파일 확장자, 크기, 접근 권한 검증을 추가한다.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>보안/인증 설정</h2>
+        <ul>
+          <li>Stateless JWT 인증을 사용한다.</li>
+          <li>허용 origin은 <code>http://localhost:4300</code>, <code>http://localhost:1422</code>, <code>tauri://localhost</code>이다.</li>
+          <li>공개 API는 회원가입, 로그인, 토큰 갱신, 이메일 확인, 사이트 설정 조회, 메뉴 조회, 시설 조회, Swagger다.</li>
+          <li>그 외 API는 인증이 필요하다.</li>
+        </ul>
+        <div class="note">
+          웹의 후원자 공개 화면에서 시설과 후원 물품을 조회해야 하므로 <code>GET /api/facilities/**</code> 공개는 자연스럽다.
+          단, 생성/수정/삭제는 관리자 권한으로 제한해야 한다.
+        </div>
+      </section>
+
+      <section>
+        <h2>DB/마이그레이션 평가</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>항목</th>
+              <th>현재</th>
+              <th>판단</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>DDL</td>
+              <td><code>spring.jpa.hibernate.ddl-auto=update</code></td>
+              <td>개발 초기에는 편하지만 운영 전에는 Flyway 또는 Liquibase 도입이 필요하다.</td>
+            </tr>
+            <tr>
+              <td>시더</td>
+              <td>Role, Permission, Menu, Facility seeder 존재</td>
+              <td>초기 데이터 재현성이 좋아진다. idempotent upsert 유지가 중요하다.</td>
+            </tr>
+            <tr>
+              <td>테스트 DB</td>
+              <td>H2 test runtime</td>
+              <td>단위 테스트에는 적절하지만 PostgreSQL 전용 동작은 Testcontainers 검토가 필요하다.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>MVP 적합성 결론</h2>
+        <div class="grid">
+          <div class="card">
+            <strong>현재 선택은 적절함</strong>
+            <span>Spring Boot + JPA + PostgreSQL 조합은 후원/결제/상태 추적성 데이터에 맞다.</span>
+          </div>
+          <div class="card">
+            <strong>과하지 않음</strong>
+            <span>도메인 규모가 MES나 쇼핑몰보다 작아 단일 모듈 백엔드로 충분하다.</span>
+          </div>
+          <div class="card">
+            <strong>주의점은 상태 정합성</strong>
+            <span>목표 달성 잠금, 결제, 환불, 통합구매는 단순 CRUD보다 엄격한 상태 전이가 필요하다.</span>
+          </div>
+        </div>
+        <div class="warning">
+          다음 단계에서 결제를 붙이면 <code>Contribution</code>, 결제 이벤트, 환불, 목표 달성 락, 구매 주문 상태를 트랜잭션 단위로 설계해야 한다.
+        </div>
+      </section>
+
+      <section>
+        <h2>권장 보강 순서</h2>
+        <ol>
+          <li>웹/Tauri 메뉴 데이터 분리 설계 확정: <code>web_platform_menus</code>, <code>tauri_admin_menus</code> 또는 <code>menuType</code>.</li>
+          <li>시설과 후원 물품 API의 공개/관리자 권한 경계를 명확히 한다.</li>
+          <li>후원 물품 상태 enum과 상태 전이 규칙을 테스트로 고정한다.</li>
+          <li>운영 전 DB migration 도구를 도입한다.</li>
+          <li>결제 전 단계에서는 사전등록 또는 더미 Contribution으로 흐름을 먼저 검증한다.</li>
+        </ol>
+      </section>
+    </main>
+  </body>
+</html>

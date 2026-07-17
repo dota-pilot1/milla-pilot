@@ -1,0 +1,1501 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>후원하기 페이지 기본 (시설 → 품목 → 상세) — 목업 v2</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f5f7fa;
+        --paper: #ffffff;
+        --text: #101828;
+        --muted: #667085;
+        --faint: #98a2b3;
+        --line: #e4e7ec;
+        --line-soft: #eef1f5;
+        --soft: #f7f9fc;
+        --brand: #047857;
+        --brand-strong: #036049;
+        --brand-soft: #ecfdf5;
+        --brand-border: #a7f3d0;
+        --blue: #0369a1;
+        --blue-soft: #e0f2fe;
+        --amber: #b45309;
+        --amber-soft: #fffbeb;
+        --amber-border: #fde68a;
+        --red: #b42318;
+        --red-soft: #fff1f3;
+        --violet: #6d28d9;
+        --violet-soft: #f5f3ff;
+        --shadow: 0 14px 40px rgba(16, 24, 40, 0.06);
+        --shadow-sm: 0 4px 14px rgba(16, 24, 40, 0.05);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--text);
+        background: var(--bg);
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", "Pretendard",
+          "Apple SD Gothic Neo", sans-serif;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      button {
+        font-family: inherit;
+        cursor: pointer;
+      }
+
+      /* ── 상단 안내 배너 ── */
+      .stage-banner {
+        background: var(--amber-soft);
+        border-bottom: 1px solid var(--amber-border);
+        color: var(--amber);
+        font-size: 12.5px;
+        text-align: center;
+        padding: 8px 16px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+
+      /* ── 헤더 ── */
+      header.site {
+        background: var(--paper);
+        border-bottom: 1px solid var(--line);
+        position: sticky;
+        top: 0;
+        z-index: 20;
+      }
+
+      .site-inner {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 14px 24px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 800;
+        font-size: 17px;
+        letter-spacing: -0.02em;
+      }
+
+      .brand .logo {
+        width: 30px;
+        height: 30px;
+        border-radius: 9px;
+        background: linear-gradient(135deg, var(--brand), #10b981);
+        display: grid;
+        place-items: center;
+        color: #fff;
+        font-size: 16px;
+      }
+
+      nav.top {
+        display: flex;
+        gap: 4px;
+        margin-left: 8px;
+      }
+
+      nav.top a {
+        font-size: 14px;
+        color: var(--muted);
+        padding: 7px 12px;
+        border-radius: 8px;
+        font-weight: 600;
+      }
+
+      nav.top a.active {
+        color: var(--brand-strong);
+        background: var(--brand-soft);
+      }
+
+      nav.top a:hover {
+        background: var(--soft);
+      }
+
+      .header-spacer {
+        flex: 1;
+      }
+
+      .ghost-btn {
+        border: 1px solid var(--line);
+        background: var(--paper);
+        color: var(--text);
+        border-radius: 9px;
+        padding: 8px 14px;
+        font-size: 13.5px;
+        font-weight: 600;
+      }
+
+      .ghost-btn:hover {
+        background: var(--soft);
+      }
+
+      /* ── 레이아웃 ── */
+      main {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 28px 24px 80px;
+      }
+
+      .page-head {
+        margin-bottom: 20px;
+      }
+
+      .breadcrumb {
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .breadcrumb button.link {
+        border: none;
+        background: none;
+        color: var(--brand-strong);
+        font-weight: 600;
+        padding: 0;
+        font-size: 13px;
+      }
+
+      .breadcrumb button.link:hover {
+        text-decoration: underline;
+      }
+
+      /* 라우트 매핑 힌트 (페이지 매핑 계획용) */
+      .route-pill {
+        font-family: "SFMono-Regular", Consolas, monospace;
+        font-size: 11.5px;
+        font-weight: 700;
+        color: var(--violet);
+        background: var(--violet-soft);
+        border: 1px solid #ddd6fe;
+        border-radius: 7px;
+        padding: 2px 8px;
+      }
+
+      h1.title {
+        margin: 0;
+        font-size: 24px;
+        letter-spacing: -0.02em;
+      }
+
+      .subtitle {
+        margin: 6px 0 0;
+        color: var(--muted);
+        font-size: 14.5px;
+      }
+
+      /* ── 상단 요약 통계 바 (GPT 계획서 반영) ── */
+      .summary {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+        margin: 18px 0 22px;
+      }
+
+      .summary .cell {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 16px 18px;
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        align-items: center;
+        gap: 13px;
+      }
+
+      .summary .ic {
+        width: 40px;
+        height: 40px;
+        border-radius: 11px;
+        display: grid;
+        place-items: center;
+        font-size: 19px;
+        flex-shrink: 0;
+      }
+
+      .summary .ic.g {
+        background: var(--brand-soft);
+      }
+      .summary .ic.b {
+        background: var(--blue-soft);
+      }
+      .summary .ic.a {
+        background: var(--amber-soft);
+      }
+
+      .summary .n {
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+      }
+
+      .summary .l {
+        font-size: 12.5px;
+        color: var(--muted);
+        font-weight: 600;
+      }
+
+      /* ── 필터 바 ── */
+      .filterbar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0 0 22px;
+        flex-wrap: wrap;
+      }
+
+      .search {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 9px 12px;
+        min-width: 240px;
+        flex: 1;
+        max-width: 320px;
+      }
+
+      .search input {
+        border: none;
+        outline: none;
+        font-size: 14px;
+        width: 100%;
+        background: transparent;
+        color: var(--text);
+      }
+
+      .chips {
+        display: flex;
+        gap: 7px;
+        flex-wrap: wrap;
+      }
+
+      .chip {
+        border: 1px solid var(--line);
+        background: var(--paper);
+        color: var(--muted);
+        border-radius: 999px;
+        padding: 7px 13px;
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .chip.active {
+        background: var(--text);
+        color: #fff;
+        border-color: var(--text);
+      }
+
+      .chip.urgent.active {
+        background: var(--amber);
+        border-color: var(--amber);
+      }
+
+      .chip:hover:not(.active) {
+        background: var(--soft);
+      }
+
+      /* ── 시설 카드 그리드 ── */
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 18px;
+      }
+
+      .facility-card {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: var(--shadow-sm);
+        transition:
+          transform 0.16s ease,
+          box-shadow 0.16s ease,
+          border-color 0.16s ease;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .facility-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow);
+        border-color: var(--brand-border);
+      }
+
+      .fc-top {
+        display: flex;
+        align-items: flex-start;
+        gap: 13px;
+      }
+
+      .fc-avatar {
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        background: var(--brand-soft);
+        color: var(--brand-strong);
+        display: grid;
+        place-items: center;
+        font-weight: 800;
+        font-size: 17px;
+        flex-shrink: 0;
+      }
+
+      .fc-name {
+        font-size: 16.5px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+      }
+
+      .fc-meta {
+        font-size: 12.5px;
+        color: var(--faint);
+        margin-top: 2px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11.5px;
+        font-weight: 700;
+        padding: 3px 9px;
+        border-radius: 999px;
+        letter-spacing: -0.01em;
+      }
+
+      .badge.verified {
+        background: var(--blue-soft);
+        color: var(--blue);
+      }
+      .badge.recruiting {
+        background: var(--brand-soft);
+        color: var(--brand-strong);
+      }
+      .badge.locked {
+        background: var(--soft);
+        color: var(--muted);
+      }
+      .badge.buying {
+        background: var(--violet-soft);
+        color: var(--violet);
+      }
+      .badge.shipping {
+        background: var(--amber-soft);
+        color: var(--amber);
+      }
+      .badge.urgent {
+        background: var(--red-soft);
+        color: var(--red);
+      }
+
+      .fc-badges {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+
+      /* 시설 카드 내 대표 물품 미리보기 (GPT 계획서 반영) */
+      .preview-items {
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+        padding: 12px;
+        background: var(--soft);
+        border-radius: 12px;
+      }
+
+      .pv-row {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        font-size: 13px;
+      }
+
+      .pv-emoji {
+        font-size: 15px;
+        flex-shrink: 0;
+      }
+
+      .pv-name {
+        flex: 1;
+        color: var(--text);
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .pv-bar {
+        width: 62px;
+        height: 6px;
+        border-radius: 999px;
+        background: var(--line);
+        overflow: hidden;
+        flex-shrink: 0;
+      }
+
+      .pv-bar > span {
+        display: block;
+        height: 100%;
+        background: var(--brand);
+        border-radius: 999px;
+      }
+
+      .pv-pct {
+        width: 34px;
+        text-align: right;
+        font-weight: 800;
+        font-size: 12px;
+        color: var(--brand-strong);
+        flex-shrink: 0;
+      }
+
+      .pv-more {
+        font-size: 12px;
+        color: var(--muted);
+        font-weight: 600;
+        text-align: center;
+        padding-top: 2px;
+      }
+
+      /* ── 진행률 바 ── */
+      .progress {
+        height: 8px;
+        border-radius: 999px;
+        background: var(--line-soft);
+        overflow: hidden;
+      }
+
+      .progress > span {
+        display: block;
+        height: 100%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, var(--brand), #10b981);
+      }
+
+      .progress.full > span {
+        background: linear-gradient(90deg, #0369a1, #0ea5e9);
+      }
+
+      .fc-cta {
+        border: 1px solid var(--brand-border);
+        background: var(--brand-soft);
+        color: var(--brand-strong);
+        font-weight: 700;
+        font-size: 13.5px;
+        padding: 10px;
+        border-radius: 10px;
+        text-align: center;
+      }
+
+      .facility-card:hover .fc-cta {
+        background: var(--brand);
+        color: #fff;
+        border-color: var(--brand);
+      }
+
+      /* ── 상세(시설) 뷰 ── */
+      .detail-head {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 24px;
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        gap: 18px;
+        align-items: flex-start;
+        margin-bottom: 22px;
+      }
+
+      .detail-head .fc-avatar {
+        width: 60px;
+        height: 60px;
+        font-size: 22px;
+        border-radius: 15px;
+      }
+
+      .dh-body {
+        flex: 1;
+      }
+
+      .dh-title {
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+
+      .dh-badges {
+        display: flex;
+        gap: 7px;
+        margin: 8px 0 10px;
+        flex-wrap: wrap;
+      }
+
+      .dh-desc {
+        font-size: 14px;
+        color: var(--muted);
+        max-width: 640px;
+      }
+
+      .section-label {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        margin: 6px 0 14px;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .section-label h2 {
+        font-size: 17px;
+        margin: 0;
+        letter-spacing: -0.01em;
+      }
+
+      .section-label .hint {
+        font-size: 12.5px;
+        color: var(--faint);
+      }
+
+      /* ── 품목(준비물) 리스트 ── */
+      .items {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .item-card {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 18px 20px;
+        display: grid;
+        grid-template-columns: 54px 1fr auto;
+        gap: 16px;
+        align-items: center;
+        box-shadow: var(--shadow-sm);
+        transition: border-color 0.15s ease;
+      }
+
+      .item-card.clickable {
+        cursor: pointer;
+      }
+
+      .item-card.clickable:hover {
+        border-color: var(--brand-border);
+      }
+
+      .item-thumb {
+        width: 54px;
+        height: 54px;
+        border-radius: 12px;
+        background: var(--soft);
+        display: grid;
+        place-items: center;
+        font-size: 24px;
+      }
+
+      .item-main {
+        min-width: 0;
+      }
+
+      .item-name {
+        font-size: 15.5px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .item-sub {
+        font-size: 12.5px;
+        color: var(--faint);
+        margin: 2px 0 10px;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .deadline {
+        color: var(--amber);
+        font-weight: 700;
+      }
+
+      .item-progress-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .item-progress-row .progress {
+        flex: 1;
+      }
+
+      .item-amount {
+        font-size: 13px;
+        color: var(--muted);
+        white-space: nowrap;
+      }
+
+      .item-amount b {
+        color: var(--text);
+        font-weight: 800;
+      }
+
+      .item-action {
+        text-align: right;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-end;
+      }
+
+      .donate-btn {
+        border: none;
+        background: var(--brand);
+        color: #fff;
+        font-weight: 700;
+        font-size: 14px;
+        padding: 10px 18px;
+        border-radius: 10px;
+        box-shadow: 0 8px 18px rgba(4, 120, 87, 0.22);
+        transition: filter 0.15s ease;
+        white-space: nowrap;
+      }
+
+      .donate-btn:hover {
+        filter: brightness(1.08);
+      }
+
+      .donate-btn.disabled {
+        background: var(--soft);
+        color: var(--faint);
+        box-shadow: none;
+        cursor: not-allowed;
+      }
+
+      .donate-btn.lg {
+        padding: 14px 22px;
+        font-size: 15.5px;
+        width: 100%;
+      }
+
+      .pct {
+        font-size: 13px;
+        font-weight: 800;
+        color: var(--brand-strong);
+      }
+
+      .pct.full {
+        color: var(--blue);
+      }
+
+      /* ── 물품 상세 뷰 (3단계, GPT 계획서 반영) ── */
+      .item-detail {
+        display: grid;
+        grid-template-columns: 1.6fr 1fr;
+        gap: 22px;
+        align-items: start;
+      }
+
+      .id-left {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 26px;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .id-hero {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        margin-bottom: 18px;
+      }
+
+      .id-emoji {
+        width: 72px;
+        height: 72px;
+        border-radius: 16px;
+        background: var(--soft);
+        display: grid;
+        place-items: center;
+        font-size: 34px;
+        flex-shrink: 0;
+      }
+
+      .id-name {
+        font-size: 21px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+
+      .id-facility {
+        font-size: 13.5px;
+        color: var(--muted);
+        margin-top: 3px;
+      }
+
+      .id-reason {
+        background: var(--soft);
+        border-radius: 12px;
+        padding: 16px;
+        font-size: 14px;
+        color: var(--text);
+        line-height: 1.65;
+        margin-top: 6px;
+      }
+
+      .id-reason b {
+        color: var(--brand-strong);
+      }
+
+      .id-right {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 24px;
+        box-shadow: var(--shadow-sm);
+        position: sticky;
+        top: 90px;
+      }
+
+      .id-figures {
+        display: flex;
+        justify-content: space-between;
+        margin: 14px 0;
+      }
+
+      .id-fig .k {
+        font-size: 12px;
+        color: var(--faint);
+        font-weight: 600;
+      }
+
+      .id-fig .v {
+        font-size: 18px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+
+      .id-fig .v.brand {
+        color: var(--brand-strong);
+      }
+
+      .amount-label {
+        font-size: 13px;
+        font-weight: 700;
+        margin: 18px 0 10px;
+      }
+
+      .amount-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+
+      .amount-btn {
+        border: 1px solid var(--line);
+        background: var(--paper);
+        border-radius: 10px;
+        padding: 12px 0;
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text);
+        transition: all 0.12s ease;
+      }
+
+      .amount-btn:hover {
+        border-color: var(--brand-border);
+        background: var(--brand-soft);
+      }
+
+      .amount-btn.active {
+        border-color: var(--brand);
+        background: var(--brand-soft);
+        color: var(--brand-strong);
+      }
+
+      .amount-custom {
+        grid-column: 1 / -1;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 10px 14px;
+        margin-top: 2px;
+      }
+
+      .amount-custom input {
+        border: none;
+        outline: none;
+        font-size: 15px;
+        font-weight: 700;
+        text-align: right;
+        width: 100%;
+        background: transparent;
+        color: var(--text);
+      }
+
+      .id-note {
+        font-size: 12px;
+        color: var(--faint);
+        margin-top: 14px;
+        line-height: 1.5;
+      }
+
+      /* ── 신뢰 안내 ── */
+      .trust {
+        margin-top: 34px;
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 22px 24px;
+      }
+
+      .trust h3 {
+        margin: 0 0 14px;
+        font-size: 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .trust-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 14px;
+      }
+
+      .trust-item {
+        font-size: 13px;
+        color: var(--muted);
+        display: flex;
+        gap: 9px;
+        align-items: flex-start;
+      }
+
+      .trust-item .ic {
+        color: var(--brand);
+        font-weight: 800;
+        flex-shrink: 0;
+      }
+
+      .trust-item b {
+        color: var(--text);
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      /* ── 결제 안내 모달 ── */
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(16, 24, 40, 0.45);
+        display: grid;
+        place-items: center;
+        z-index: 60;
+        padding: 20px;
+      }
+
+      .modal {
+        background: var(--paper);
+        border-radius: 18px;
+        padding: 26px;
+        max-width: 420px;
+        width: 100%;
+        box-shadow: 0 30px 70px rgba(16, 24, 40, 0.3);
+      }
+
+      .modal h3 {
+        margin: 0 0 6px;
+        font-size: 18px;
+      }
+
+      .modal p {
+        color: var(--muted);
+        font-size: 13.5px;
+        margin: 0 0 18px;
+      }
+
+      .modal .row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 14px;
+        padding: 9px 0;
+        border-bottom: 1px dashed var(--line);
+      }
+
+      .modal .row:last-of-type {
+        border-bottom: none;
+      }
+
+      .modal-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+      }
+
+      .modal-actions button {
+        flex: 1;
+        padding: 11px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 14px;
+        border: 1px solid var(--line);
+        background: var(--paper);
+      }
+
+      .modal-actions .primary {
+        background: var(--brand);
+        color: #fff;
+        border-color: var(--brand);
+      }
+
+      @media (max-width: 720px) {
+        .summary {
+          grid-template-columns: 1fr;
+        }
+        .item-detail {
+          grid-template-columns: 1fr;
+        }
+        .id-right {
+          position: static;
+        }
+        .item-card {
+          grid-template-columns: 44px 1fr;
+        }
+        .item-action {
+          grid-column: 1 / -1;
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: center;
+        }
+        nav.top {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="stage-banner">
+      🔧 현재 <b>사전등록·리허설 단계</b>입니다 — 실제 결제는 전문가 사전 검토 관문 통과 후 활성화됩니다. (기획안 F-012·F-016)
+    </div>
+
+    <header class="site">
+      <div class="site-inner">
+        <div class="brand">
+          <span class="logo">밀</span>
+          <span>밀라파일럿</span>
+        </div>
+        <nav class="top">
+          <a href="#" class="active">후원하기</a>
+          <a href="#">내 후원 내역</a>
+          <a href="#">서비스 소개</a>
+          <a href="#">FAQ</a>
+        </nav>
+        <div class="header-spacer"></div>
+        <button class="ghost-btn">로그인 / 사전등록</button>
+      </div>
+    </header>
+
+    <main>
+      <!-- ═══════════ 뷰 A: 시설 목록  ·  /donate ═══════════ -->
+      <section id="view-list">
+        <div class="page-head">
+          <div class="breadcrumb">
+            <span>후원하기</span>
+            <span class="route-pill">/donate</span>
+          </div>
+          <h1 class="title">지금 어떤 물품을 후원할 수 있나요?</h1>
+          <p class="subtitle">
+            시설이 직접 검수해 올린 준비물 목표에 품목 단위로 참여합니다. 시설을
+            선택하면 지금 필요한 물품 목록으로 이동해요.
+          </p>
+        </div>
+
+        <!-- 상단 요약 통계 -->
+        <div class="summary">
+          <div class="cell">
+            <div class="ic g">🏠</div>
+            <div>
+              <div class="n" id="s-fac">0</div>
+              <div class="l">후원 가능한 시설</div>
+            </div>
+          </div>
+          <div class="cell">
+            <div class="ic b">📦</div>
+            <div>
+              <div class="n" id="s-item">0</div>
+              <div class="l">함께 채울 물품</div>
+            </div>
+          </div>
+          <div class="cell">
+            <div class="ic a">🔥</div>
+            <div>
+              <div class="n" id="s-urgent">0</div>
+              <div class="l">목표 달성 임박</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="filterbar">
+          <div class="search">
+            <span>🔍</span>
+            <input placeholder="시설명·지역·물품으로 검색" />
+          </div>
+          <div class="chips">
+            <button class="chip active">전체</button>
+            <button class="chip urgent">🔥 마감임박</button>
+            <button class="chip">서울·경기</button>
+            <button class="chip">생활용품</button>
+            <button class="chip">학습용품</button>
+            <button class="chip">위생용품</button>
+          </div>
+        </div>
+
+        <div class="grid" id="facility-grid"><!-- JS 렌더 --></div>
+
+        <div class="trust">
+          <h3>🛡️ 이렇게 신뢰를 지킵니다</h3>
+          <div class="trust-grid">
+            <div class="trust-item">
+              <span class="ic">✓</span>
+              <span><b>시설 전용계좌로 직접 귀속.</b> 후원금은 플랫폼 계좌에 모이지 않고 시설의 후원금 전용계좌로 바로 들어갑니다.</span>
+            </div>
+            <div class="trust-item">
+              <span class="ic">✓</span>
+              <span><b>목표 도달 시 결제 잠금.</b> 필요한 만큼만 모이면 추가 결제를 막고, 한 번에 통합구매합니다.</span>
+            </div>
+            <div class="trust-item">
+              <span class="ic">✓</span>
+              <span><b>아동 정보 비노출.</b> 공개 화면은 품목 중심이며 아동의 얼굴·사연·이름을 노출하지 않습니다.</span>
+            </div>
+            <div class="trust-item">
+              <span class="ic">✓</span>
+              <span><b>구매증빙과 세액공제 영수증은 다릅니다.</b> 발급 주체와 상태를 구분해 안내합니다.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════ 뷰 B: 시설 상세  ·  /donate/facilities/{id} ═══════════ -->
+      <section id="view-detail" class="hidden">
+        <div class="page-head">
+          <div class="breadcrumb">
+            <button class="link" onclick="showList()">후원하기</button>
+            <span>›</span>
+            <span id="crumb-name">시설명</span>
+            <span class="route-pill" id="crumb-route">/donate/facilities/f1</span>
+          </div>
+        </div>
+
+        <div class="detail-head">
+          <div class="fc-avatar" id="d-avatar">햇</div>
+          <div class="dh-body">
+            <div class="dh-title" id="d-name">햇살아동양육시설</div>
+            <div class="dh-badges" id="d-badges"></div>
+            <div class="dh-desc" id="d-desc"></div>
+          </div>
+        </div>
+
+        <div class="section-label">
+          <h2>지금 필요한 준비물</h2>
+          <span class="hint">목표금액은 실제 구매 총액 기준입니다 (추상 모금 목표 아님) · 물품을 눌러 상세 보기</span>
+        </div>
+
+        <div class="items" id="item-list"><!-- JS 렌더 --></div>
+
+        <div class="trust">
+          <h3>ℹ️ 이 시설 후원 안내</h3>
+          <div class="trust-grid">
+            <div class="trust-item">
+              <span class="ic">1</span>
+              <span>후원자별 결제는 <b>기부 원장</b>에 식별·기록되어, 내 금액이 어느 품목에 배정됐는지 확인할 수 있습니다.</span>
+            </div>
+            <div class="trust-item">
+              <span class="ic">2</span>
+              <span>목표 달성 → 시설(또는 위임 구매자)이 <b>한 번만 통합구매</b> → 판매처에서 시설로 직배송됩니다.</span>
+            </div>
+            <div class="trust-item">
+              <span class="ic">3</span>
+              <span>배송·수령확인·영수증 상태가 <b>내 후원 내역</b> 화면에 단계별로 반영됩니다.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════ 뷰 C: 물품 상세  ·  /donate/items/{id} ═══════════ -->
+      <section id="view-item" class="hidden">
+        <div class="page-head">
+          <div class="breadcrumb">
+            <button class="link" onclick="showList()">후원하기</button>
+            <span>›</span>
+            <button class="link" id="ic-crumb-fac" onclick="backToFacility()">시설명</button>
+            <span>›</span>
+            <span id="ic-crumb-item">품목명</span>
+            <span class="route-pill" id="ic-crumb-route">/donate/items/f1-0</span>
+          </div>
+        </div>
+
+        <div class="item-detail">
+          <div class="id-left">
+            <div class="id-hero">
+              <div class="id-emoji" id="ic-emoji">📚</div>
+              <div>
+                <div class="id-name" id="ic-name">품목명</div>
+                <div class="id-facility" id="ic-facility">시설명 · 지역</div>
+              </div>
+            </div>
+            <div class="id-reason" id="ic-reason"></div>
+
+            <div class="section-label" style="margin-top: 22px">
+              <h2 style="font-size: 15px">진행 상황</h2>
+            </div>
+            <div class="item-progress-row">
+              <div class="progress" id="ic-progress"><span style="width: 0%"></span></div>
+              <span class="pct" id="ic-pct">0%</span>
+            </div>
+          </div>
+
+          <div class="id-right">
+            <div class="id-figures">
+              <div class="id-fig">
+                <div class="k">모인 금액</div>
+                <div class="v brand" id="ic-raised">0원</div>
+              </div>
+              <div class="id-fig" style="text-align: right">
+                <div class="k">목표 / 남은 금액</div>
+                <div class="v" id="ic-goal">0원</div>
+              </div>
+            </div>
+
+            <div id="ic-amount-block">
+              <div class="amount-label">후원 금액 선택</div>
+              <div class="amount-grid">
+                <button class="amount-btn" onclick="pickAmount(this,10000)">1만원</button>
+                <button class="amount-btn active" onclick="pickAmount(this,30000)">3만원</button>
+                <button class="amount-btn" onclick="pickAmount(this,50000)">5만원</button>
+                <div class="amount-custom">
+                  <span style="color: var(--muted); font-size: 14px">직접입력</span>
+                  <input id="ic-custom" type="text" value="30,000" />
+                  <span style="color: var(--muted); font-size: 14px">원</span>
+                </div>
+              </div>
+              <button class="donate-btn lg" style="margin-top: 14px" id="ic-donate">
+                이 품목 후원하기
+              </button>
+              <p class="id-note">
+                사전등록 단계에서는 실제 결제가 열리지 않습니다. 후원금은 결제 시
+                시설 후원금 전용계좌로 직접 귀속되며, 구매증빙과 세액공제 영수증은
+                구분해 안내됩니다.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div id="modal-root"></div>
+
+    <script>
+      // ── 데이터 모델 (기획안 도메인 기준) ──
+      //   facility     → Facility        : 후원 물품이 연결되는 기준 시설
+      //   facility.items[] → DonationItem : 시설이 승인한 공용 필요 물품(준비물 목표)
+      //   raised       → Σ Contribution  : 후원자별 참여 기록의 합(달성률 계산)
+      //   status buying/shipping → PurchaseOrder : 목표달성 후 통합구매·배송
+      const facilities = [
+        {
+          id: "f1", initial: "햇", name: "햇살아동양육시설",
+          region: "서울 성북구", type: "아동양육시설",
+          status: "recruiting", statusLabel: "모집중",
+          desc: "보호아동 32명이 생활하는 시설입니다. 이번 달 생활·학습 준비물 4종을 함께 채워요.",
+          items: [
+            { emoji: "📚", name: "초등 학습 문제집 세트", note: "6종 · 30권", cat: "학습용품", raised: 420000, goal: 600000, deadline: 12,
+              reason: "학기 중 방과후 자습에 쓸 과목별 문제집이 부족합니다. 아동 1인당 최소 1권씩 돌아가도록 30권을 채우려 합니다." },
+            { emoji: "🧦", name: "겨울 내복·양말 세트", note: "아동 32명분", cat: "생활용품", raised: 680000, goal: 700000, deadline: 3,
+              reason: "겨울철 실내 난방 절약을 위해 내복이 꼭 필요합니다. 32명 전원분을 한 번에 준비합니다." },
+            { emoji: "🪥", name: "위생용품 키트", note: "칫솔·치약·바디워시", cat: "위생용품", raised: 140000, goal: 500000, deadline: 20,
+              reason: "매월 소모되는 개인 위생용품을 아동별 키트로 정기 보충합니다." },
+            { emoji: "🎨", name: "미술활동 재료", note: "학기 방과후용", cat: "학습용품", raised: 300000, goal: 300000, deadline: 0,
+              reason: "방과후 미술 프로그램 재료입니다. 목표가 달성되어 곧 통합구매로 넘어갑니다." },
+          ],
+        },
+        {
+          id: "f2", initial: "푸", name: "푸른숲 지역아동센터",
+          region: "경기 고양시", type: "지역아동센터",
+          status: "buying", statusLabel: "통합구매 진행",
+          desc: "방과후 돌봄 아동 24명. 이번 목표는 달성되어 현재 통합구매를 진행 중입니다.",
+          items: [
+            { emoji: "💻", name: "코딩교육 노트북 (중고)", note: "3대", cat: "학습용품", raised: 600000, goal: 600000, deadline: 0, status: "buying",
+              reason: "코딩 방과후 수업용 중고 노트북 3대. 목표 달성 후 위임 구매자가 통합구매를 진행 중입니다." },
+            { emoji: "📖", name: "도서관 신간 도서", note: "40권", cat: "학습용품", raised: 290000, goal: 300000, deadline: 5,
+              reason: "센터 작은 도서관의 신간 보충입니다. 아동 추천 도서 위주로 40권을 채웁니다." },
+          ],
+        },
+        {
+          id: "f3", initial: "온", name: "온마을 그룹홈",
+          region: "인천 남동구", type: "아동양육시설",
+          status: "shipping", statusLabel: "배송 중",
+          desc: "소규모 그룹홈. 지난 목표 품목이 판매처에서 시설로 배송 중이며 수령확인을 기다리고 있어요.",
+          items: [
+            { emoji: "🛏️", name: "이층침대 매트리스", note: "4개", cat: "생활용품", raised: 450000, goal: 450000, deadline: 0, status: "shipping",
+              reason: "낡은 매트리스 교체분 4개. 목표 달성 후 판매처에서 시설로 직배송 중입니다." },
+            { emoji: "🍚", name: "주식·부식 식자재", note: "1개월분", cat: "생활용품", raised: 0, goal: 800000, deadline: 25,
+              reason: "한 달치 주·부식 식자재를 시설 식단표에 맞춰 준비합니다." },
+          ],
+        },
+        {
+          id: "f4", initial: "새", name: "새싹키움 지역아동센터",
+          region: "서울 은평구", type: "지역아동센터",
+          status: "recruiting", statusLabel: "모집중",
+          desc: "저학년 돌봄 위주 센터입니다. 겨울 실내활동 준비물을 모으고 있어요.",
+          items: [
+            { emoji: "🧩", name: "보드게임·교구 세트", note: "10종", cat: "학습용품", raised: 120000, goal: 400000, deadline: 15,
+              reason: "실내 놀이·교육을 겸한 보드게임 교구 10종을 채웁니다." },
+            { emoji: "🧥", name: "실내 방한 담요", note: "24장", cat: "생활용품", raised: 320000, goal: 350000, deadline: 4,
+              reason: "난방비 절감을 위한 개인 담요 24장. 목표 달성이 임박했습니다." },
+            { emoji: "✏️", name: "학용품 종합 세트", note: "24명분", cat: "학습용품", raised: 0, goal: 400000, deadline: 18,
+              reason: "신학기 개인 학용품 세트를 아동 24명 전원분으로 준비합니다." },
+          ],
+        },
+      ];
+
+      const won = (n) => n.toLocaleString("ko-KR") + "원";
+      const pct = (a, g) => Math.min(100, Math.round((a / g) * 100));
+      const isFull = (it) => it.raised >= it.goal;
+      // 임박 = 미달성 + (달성률 80%↑ 또는 마감 3일 이내)
+      const isUrgent = (it) =>
+        !isFull(it) && it.status == null && (pct(it.raised, it.goal) >= 80 || it.deadline <= 3);
+
+      const statusBadge = (s, label) => {
+        const map = { recruiting: "recruiting", buying: "buying", shipping: "shipping", locked: "locked", urgent: "urgent" };
+        return `<span class="badge ${map[s] || "recruiting"}">${label}</span>`;
+      };
+
+      const facRaised = (f) => f.items.reduce((s, it) => s + it.raised, 0);
+      const facGoal = (f) => f.items.reduce((s, it) => s + it.goal, 0);
+      const urgentCount = () =>
+        facilities.reduce((s, f) => s + f.items.filter(isUrgent).length, 0);
+      const itemCount = () => facilities.reduce((s, f) => s + f.items.length, 0);
+
+      let current = { fid: null, iidx: null, amount: 30000 };
+
+      // ── 상단 요약 ──
+      function renderSummary() {
+        document.getElementById("s-fac").textContent = facilities.length;
+        document.getElementById("s-item").textContent = itemCount();
+        document.getElementById("s-urgent").textContent = urgentCount();
+      }
+
+      // ── 시설 목록 (대표 물품 미리보기 포함) ──
+      function renderList() {
+        const grid = document.getElementById("facility-grid");
+        grid.innerHTML = facilities
+          .map((f) => {
+            const r = facRaised(f), g = facGoal(f), p = pct(r, g);
+            const hasUrgent = f.items.some(isUrgent);
+            const preview = f.items.slice(0, 3);
+            const rows = preview
+              .map((it) => {
+                const ip = pct(it.raised, it.goal);
+                return `
+              <div class="pv-row">
+                <span class="pv-emoji">${it.emoji}</span>
+                <span class="pv-name">${it.name}</span>
+                <span class="pv-bar"><span style="width:${ip}%"></span></span>
+                <span class="pv-pct">${ip}%</span>
+              </div>`;
+              })
+              .join("");
+            const more = f.items.length > 3 ? `<div class="pv-more">+ ${f.items.length - 3}종 더보기</div>` : "";
+            return `
+          <article class="facility-card" onclick="showFacility('${f.id}')">
+            <div class="fc-top">
+              <div class="fc-avatar">${f.initial}</div>
+              <div style="flex:1">
+                <div class="fc-name">${f.name}</div>
+                <div class="fc-meta">${f.region} · ${f.type}</div>
+              </div>
+              <span class="badge verified">✓ 자격확인</span>
+            </div>
+            <div class="fc-badges">
+              ${statusBadge(f.status, f.statusLabel)}
+              <span class="badge locked">준비물 ${f.items.length}종</span>
+              ${hasUrgent ? statusBadge("urgent", "🔥 임박") : ""}
+            </div>
+            <div class="preview-items">
+              ${rows}${more}
+            </div>
+            <div class="fc-cta">이 시설 후원 물품 보기 →</div>
+          </article>`;
+          })
+          .join("");
+      }
+
+      // ── 시설 상세 (물품 목록) ──
+      function showFacility(id) {
+        const f = facilities.find((x) => x.id === id);
+        if (!f) return;
+        current.fid = id;
+        document.getElementById("d-avatar").textContent = f.initial;
+        document.getElementById("d-name").textContent = f.name;
+        document.getElementById("crumb-name").textContent = f.name;
+        document.getElementById("crumb-route").textContent = `/donate/facilities/${f.id}`;
+        document.getElementById("d-desc").textContent = f.desc;
+        document.getElementById("d-badges").innerHTML =
+          `<span class="badge verified">✓ 시설 자격확인 완료</span>` +
+          statusBadge(f.status, f.statusLabel) +
+          `<span class="badge locked">${f.region} · ${f.type}</span>`;
+
+        document.getElementById("item-list").innerHTML = f.items
+          .map((it, idx) => {
+            const p = pct(it.raised, it.goal), full = isFull(it), urgent = isUrgent(it);
+            let btn;
+            if (it.status === "buying") btn = `<button class="donate-btn disabled" disabled>통합구매 진행중</button>`;
+            else if (it.status === "shipping") btn = `<button class="donate-btn disabled" disabled>배송 중</button>`;
+            else if (full) btn = `<button class="donate-btn disabled" disabled>🔒 목표 달성</button>`;
+            else btn = `<button class="donate-btn" onclick="event.stopPropagation();showItem('${f.id}',${idx})">후원하기</button>`;
+
+            const clickable = it.status == null && !full;
+            const deadlineTxt =
+              it.deadline > 0 ? `<span class="deadline">⏰ 마감 D-${it.deadline}</span>` : "";
+
+            return `
+          <div class="item-card ${clickable ? "clickable" : ""}" ${clickable ? `onclick="showItem('${f.id}',${idx})"` : ""}>
+            <div class="item-thumb">${it.emoji}</div>
+            <div class="item-main">
+              <div class="item-name">
+                ${it.name}
+                ${full ? statusBadge("locked", "목표달성") : ""}
+                ${urgent ? statusBadge("urgent", "🔥 임박") : ""}
+                ${it.status === "buying" ? statusBadge("buying", "구매중") : ""}
+                ${it.status === "shipping" ? statusBadge("shipping", "배송중") : ""}
+              </div>
+              <div class="item-sub"><span>${it.note}</span>${deadlineTxt}</div>
+              <div class="item-progress-row">
+                <div class="progress ${full ? "full" : ""}"><span style="width:${p}%"></span></div>
+                <span class="item-amount"><b>${won(it.raised)}</b> / ${won(it.goal)}</span>
+              </div>
+            </div>
+            <div class="item-action">
+              <span class="pct ${full ? "full" : ""}">${p}%</span>
+              ${btn}
+            </div>
+          </div>`;
+          })
+          .join("");
+
+        swapView("view-detail");
+      }
+
+      // ── 물품 상세 (3단계) ──
+      function showItem(fid, idx) {
+        const f = facilities.find((x) => x.id === fid);
+        const it = f.items[idx];
+        current.fid = fid;
+        current.iidx = idx;
+        const p = pct(it.raised, it.goal), remain = Math.max(0, it.goal - it.raised);
+
+        document.getElementById("ic-emoji").textContent = it.emoji;
+        document.getElementById("ic-name").textContent = it.name;
+        document.getElementById("ic-crumb-item").textContent = it.name;
+        document.getElementById("ic-crumb-fac").textContent = f.name;
+        document.getElementById("ic-crumb-route").textContent = `/donate/items/${f.id}-${idx}`;
+        document.getElementById("ic-facility").textContent = `${f.name} · ${f.region}`;
+        document.getElementById("ic-reason").innerHTML =
+          `<b>필요한 이유</b><br>${it.reason}`;
+        document.getElementById("ic-progress").innerHTML = `<span style="width:${p}%"></span>`;
+        document.getElementById("ic-pct").textContent = p + "%";
+        document.getElementById("ic-raised").textContent = won(it.raised);
+        document.getElementById("ic-goal").innerHTML =
+          `${won(it.goal)} <span style="font-size:12px;color:var(--muted)">· 남은 ${won(remain)}</span>`;
+        document.getElementById("ic-donate").onclick = () => openDonate(f.name, it.name);
+
+        swapView("view-item");
+      }
+
+      function backToFacility() {
+        if (current.fid) showFacility(current.fid);
+      }
+
+      function pickAmount(el, amount) {
+        document.querySelectorAll(".amount-btn").forEach((b) => b.classList.remove("active"));
+        el.classList.add("active");
+        current.amount = amount;
+        document.getElementById("ic-custom").value = amount.toLocaleString("ko-KR");
+      }
+
+      function showList() {
+        swapView("view-list");
+      }
+
+      function swapView(id) {
+        ["view-list", "view-detail", "view-item"].forEach((v) =>
+          document.getElementById(v).classList.toggle("hidden", v !== id),
+        );
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      // ── 후원 결제 안내 모달 ──
+      function openDonate(facName, itemName) {
+        const amt = document.getElementById("ic-custom")?.value || "30,000";
+        document.getElementById("modal-root").innerHTML = `
+        <div class="modal-backdrop" onclick="closeModal(event)">
+          <div class="modal" onclick="event.stopPropagation()">
+            <h3>후원 참여</h3>
+            <p>사전등록 단계에서는 실제 결제가 열리지 않습니다. 아래는 결제 흐름 미리보기입니다.</p>
+            <div class="row"><span>시설</span><b>${facName}</b></div>
+            <div class="row"><span>품목</span><b>${itemName}</b></div>
+            <div class="row"><span>후원 금액</span><b>${amt}원</b></div>
+            <div class="row"><span>귀속 계좌</span><b>시설 후원금 전용계좌</b></div>
+            <div class="modal-actions">
+              <button onclick="closeModal(event)">닫기</button>
+              <button class="primary" onclick="closeModal(event)">사전등록하고 알림받기</button>
+            </div>
+          </div>
+        </div>`;
+      }
+
+      function closeModal() {
+        document.getElementById("modal-root").innerHTML = "";
+      }
+
+      renderSummary();
+      renderList();
+    </script>
+  </body>
+</html>

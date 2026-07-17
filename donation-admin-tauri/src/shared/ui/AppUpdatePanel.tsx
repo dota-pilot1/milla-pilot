@@ -1,5 +1,6 @@
 import { CheckCircle2, CircleAlert, Download, Loader2, RefreshCw } from "lucide-react";
 import type { AppUpdateState } from "../lib/useAppUpdate";
+import { Button } from "./Button";
 
 type AppUpdatePanelProps = {
   updateState: AppUpdateState;
@@ -20,10 +21,10 @@ export function AppUpdatePanel({ updateState, busy, onCheckUpdate, onInstallUpda
           <strong>앱 업데이트</strong>
           <span>현재 버전 v{updateState.currentVersion}</span>
         </div>
-        <button type="button" onClick={onCheckUpdate} disabled={busy}>
+        <Button size="sm" variant="outline" onClick={onCheckUpdate} disabled={busy}>
           {checking ? <Loader2 className="spin" size={16} /> : <RefreshCw size={16} />}
           {checking ? "확인 중" : "업데이트 확인"}
-        </button>
+        </Button>
       </div>
 
       {updateState.status === "uptodate" && (
@@ -52,10 +53,10 @@ export function AppUpdatePanel({ updateState, busy, onCheckUpdate, onInstallUpda
               <div style={{ width: `${updateState.progress}%` }} />
             </div>
           )}
-          <button type="button" onClick={onInstallUpdate} disabled={busy && !downloading}>
+          <Button size="sm" onClick={onInstallUpdate} disabled={busy && !downloading}>
             {downloading ? <Loader2 className="spin" size={16} /> : <Download size={16} />}
             {downloading ? `다운로드 ${updateState.progress}%` : "지금 업데이트"}
-          </button>
+          </Button>
         </div>
       )}
     </section>

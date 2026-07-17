@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Step1 DB 설계 컨셉 — 시설물 · 후원 물품</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f8fb;
+        --paper: #ffffff;
+        --text: #111827;
+        --muted: #667085;
+        --line: #d8e0eb;
+        --soft: #f1f5f9;
+        --green: #047857;
+        --green-soft: #ecfdf5;
+        --blue: #0369a1;
+        --blue-soft: #e0f2fe;
+        --amber: #b45309;
+        --amber-soft: #fffbeb;
+        --violet: #6d28d9;
+        --violet-soft: #f5f3ff;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; color: var(--text); background: var(--bg);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.65;
+      }
+      main { max-width: 1080px; margin: 0 auto; padding: 40px 24px 72px; }
+      header, section {
+        border: 1px solid var(--line); border-radius: 18px; background: var(--paper);
+        box-shadow: 0 16px 42px rgba(15, 23, 42, 0.05);
+      }
+      header { padding: 30px; }
+      section { margin-top: 18px; padding: 24px; }
+      h1, h2, h3, p { margin-top: 0; }
+      h1 { margin-bottom: 10px; font-size: 30px; letter-spacing: -0.01em; }
+      h2 { margin-bottom: 14px; font-size: 21px; letter-spacing: -0.01em; }
+      h3 { margin: 18px 0 8px; font-size: 15px; }
+      p { margin-bottom: 12px; }
+      .lead { max-width: 820px; margin-bottom: 0; color: var(--muted); font-size: 16px; }
+      .meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+      .pill {
+        display: inline-flex; align-items: center; min-height: 28px; padding: 0 11px;
+        border: 1px solid var(--line); border-radius: 999px; color: #344054;
+        background: #fff; font-size: 12px; font-weight: 800;
+      }
+      .pill.g { color: var(--green); background: var(--green-soft); border-color: #a7f3d0; }
+      .pill.v { color: var(--violet); background: var(--violet-soft); border-color: #ddd6fe; }
+      code {
+        padding: 2px 6px; border-radius: 6px; color: #0f172a; background: var(--soft);
+        font-family: "SFMono-Regular", Consolas, monospace; font-size: 0.9em;
+      }
+      pre {
+        overflow-x: auto; margin: 10px 0 0; padding: 16px; border: 1px solid var(--line);
+        border-radius: 12px; color: #1f2937; background: #f8fafc; font-size: 12.5px;
+        line-height: 1.6; font-family: "SFMono-Regular", Consolas, monospace;
+      }
+      table {
+        width: 100%; border-collapse: collapse; overflow: hidden; border: 1px solid var(--line);
+        border-radius: 12px; font-size: 13.5px; margin-top: 6px;
+      }
+      th, td { padding: 10px 13px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+      th { color: #475467; background: #f8fafc; font-size: 11.5px; font-weight: 800; text-transform: uppercase; }
+      tr:last-child td { border-bottom: 0; }
+      td code { font-size: 12.5px; }
+      .tag {
+        display: inline-block; font-size: 10.5px; font-weight: 800; padding: 1px 7px;
+        border-radius: 6px; letter-spacing: 0.02em;
+      }
+      .tag.pk { color: #b42318; background: #fff1f3; }
+      .tag.fk { color: var(--violet); background: var(--violet-soft); }
+      .tag.uk { color: var(--blue); background: var(--blue-soft); }
+      .tag.nn { color: #475467; background: var(--soft); }
+      .callout {
+        margin-top: 14px; padding: 16px; border: 1px solid #a7f3d0; border-radius: 12px;
+        color: #065f46; background: var(--green-soft);
+      }
+      .note {
+        margin-top: 14px; padding: 16px; border: 1px solid #bae6fd; border-radius: 12px;
+        color: var(--blue); background: var(--blue-soft);
+      }
+      .warning {
+        margin-top: 14px; padding: 16px; border: 1px solid #fde68a; border-radius: 12px;
+        color: var(--amber); background: var(--amber-soft);
+      }
+      ul { margin: 0; padding-left: 20px; }
+      li + li { margin-top: 6px; }
+      .rel {
+        display: flex; align-items: center; gap: 14px; padding: 16px; border: 1px solid var(--line);
+        border-radius: 12px; background: #fff; font-size: 14px; margin-top: 6px;
+      }
+      .rel .box { font-weight: 800; padding: 8px 14px; border-radius: 10px; background: var(--soft); }
+      .rel .arrow { color: var(--muted); font-weight: 800; font-family: monospace; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="meta">
+          <span class="pill">Step 1</span>
+          <span class="pill g">DB 설계</span>
+          <span class="pill">Spring · JPA</span>
+          <span class="pill">2 tables</span>
+        </div>
+        <h1>DB 설계 컨셉 — 시설물 · 후원 물품</h1>
+        <p class="lead">
+          <code>후원하기 → 시설물 목록 → 물품 목록</code> 을 지탱하는 최소 스키마.
+          테이블 2개(<code>facilities</code> 1 : N <code>donation_items</code>)로 시작하고,
+          결제·후원참여 테이블은 다음 스텝으로 분리한다. 기존 <code>role·menu</code> 도메인의 JPA 컨벤션을 그대로 따른다.
+        </p>
+      </header>
+
+      <section>
+        <h2>1. 관계 한눈에</h2>
+        <div class="rel">
+          <span class="box">facilities</span>
+          <span class="arrow">1 ──&lt; N</span>
+          <span class="box">donation_items</span>
+          <span style="color: var(--muted); font-size: 13px">시설 하나에 후원 물품 여러 개</span>
+        </div>
+        <div class="callout">
+          한 시설이 여러 준비물(물품) 목표를 가진다. 시설 삭제 시 물품도 함께 삭제
+          (<code>ON DELETE CASCADE</code> / JPA <code>orphanRemoval</code>).
+        </div>
+        <div class="note">
+          ERD 다이어그램 소스는 같은 폴더의 <code>erd.mmd</code> (Mermaid). 아래 6절에 소스 첨부.
+        </div>
+      </section>
+
+      <section>
+        <h2>2. <code>facilities</code> — 시설물</h2>
+        <table>
+          <thead>
+            <tr><th>컬럼</th><th>타입</th><th>제약</th><th>설명</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>id</code></td><td>BIGINT</td><td><span class="tag pk">PK</span> <span class="tag nn">IDENTITY</span></td><td>기본키</td></tr>
+            <tr><td><code>code</code></td><td>VARCHAR(100)</td><td><span class="tag uk">UNIQUE</span></td><td>slug · 시더 멱등키 (URL/재실행 대비)</td></tr>
+            <tr><td><code>name</code></td><td>VARCHAR(100)</td><td><span class="tag nn">NOT NULL</span></td><td>시설명</td></tr>
+            <tr><td><code>region</code></td><td>VARCHAR(100)</td><td></td><td>지역 (예: 서울 성북구)</td></tr>
+            <tr><td><code>type</code></td><td>VARCHAR(30)</td><td><span class="tag nn">ENUM</span></td><td>시설 유형 — <code>ORPHANAGE</code> / <code>CHILD_CENTER</code></td></tr>
+            <tr><td><code>description</code></td><td>VARCHAR(500)</td><td></td><td>소개 (⚠️ 아동 개인정보 미포함)</td></tr>
+            <tr><td><code>status</code></td><td>VARCHAR(20)</td><td><span class="tag nn">ENUM</span></td><td>표시 상태 — <code>RECRUITING</code> / <code>BUYING</code> / <code>SHIPPING</code></td></tr>
+            <tr><td><code>verified</code></td><td>BOOLEAN</td><td><span class="tag nn">NOT NULL</span></td><td>자격확인 여부 (기본 false)</td></tr>
+            <tr><td><code>avatar_initial</code></td><td>VARCHAR(4)</td><td></td><td>카드 이니셜 (예: "햇")</td></tr>
+            <tr><td><code>display_order</code></td><td>INT</td><td><span class="tag nn">DEFAULT 0</span></td><td>목록 정렬 순서</td></tr>
+            <tr><td><code>created_at</code></td><td>TIMESTAMP</td><td><span class="tag nn">NOT NULL</span></td><td><code>@CreationTimestamp</code></td></tr>
+            <tr><td><code>updated_at</code></td><td>TIMESTAMP</td><td><span class="tag nn">NOT NULL</span></td><td><code>@UpdateTimestamp</code></td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>3. <code>donation_items</code> — 후원 구매 물품</h2>
+        <table>
+          <thead>
+            <tr><th>컬럼</th><th>타입</th><th>제약</th><th>설명</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>id</code></td><td>BIGINT</td><td><span class="tag pk">PK</span> <span class="tag nn">IDENTITY</span></td><td>기본키</td></tr>
+            <tr><td><code>facility_id</code></td><td>BIGINT</td><td><span class="tag fk">FK</span> <span class="tag nn">NOT NULL</span></td><td><code>@ManyToOne</code> → facilities</td></tr>
+            <tr><td><code>name</code></td><td>VARCHAR(150)</td><td><span class="tag nn">NOT NULL</span></td><td>물품명</td></tr>
+            <tr><td><code>category</code></td><td>VARCHAR(30)</td><td><span class="tag nn">ENUM</span></td><td><code>LEARNING</code> / <code>LIVING</code> / <code>HYGIENE</code></td></tr>
+            <tr><td><code>note</code></td><td>VARCHAR(150)</td><td></td><td>수량 메모 (예: 6종·30권)</td></tr>
+            <tr><td><code>reason</code></td><td>VARCHAR(1000)</td><td></td><td>필요한 이유 (물품 상세용)</td></tr>
+            <tr><td><code>emoji</code></td><td>VARCHAR(10)</td><td></td><td>썸네일 이모지</td></tr>
+            <tr><td><code>goal_amount</code></td><td>BIGINT</td><td><span class="tag nn">NOT NULL</span></td><td>목표금액(원) — 실제 구매 총액 기준</td></tr>
+            <tr><td><code>raised_amount</code></td><td>BIGINT</td><td><span class="tag nn">DEFAULT 0</span></td><td>모인금액 — <b>이번엔 표시용</b>, 차기 <code>Σ CONTRIBUTION</code></td></tr>
+            <tr><td><code>target_quantity</code></td><td>INT</td><td></td><td>목표수량</td></tr>
+            <tr><td><code>status</code></td><td>VARCHAR(20)</td><td><span class="tag nn">ENUM</span></td><td><code>RECRUITING</code> / <code>LOCKED</code> / <code>BUYING</code> / <code>SHIPPING</code></td></tr>
+            <tr><td><code>deadline</code></td><td>DATE</td><td></td><td>마감일 (nullable)</td></tr>
+            <tr><td><code>display_order</code></td><td>INT</td><td><span class="tag nn">DEFAULT 0</span></td><td>정렬 순서</td></tr>
+            <tr><td><code>created_at</code></td><td>TIMESTAMP</td><td><span class="tag nn">NOT NULL</span></td><td><code>@CreationTimestamp</code></td></tr>
+            <tr><td><code>updated_at</code></td><td>TIMESTAMP</td><td><span class="tag nn">NOT NULL</span></td><td><code>@UpdateTimestamp</code></td></tr>
+          </tbody>
+        </table>
+        <div class="warning">
+          <b>raised_amount 주의.</b> 이번 스텝에서는 관리자가 넣거나 0으로 두는 <b>표시용 값</b>이다.
+          실제 결제 스텝에서 <code>CONTRIBUTION</code> 테이블이 생기면 이 값은 후원 참여액의 합계로 대체된다.
+          진행률 = <code>raised_amount / goal_amount</code> (추상 모금 목표 금지, 기획안 F-013).
+        </div>
+      </section>
+
+      <section>
+        <h2>4. Enum 값 정리</h2>
+        <table>
+          <thead><tr><th>Enum</th><th>값</th><th>용도</th></tr></thead>
+          <tbody>
+            <tr><td><code>FacilityType</code></td><td><code>ORPHANAGE</code>, <code>CHILD_CENTER</code></td><td>아동양육시설 / 지역아동센터</td></tr>
+            <tr><td><code>FacilityStatus</code></td><td><code>RECRUITING</code>, <code>BUYING</code>, <code>SHIPPING</code></td><td>시설 카드 상태 배지</td></tr>
+            <tr><td><code>ItemCategory</code></td><td><code>LEARNING</code>, <code>LIVING</code>, <code>HYGIENE</code></td><td>학습 / 생활 / 위생 — 필터</td></tr>
+            <tr><td><code>ItemStatus</code></td><td><code>RECRUITING</code>, <code>LOCKED</code>, <code>BUYING</code>, <code>SHIPPING</code></td><td>물품 상태 — 목표달성 시 LOCKED</td></tr>
+          </tbody>
+        </table>
+        <div class="note">
+          JPA는 <code>@Enumerated(EnumType.STRING)</code> 로 문자열 저장 (순서 변경에 안전).
+        </div>
+      </section>
+
+      <section>
+        <h2>5. 이번 범위 / 차기 분리</h2>
+        <h3>✅ 이번 스텝 (실선 테이블)</h3>
+        <ul>
+          <li><code>facilities</code>, <code>donation_items</code> — CRUD(Tauri) + 조회(웹)</li>
+        </ul>
+        <h3>⛔ 다음 스텝 (결제 도입 시 추가)</h3>
+        <ul>
+          <li><code>contributions</code> — 후원자별 참여 기록(기부 원장). <code>raised_amount</code>를 대체.</li>
+          <li><code>purchase_orders</code> — 목표달성 후 통합구매·배송 추적.</li>
+        </ul>
+        <div class="callout">
+          지금 두 테이블만 잘 만들면 차기 테이블은 <code>donation_item_id</code> FK로 자연스럽게 붙는다.
+          그래서 <code>donation_items</code>가 향후 후원·구매의 <b>연결 허브</b>가 된다.
+        </div>
+      </section>
+
+      <section>
+        <h2>6. ERD 소스 (Mermaid)</h2>
+        <p>같은 폴더 <code>erd.mmd</code> 와 동일. Mermaid Live 등에 붙여 렌더.</p>
+        <pre>erDiagram
+    FACILITY ||--o{ DONATION_ITEM : "has (1:N)"
+
+    FACILITY {
+        bigint    id            PK
+        varchar   code          UK
+        varchar   name
+        varchar   region
+        varchar   type          "ORPHANAGE|CHILD_CENTER"
+        varchar   status        "RECRUITING|BUYING|SHIPPING"
+        boolean   verified
+        int       display_order
+        timestamp created_at
+        timestamp updated_at
+    }
+    DONATION_ITEM {
+        bigint    id            PK
+        bigint    facility_id   FK
+        varchar   name
+        varchar   category      "LEARNING|LIVING|HYGIENE"
+        varchar   reason
+        bigint    goal_amount
+        bigint    raised_amount "표시용 → 차기 ΣCONTRIBUTION"
+        varchar   status        "RECRUITING|LOCKED|BUYING|SHIPPING"
+        date      deadline
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    %% 차기 스텝
+    DONATION_ITEM ||..o{ CONTRIBUTION : "차기: 후원참여"
+    DONATION_ITEM ||..o| PURCHASE_ORDER : "차기: 통합구매"</pre>
+      </section>
+
+      <section>
+        <h2>7. JPA 매핑 노트 (기존 컨벤션)</h2>
+        <ul>
+          <li><code>@Entity</code> + <code>@Table(name="...", uniqueConstraints=...)</code></li>
+          <li><code>@Id @GeneratedValue(strategy = IDENTITY) Long id</code></li>
+          <li><code>@NoArgsConstructor(access = PROTECTED)</code> + 정적 팩토리 <code>create(...)</code>, 도메인 메서드로 변경</li>
+          <li><code>@CreationTimestamp</code> / <code>@UpdateTimestamp</code> (<code>Instant</code>)</li>
+          <li>FK: <code>@ManyToOne(fetch = LAZY) @JoinColumn(name = "facility_id")</code></li>
+          <li>패키지: <code>com.cj.donationplatform.facility.*</code>, <code>...donation_item.*</code></li>
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>

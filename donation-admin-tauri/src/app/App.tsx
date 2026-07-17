@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Activity, Database, RefreshCw } from "lucide-react";
 import { AppUpdatePanel } from "../shared/ui/AppUpdatePanel";
 import { LoginScreen } from "../features/auth/login/LoginScreen";
@@ -6,6 +6,7 @@ import { useAppUpdate } from "../shared/lib/useAppUpdate";
 import type { UserSummary } from "../entities/user/model/types";
 import { login, logout, me, signup } from "../features/auth/api/authApi";
 import { fetchMenus } from "../features/menu/api/menuApi";
+import { FacilityManagementScreen } from "../features/facility-management/ui/FacilityManagementScreen";
 import { API_BASE_URL, SERVER_ROOT_PATH } from "../shared/config/server";
 import { AppSidebar } from "../widgets/app-shell/ui/AppSidebar";
 import { AppTopbar } from "../widgets/app-shell/ui/AppTopbar";
@@ -57,10 +58,9 @@ export function App() {
       .finally(() => setBooting(false));
   }, [token]);
 
-  useEffect(() => {
-    if (!token || !user) return;
-
-    fetchMenus(token)
+  const loadMenus = useCallback(() => {
+    if (!token || !user) return Promise.resolve();
+    return fetchMenus(token)
       .then((nextMenus) => {
         setMenus(nextMenus);
         setMenuError("");
@@ -70,9 +70,16 @@ export function App() {
       });
   }, [token, user]);
 
+  useEffect(() => {
+    loadMenus();
+  }, [loadMenus]);
+
   const adminMenus = useMemo(() => {
     const tree = buildTree(menus, user);
-    return tree.map(toAdminMenu);
+    const mapped = tree.map(toAdminMenu);
+    // "관리"(ADMIN) 래퍼는 벗기고 하위(후원 관리/시스템 관리)를 최상위로 올린다.
+    // Tauri 사이드바 전용 평탄화 — 서버/웹 메뉴 구조는 그대로 둔다.
+    return mapped.flatMap((menu) => (menu.code === "ADMIN" ? menu.children : [menu]));
   }, [menus, user]);
 
   const flatAdminMenus = useMemo(
@@ -139,6 +146,7 @@ export function App() {
         updateState={appUpdate.state}
         updateBusy={appUpdate.busy}
         onOpenMenu={openMenu}
+        onRefreshMenus={loadMenus}
         onInstallUpdate={() => void appUpdate.installUpdate()}
         onLogout={handleLogout}
       />
@@ -203,6 +211,10 @@ function AdminWorkspace({
         </section>
       </main>
     );
+  }
+
+  if (activeMenu === "ADMIN_FACILITIES") {
+    return <FacilityManagementScreen token={token} />;
   }
 
   const Icon = activeWebMenu.icon;

@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>1차 MVP 디자인 컨셉 및 공통 컴포넌트 설계</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f7f9;
+        --paper: #ffffff;
+        --text: #111827;
+        --muted: #667085;
+        --line: #d8dee8;
+        --soft: #f1f5f9;
+        --ink: #171717;
+        --green: #059669;
+        --green-soft: #ecfdf5;
+        --blue: #2563eb;
+        --blue-soft: #eff6ff;
+        --amber: #b45309;
+        --amber-soft: #fffbeb;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--text);
+        background: var(--bg);
+        font-family:
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        line-height: 1.65;
+      }
+
+      main {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 40px 24px 72px;
+      }
+
+      header,
+      section {
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: var(--paper);
+        box-shadow: 0 16px 42px rgba(15, 23, 42, 0.05);
+      }
+
+      header {
+        padding: 30px;
+      }
+
+      section {
+        margin-top: 18px;
+        padding: 24px;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        margin-bottom: 10px;
+        font-size: 32px;
+        line-height: 1.25;
+        letter-spacing: 0;
+      }
+
+      h2 {
+        margin-bottom: 12px;
+        font-size: 22px;
+        letter-spacing: 0;
+      }
+
+      h3 {
+        margin-bottom: 8px;
+        font-size: 16px;
+      }
+
+      p {
+        margin-bottom: 12px;
+      }
+
+      code,
+      pre {
+        font-family:
+          "SFMono-Regular",
+          Consolas,
+          "Liberation Mono",
+          monospace;
+      }
+
+      code {
+        padding: 2px 5px;
+        border-radius: 6px;
+        color: #0f172a;
+        background: var(--soft);
+        font-size: 0.92em;
+      }
+
+      pre {
+        overflow-x: auto;
+        margin: 12px 0 0;
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        color: #1f2937;
+        background: #f8fafc;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      ul,
+      ol {
+        margin: 0;
+        padding-left: 22px;
+      }
+
+      li + li {
+        margin-top: 8px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        font-size: 14px;
+      }
+
+      th,
+      td {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        color: #475467;
+        background: #f8fafc;
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .lead {
+        max-width: 860px;
+        margin-bottom: 0;
+        color: var(--muted);
+        font-size: 16px;
+      }
+
+      .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 18px;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 0 10px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: #344054;
+        background: #fff;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .card {
+        min-height: 120px;
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #fff;
+      }
+
+      .card strong {
+        display: block;
+        margin-bottom: 8px;
+      }
+
+      .card span {
+        display: block;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .callout,
+      .warning,
+      .note {
+        margin-top: 14px;
+        padding: 14px 16px;
+        border-radius: 12px;
+        font-size: 14px;
+      }
+
+      .callout {
+        border: 1px solid #bbf7d0;
+        color: #065f46;
+        background: var(--green-soft);
+      }
+
+      .warning {
+        border: 1px solid #fed7aa;
+        color: #92400e;
+        background: var(--amber-soft);
+      }
+
+      .note {
+        border: 1px solid #bfdbfe;
+        color: #1d4ed8;
+        background: var(--blue-soft);
+      }
+
+      @media (max-width: 820px) {
+        main {
+          padding: 24px 14px 52px;
+        }
+
+        header,
+        section {
+          border-radius: 14px;
+        }
+
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="meta">
+          <span class="pill">1차 MVP</span>
+          <span class="pill">Design System</span>
+          <span class="pill">shadcn/ui</span>
+          <span class="pill">FSD</span>
+        </div>
+        <h1>디자인 컨셉 및 공통 컴포넌트 설계</h1>
+        <p class="lead">
+          DonationPlatform의 1차 MVP 디자인은 shadcn/ui 스타일을 기준으로 한 모던 시크 톤으로 통일한다.
+          웹은 후원자가 빠르게 후원 대상을 탐색하고 참여하는 화면, Tauri 앱은 관리자가 반복 업무를 처리하는 운영 콘솔로 구분한다.
+        </p>
+      </header>
+
+      <section>
+        <h2>디자인 컨셉</h2>
+        <div class="grid">
+          <div class="card">
+            <strong>Modern Chic</strong>
+            <span>과한 장식보다 선명한 정보 구조, 넓은 여백, 얇은 border, 낮은 채도의 색을 사용한다.</span>
+          </div>
+          <div class="card">
+            <strong>shadcn/ui Base</strong>
+            <span>Radix 접근성, Tailwind utility, CVA variant, lucide icon을 기본 컴포넌트 규칙으로 삼는다.</span>
+          </div>
+          <div class="card">
+            <strong>Donation First</strong>
+            <span>웹 화면은 관리 용어보다 후원자 행동 언어를 우선한다. 예: 관리 → 보기/후원하기/내역.</span>
+          </div>
+        </div>
+        <div class="callout">
+          결론: 디자인 키워드는 <b>shadcn/ui 기반의 모던 시크 운영형 UI</b>다. 화려한 랜딩 페이지보다 실제 업무와 후원 흐름이 잘 보이는 화면을 우선한다.
+        </div>
+      </section>
+
+      <section>
+        <h2>시각 규칙</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>영역</th>
+              <th>규칙</th>
+              <th>비고</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>색상</td>
+              <td>기본은 neutral/white/black 계열, 강조는 green 또는 blue를 제한적으로 사용한다.</td>
+              <td>기부/후원 CTA는 green, 시스템 정보나 링크는 blue.</td>
+            </tr>
+            <tr>
+              <td>라운드</td>
+              <td>버튼과 입력은 8~10px, 큰 패널은 12~16px 정도로 제한한다.</td>
+              <td>과한 pill/card 남발 금지.</td>
+            </tr>
+            <tr>
+              <td>타이포</td>
+              <td>페이지 제목은 굵고 명확하게, 카드 내부 제목은 작고 단단하게 사용한다.</td>
+              <td>viewport 기반 font-size scaling 금지.</td>
+            </tr>
+            <tr>
+              <td>아이콘</td>
+              <td>lucide-react를 기본으로 사용한다.</td>
+              <td>직접 SVG를 그리기보다 기존 아이콘 우선.</td>
+            </tr>
+            <tr>
+              <td>상태 표현</td>
+              <td>badge, progress, disabled button으로 상태를 명확히 분리한다.</td>
+              <td>모집중, 목표달성, 구매중, 배송중, 수령완료.</td>
+            </tr>
+            <tr>
+              <td>다크 모드</td>
+              <td>1차 MVP 문서와 기본 화면은 light mode 우선.</td>
+              <td>다크 모드는 추후 테마 작업에서 분리한다.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>공통 컴포넌트 분류</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>분류</th>
+              <th>컴포넌트 예시</th>
+              <th>FSD 위치</th>
+              <th>판단 기준</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>순수 UI Primitive</td>
+              <td><code>Button</code>, <code>Input</code>, <code>Textarea</code>, <code>Select</code>, <code>Dialog</code>, <code>Badge</code>, <code>Progress</code>, <code>Tabs</code></td>
+              <td><code>src/shared/ui</code></td>
+              <td>도메인 단어 없이 어디서나 재사용 가능하면 shared.</td>
+            </tr>
+            <tr>
+              <td>레이아웃/프레임</td>
+              <td><code>AppShell</code>, <code>Sidebar</code>, <code>TopBar</code>, <code>PageHeader</code>, <code>SectionPanel</code></td>
+              <td><code>src/widgets/*/ui</code></td>
+              <td>여러 shared UI를 조합해 화면 뼈대를 만들면 widget.</td>
+            </tr>
+            <tr>
+              <td>도메인 카드</td>
+              <td><code>FacilityCard</code>, <code>DonationItemCard</code>, <code>ContributionStatusCard</code></td>
+              <td><code>src/entities/{domain}/ui</code></td>
+              <td>특정 엔티티 데이터를 보여주는 재사용 가능한 표시 컴포넌트.</td>
+            </tr>
+            <tr>
+              <td>사용자 행동</td>
+              <td><code>DonateButton</code>, <code>FacilitySearchFilter</code>, <code>CreateFacilityForm</code>, <code>DonationAmountForm</code></td>
+              <td><code>src/features/{feature}/ui</code></td>
+              <td>클릭/제출/API 호출 등 사용자의 행동 단위가 있으면 feature.</td>
+            </tr>
+            <tr>
+              <td>페이지</td>
+              <td><code>/donate</code>, <code>/donate/facilities/[id]</code>, <code>/dashboard</code></td>
+              <td><code>src/app/*/page.tsx</code></td>
+              <td>라우팅, 데이터 조합, page-level composition만 담당.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>웹 FSD 배치 계획</h2>
+        <pre><code>donation-platform-front/src
+├─ shared
+│  ├─ ui
+│  │  ├─ Button.tsx
+│  │  ├─ Input.tsx
+│  │  ├─ Badge.tsx
+│  │  ├─ Progress.tsx
+│  │  ├─ Dialog.tsx
+│  │  ├─ PageHeader.tsx
+│  │  └─ EmptyState.tsx
+│  └─ lib
+│     └─ utils.ts
+├─ entities
+│  ├─ facility
+│  │  ├─ model
+│  │  ├─ api
+│  │  └─ ui/FacilityCard.tsx
+│  ├─ donation-item
+│  │  ├─ model
+│  │  ├─ api
+│  │  └─ ui/DonationItemCard.tsx
+│  └─ contribution
+│     ├─ model
+│     ├─ api
+│     └─ ui/ContributionStatusBadge.tsx
+├─ features
+│  ├─ donation-flow
+│  │  └─ ui/DonationAmountDialog.tsx
+│  ├─ facility-search
+│  │  └─ ui/FacilityFilterBar.tsx
+│  └─ auth
+├─ widgets
+│  ├─ header
+│  ├─ donation-sidebar
+│  └─ donation-list
+└─ app
+   ├─ donate/page.tsx
+   ├─ donate/facilities/[facilityId]/page.tsx
+   └─ my-donations/page.tsx</code></pre>
+        <div class="note">
+          현재 웹 프로젝트는 <code>components.json</code>에서 shadcn alias를 <code>@/shared/ui</code>로 잡고 있다.
+          따라서 shadcn primitive는 <code>src/shared/ui</code>에 두는 것이 현재 설정과 맞다.
+        </div>
+      </section>
+
+      <section>
+        <h2>Tauri 관리자 앱 FSD 배치 계획</h2>
+        <pre><code>donation-admin-tauri/src
+├─ shared
+│  ├─ ui
+│  │  ├─ Button.tsx
+│  │  ├─ Input.tsx
+│  │  ├─ Badge.tsx
+│  │  ├─ DataTable.tsx
+│  │  ├─ FormShell.tsx
+│  │  └─ EmptyState.tsx
+│  ├─ api
+│  └─ config
+├─ entities
+│  ├─ facility
+│  │  ├─ model
+│  │  ├─ api
+│  │  └─ ui/FacilityRow.tsx
+│  └─ donation-item
+│     ├─ model
+│     ├─ api
+│     └─ ui/DonationItemRow.tsx
+├─ features
+│  ├─ facility-management
+│  │  └─ ui/FacilityForm.tsx
+│  ├─ donation-item-management
+│  │  └─ ui/DonationItemForm.tsx
+│  └─ menu
+├─ widgets
+│  └─ app-shell
+└─ app</code></pre>
+        <div class="callout">
+          Tauri는 웹보다 더 조밀한 운영 화면을 쓴다. 카드형 랜딩보다 테이블, 폼, 상태 배지, 작업 버튼 중심이 맞다.
+        </div>
+      </section>
+
+      <section>
+        <h2>우선 만들 공통 컴포넌트</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>우선순위</th>
+              <th>컴포넌트</th>
+              <th>사용처</th>
+              <th>비고</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td><code>Button</code>, <code>Input</code>, <code>Badge</code>, <code>Progress</code></td>
+              <td>웹 후원하기, Tauri 시설 관리</td>
+              <td>shadcn 스타일 primitive 먼저 정리.</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td><code>PageHeader</code>, <code>SectionPanel</code>, <code>EmptyState</code></td>
+              <td>대부분의 페이지</td>
+              <td>페이지마다 반복되는 제목/설명/빈 상태 통일.</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td><code>FacilityCard</code>, <code>DonationItemCard</code></td>
+              <td>웹 후원하기</td>
+              <td>후원자용 도메인 표시 컴포넌트.</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td><code>DataTable</code>, <code>FormShell</code>, <code>StatusBadge</code></td>
+              <td>Tauri 관리자 앱</td>
+              <td>시설/물품 CRUD에 바로 필요.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>컴포넌트 작성 규칙</h2>
+        <ol>
+          <li>공통 primitive는 도메인 단어를 넣지 않는다. 예: <code>Button</code>, <code>Badge</code>.</li>
+          <li>도메인 표시 컴포넌트는 <code>entities</code>에 둔다. 예: <code>FacilityCard</code>.</li>
+          <li>등록, 수정, 삭제, 검색처럼 행동이 있는 UI는 <code>features</code>에 둔다.</li>
+          <li>페이지 전체 레이아웃은 <code>widgets</code>에 둔다. 예: sidebar, app shell.</li>
+          <li>라우트 파일은 조립만 담당하고, UI 로직을 길게 넣지 않는다.</li>
+          <li>variant가 필요한 컴포넌트는 <code>class-variance-authority</code>를 사용한다.</li>
+          <li>아이콘은 <code>lucide-react</code>를 우선 사용한다.</li>
+        </ol>
+      </section>
+
+      <section>
+        <h2>1차 적용 순서</h2>
+        <ol>
+          <li>웹과 Tauri의 <code>shared/ui</code> primitive를 shadcn 스타일로 정리한다.</li>
+          <li>웹 <code>/donate</code> 페이지에 <code>FacilityCard</code>, <code>DonationItemCard</code>, <code>FacilityFilterBar</code>를 적용한다.</li>
+          <li>Tauri 시설 관리 화면에 <code>DataTable</code>, <code>FormShell</code>, <code>StatusBadge</code>를 적용한다.</li>
+          <li>중복 스타일이 생기면 shared primitive로 내리고, 도메인 규칙은 entities/features에 남긴다.</li>
+        </ol>
+        <div class="warning">
+          공통 컴포넌트를 처음부터 과하게 만들지 않는다. 실제로 두 번 이상 반복되는 UI만 shared로 내리고,
+          도메인 맥락이 강한 컴포넌트는 entities 또는 features에 남긴다.
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

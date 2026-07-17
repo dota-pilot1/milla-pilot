@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   BadgeCheck,
+  Building2,
   ChevronDown,
   FileText,
   HandCoins,
@@ -65,6 +66,11 @@ function isWebMenu(menu: MenuRecord) {
 
 const menuIcons: Record<string, LucideIcon> = {
   DASHBOARD: LayoutDashboard,
+  WEB_DONATE: HandCoins,
+  WEB_MY_DONATIONS: ReceiptText,
+  WEB_FACILITIES: Building2,
+  WEB_DONATION_ITEMS: PackagePlus,
+  WEB_MY_CONTRIBUTIONS: ReceiptText,
   ADMIN: Settings,
   ADMIN_DONATION: HandCoins,
   ADMIN_SYSTEM: Settings,
@@ -327,6 +333,9 @@ function SidebarSection({
 function Sidebar({ tree }: { tree: MenuItem[] }) {
   const dashboard = tree.find((item) => item.code === "DASHBOARD");
   const admin = tree.find((item) => item.code === "ADMIN");
+  const webLinks = tree.filter(
+    (item) => item.code !== "DASHBOARD" && item.code !== "ADMIN" && item.path
+  );
   const sections = normalizeAdminSections(admin);
 
   return (
@@ -337,7 +346,12 @@ function Sidebar({ tree }: { tree: MenuItem[] }) {
         </Link>
       </div>
       <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-4">
-        {dashboard && <SidebarLink item={dashboard} />}
+        <div className="space-y-1">
+          {dashboard && <SidebarLink item={dashboard} />}
+          {webLinks.map((item) => (
+            <SidebarLink key={item.id} item={item} />
+          ))}
+        </div>
         {sections.map((section) => (
           <SidebarSection
             key={section.id}

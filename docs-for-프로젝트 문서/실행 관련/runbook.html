@@ -1,0 +1,795 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DonationPlatform 실행 관련 정보</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f8fb;
+        --paper: #ffffff;
+        --text: #111827;
+        --muted: #667085;
+        --line: #d8e0eb;
+        --soft: #f1f5f9;
+        --green: #047857;
+        --green-soft: #ecfdf5;
+        --blue: #1d4ed8;
+        --blue-soft: #eff6ff;
+        --amber: #b45309;
+        --amber-soft: #fffbeb;
+        --red: #b42318;
+        --red-soft: #fef3f2;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--text);
+        background: var(--bg);
+        font-family:
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        line-height: 1.65;
+      }
+
+      main {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 40px 24px 72px;
+      }
+
+      header,
+      section {
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: var(--paper);
+        box-shadow: 0 16px 42px rgba(15, 23, 42, 0.05);
+      }
+
+      header {
+        padding: 30px;
+      }
+
+      section {
+        margin-top: 18px;
+        padding: 24px;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        margin-bottom: 10px;
+        font-size: 32px;
+        line-height: 1.25;
+        letter-spacing: 0;
+      }
+
+      h2 {
+        margin-bottom: 12px;
+        font-size: 22px;
+        letter-spacing: 0;
+      }
+
+      h3 {
+        margin-bottom: 8px;
+        font-size: 16px;
+      }
+
+      p {
+        margin-bottom: 12px;
+      }
+
+      a {
+        color: var(--blue);
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      code,
+      pre {
+        font-family:
+          "SFMono-Regular",
+          Consolas,
+          "Liberation Mono",
+          monospace;
+      }
+
+      code {
+        padding: 2px 5px;
+        border-radius: 6px;
+        color: #0f172a;
+        background: var(--soft);
+        font-size: 0.92em;
+      }
+
+      pre {
+        overflow-x: auto;
+        margin: 12px 0 0;
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        color: #1f2937;
+        background: #f8fafc;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      ul,
+      ol {
+        margin: 0;
+        padding-left: 22px;
+      }
+
+      li + li {
+        margin-top: 8px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        font-size: 14px;
+      }
+
+      th,
+      td {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        color: #475467;
+        background: #f8fafc;
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .lead {
+        max-width: 860px;
+        margin-bottom: 0;
+        color: var(--muted);
+        font-size: 16px;
+      }
+
+      .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 18px;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 0 10px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: #344054;
+        background: #fff;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .card {
+        min-height: 126px;
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #fff;
+      }
+
+      .card strong {
+        display: block;
+        margin-bottom: 8px;
+      }
+
+      .card span {
+        display: block;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .callout,
+      .warning,
+      .danger,
+      .note {
+        margin-top: 14px;
+        padding: 14px 16px;
+        border-radius: 12px;
+        font-size: 14px;
+      }
+
+      .callout {
+        border: 1px solid #bbf7d0;
+        color: #065f46;
+        background: var(--green-soft);
+      }
+
+      .warning {
+        border: 1px solid #fed7aa;
+        color: #92400e;
+        background: var(--amber-soft);
+      }
+
+      .danger {
+        border: 1px solid #fecdca;
+        color: var(--red);
+        background: var(--red-soft);
+      }
+
+      .note {
+        border: 1px solid #bfdbfe;
+        color: #1d4ed8;
+        background: var(--blue-soft);
+      }
+
+      @media (max-width: 860px) {
+        main {
+          padding: 24px 14px 52px;
+        }
+
+        header,
+        section {
+          border-radius: 14px;
+        }
+
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="meta">
+          <span class="pill">Runbook</span>
+          <span class="pill">Backend</span>
+          <span class="pill">Frontend</span>
+          <span class="pill">Tauri</span>
+          <span class="pill">Docker</span>
+        </div>
+        <h1>DonationPlatform 실행 관련 정보</h1>
+        <p class="lead">
+          로컬 개발에서 자주 쓰는 실행 명령어, URL, 포트, Docker, Swagger, GitHub 정보를 한 곳에 모은 문서다.
+          기준 경로는 <code>/Users/terecal/milla-pilot</code>이다.
+        </p>
+      </header>
+
+      <section>
+        <h2>서비스 요약</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>서비스</th>
+              <th>경로</th>
+              <th>기술</th>
+              <th>기본 포트</th>
+              <th>주요 URL</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Backend API</td>
+              <td><code>donation-platform-server</code></td>
+              <td>Spring Boot 4, Java 21, JPA, Security, JWT, springdoc-openapi</td>
+              <td><code>4301</code></td>
+              <td><a href="http://localhost:4301">http://localhost:4301</a></td>
+            </tr>
+            <tr>
+              <td>Frontend Web</td>
+              <td><code>donation-platform-front</code></td>
+              <td>Next.js 16, React 19, Tailwind v4, shadcn/ui style</td>
+              <td><code>4300</code></td>
+              <td><a href="http://localhost:4300">http://localhost:4300</a></td>
+            </tr>
+            <tr>
+              <td>Tauri Admin</td>
+              <td><code>donation-admin-tauri</code></td>
+              <td>Tauri 2, Vite 7, React 19, Tailwind v4</td>
+              <td><code>1422</code> devUrl</td>
+              <td><a href="http://localhost:1422">http://localhost:1422</a></td>
+            </tr>
+            <tr>
+              <td>PostgreSQL</td>
+              <td><code>donation-platform-server/docker-compose.yml</code></td>
+              <td>postgres:15-alpine</td>
+              <td><code>5436</code> host</td>
+              <td><code>localhost:5436/donation_platform</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>전체 로컬 실행 순서</h2>
+        <ol>
+          <li>PostgreSQL 컨테이너를 먼저 실행한다.</li>
+          <li>백엔드 서버를 실행한다.</li>
+          <li>웹 프론트 또는 Tauri 관리자 앱을 실행한다.</li>
+          <li>Swagger 또는 브라우저에서 API 연결을 확인한다.</li>
+        </ol>
+        <pre><code>cd /Users/terecal/milla-pilot/donation-platform-server
+docker compose up -d postgres
+./gradlew bootRun
+
+cd /Users/terecal/milla-pilot/donation-platform-front
+npm install
+npm run dev
+
+cd /Users/terecal/milla-pilot/donation-admin-tauri
+npm install
+npm run tauri dev</code></pre>
+        <div class="warning">
+          같은 포트에 기존 프로세스가 떠 있으면 실행이 실패한다. 백엔드는 <code>4301</code>, 웹은 <code>4300</code>,
+          Tauri devUrl은 <code>1422</code>를 사용한다.
+        </div>
+      </section>
+
+      <section>
+        <h2>Backend 실행</h2>
+        <div class="grid">
+          <div class="card">
+            <strong>Runtime</strong>
+            <span>Java 21 toolchain, Spring Boot 4.0.5, Gradle wrapper 사용.</span>
+          </div>
+          <div class="card">
+            <strong>Database</strong>
+            <span>PostgreSQL, host port 5436, database donation_platform.</span>
+          </div>
+          <div class="card">
+            <strong>API Port</strong>
+            <span><code>server.port=4301</code>.</span>
+          </div>
+        </div>
+        <pre><code>cd /Users/terecal/milla-pilot/donation-platform-server
+
+# env 준비
+cp .env.example .env
+
+# DB 실행
+docker compose up -d postgres
+
+# 서버 실행
+./gradlew bootRun
+
+# 테스트
+./gradlew test
+
+# 컴파일 확인
+./gradlew compileJava</code></pre>
+        <table>
+          <thead>
+            <tr>
+              <th>항목</th>
+              <th>값</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>서버 URL</td>
+              <td><a href="http://localhost:4301">http://localhost:4301</a></td>
+            </tr>
+            <tr>
+              <td>Swagger UI</td>
+              <td><a href="http://localhost:4301/swagger-ui/index.html">http://localhost:4301/swagger-ui/index.html</a></td>
+            </tr>
+            <tr>
+              <td>OpenAPI JSON</td>
+              <td><a href="http://localhost:4301/v3/api-docs">http://localhost:4301/v3/api-docs</a></td>
+            </tr>
+            <tr>
+              <td>DB URL</td>
+              <td><code>jdbc:postgresql://localhost:5436/donation_platform</code></td>
+            </tr>
+            <tr>
+              <td>DB 계정</td>
+              <td><code>postgres / postgres</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Backend 환경 변수</h2>
+        <p>
+          <code>./gradlew bootRun</code>은 <code>donation-platform-server/.env</code> 파일이 있으면 읽어서 환경 변수로 주입한다.
+        </p>
+        <pre><code>JWT_SECRET=donation-platform-dev-secret-key-must-be-at-least-32-bytes-long
+AWS_ACCESS_KEY_ID=YOUR_AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY=YOUR_AWS_SECRET_ACCESS_KEY
+AWS_S3_BUCKET_NAME=your-bucket-name
+AWS_S3_REGION=ap-northeast-2
+AWS_S3_PREFIX=donation-platform</code></pre>
+        <div class="note">
+          S3 값이 비어 있어도 기본 API 실행은 가능하지만, 업로드 presign 기능은 실제 AWS 설정이 필요하다.
+        </div>
+      </section>
+
+      <section>
+        <h2>Docker / PostgreSQL</h2>
+        <pre><code>cd /Users/terecal/milla-pilot/donation-platform-server
+
+# 실행
+docker compose up -d postgres
+
+# 상태 확인
+docker compose ps
+
+# 로그 확인
+docker compose logs -f postgres
+
+# 중지
+docker compose stop postgres
+
+# 컨테이너 제거
+docker compose down
+
+# 볼륨까지 제거: 로컬 DB 데이터 삭제됨
+docker compose down -v</code></pre>
+        <div class="danger">
+          <code>docker compose down -v</code>는 <code>donation_platform_postgres_data</code> 볼륨을 삭제하므로 로컬 DB 데이터가 사라진다.
+        </div>
+      </section>
+
+      <section>
+        <h2>Frontend Web 실행</h2>
+        <div class="grid">
+          <div class="card">
+            <strong>Framework</strong>
+            <span>Next.js 16, React 19, TypeScript.</span>
+          </div>
+          <div class="card">
+            <strong>Style</strong>
+            <span>Tailwind v4, shadcn/ui 설정, lucide-react.</span>
+          </div>
+          <div class="card">
+            <strong>API Base</strong>
+            <span><code>NEXT_PUBLIC_API_URL</code>, 기본값 <code>http://localhost:4301</code>.</span>
+          </div>
+        </div>
+        <pre><code>cd /Users/terecal/milla-pilot/donation-platform-front
+
+npm install
+npm run dev      # http://localhost:4300
+npm run build
+npm run start    # http://localhost:4300
+npm run lint</code></pre>
+        <table>
+          <thead>
+            <tr>
+              <th>항목</th>
+              <th>값</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>웹 URL</td>
+              <td><a href="http://localhost:4300">http://localhost:4300</a></td>
+            </tr>
+            <tr>
+              <td>대시보드</td>
+              <td><a href="http://localhost:4300/dashboard/">http://localhost:4300/dashboard/</a></td>
+            </tr>
+            <tr>
+              <td>후원하기</td>
+              <td><a href="http://localhost:4300/donate/">http://localhost:4300/donate/</a></td>
+            </tr>
+            <tr>
+              <td>내 후원 내역</td>
+              <td><a href="http://localhost:4300/my-donations/">http://localhost:4300/my-donations/</a></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="note">
+          <code>next.config.ts</code>는 production에서 static export를 사용하고, <code>GITHUB_PAGES=true</code>일 때
+          <code>/DonationPlatform</code> basePath와 assetPrefix를 적용한다.
+        </div>
+      </section>
+
+      <section>
+        <h2>Tauri 관리자 앱 실행</h2>
+        <div class="grid">
+          <div class="card">
+            <strong>Product</strong>
+            <span>Donation Admin, version 0.1.1.</span>
+          </div>
+          <div class="card">
+            <strong>Dev URL</strong>
+            <span><code>http://localhost:1422</code>, strictPort true.</span>
+          </div>
+          <div class="card">
+            <strong>API Base</strong>
+            <span><code>VITE_API_BASE_URL</code>, 기본값 <code>http://localhost:4301</code>.</span>
+          </div>
+        </div>
+        <pre><code>cd /Users/terecal/milla-pilot/donation-admin-tauri
+
+cp .env.example .env
+npm install
+
+# Vite만 실행
+npm run dev
+
+# 백엔드 실행 helper
+npm run server:dev
+
+# Tauri 앱 실행
+npm run tauri dev
+
+# 프론트 빌드
+npm run build
+
+# Tauri 번들 빌드
+npm run tauri build</code></pre>
+        <table>
+          <thead>
+            <tr>
+              <th>항목</th>
+              <th>값</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Vite devUrl</td>
+              <td><a href="http://localhost:1422">http://localhost:1422</a></td>
+            </tr>
+            <tr>
+              <td>서버 루트 경로</td>
+              <td><code>/Users/terecal/milla-pilot/donation-platform-server</code></td>
+            </tr>
+            <tr>
+              <td>Tauri identifier</td>
+              <td><code>com.donationplatform.admin.desktop</code></td>
+            </tr>
+            <tr>
+              <td>Updater endpoint</td>
+              <td><code>https://github.com/dota-pilot1/donation-admin-tauri/releases/latest/download/latest.json</code></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="warning">
+          Tauri 앱에서 API 호출 시 백엔드가 먼저 <code>4301</code>에서 떠 있어야 한다. CORS 또는 403이 보이면 서버 보안/CORS 설정과 origin을 먼저 확인한다.
+        </div>
+      </section>
+
+      <section>
+        <h2>Swagger / API 확인</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>목적</th>
+              <th>URL 또는 API</th>
+              <th>비고</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Swagger UI</td>
+              <td><a href="http://localhost:4301/swagger-ui/index.html">http://localhost:4301/swagger-ui/index.html</a></td>
+              <td>SecurityConfig에서 permitAll 처리됨.</td>
+            </tr>
+            <tr>
+              <td>OpenAPI JSON</td>
+              <td><a href="http://localhost:4301/v3/api-docs">http://localhost:4301/v3/api-docs</a></td>
+              <td>API 스키마 확인.</td>
+            </tr>
+            <tr>
+              <td>로그인</td>
+              <td><code>POST /api/auth/login</code></td>
+              <td>JWT access/refresh token 발급.</td>
+            </tr>
+            <tr>
+              <td>현재 사용자</td>
+              <td><code>GET /api/auth/me</code></td>
+              <td>Bearer token 필요.</td>
+            </tr>
+            <tr>
+              <td>메뉴</td>
+              <td><code>GET /api/menus</code></td>
+              <td>웹/Tauri 사이드바 메뉴 확인.</td>
+            </tr>
+            <tr>
+              <td>시설</td>
+              <td><code>GET /api/facilities</code>, <code>GET /api/facilities/{id}/items</code></td>
+              <td>후원하기 화면의 기본 데이터 후보.</td>
+            </tr>
+            <tr>
+              <td>후원 물품</td>
+              <td><code>POST/PATCH/DELETE /api/donation-items</code></td>
+              <td>관리자 앱에서 CRUD 연결 예정.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>주요 API 그룹</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>그룹</th>
+              <th>Base Path</th>
+              <th>용도</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Auth</td>
+              <td><code>/api/auth</code></td>
+              <td>회원가입, 이메일 확인, 로그인, 토큰 갱신, 로그아웃, 내 정보.</td>
+            </tr>
+            <tr>
+              <td>Users</td>
+              <td><code>/api/users</code></td>
+              <td>사용자 관리, 역할/활성화 상태 변경.</td>
+            </tr>
+            <tr>
+              <td>Menus</td>
+              <td><code>/api/menus</code></td>
+              <td>DB 기반 메뉴 조회 및 관리.</td>
+            </tr>
+            <tr>
+              <td>Facilities</td>
+              <td><code>/api/facilities</code></td>
+              <td>시설 목록, 상세, 시설별 후원 물품 조회, 시설 CRUD.</td>
+            </tr>
+            <tr>
+              <td>Donation Items</td>
+              <td><code>/api/donation-items</code></td>
+              <td>후원 물품 생성, 수정, 삭제, 상세 조회.</td>
+            </tr>
+            <tr>
+              <td>Roles / Permissions</td>
+              <td><code>/api/roles</code>, <code>/api/permissions</code>, <code>/api/permission-categories</code></td>
+              <td>RBAC 관리.</td>
+            </tr>
+            <tr>
+              <td>Site Settings</td>
+              <td><code>/api/site-settings</code></td>
+              <td>사이트 설정 조회/저장.</td>
+            </tr>
+            <tr>
+              <td>Upload</td>
+              <td><code>/api/upload/presign</code></td>
+              <td>S3 presigned upload URL 발급.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>GitHub 정보</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>항목</th>
+              <th>값</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Monorepo remote</td>
+              <td><a href="https://github.com/dota-pilot1/milla-pilot">https://github.com/dota-pilot1/milla-pilot</a></td>
+            </tr>
+            <tr>
+              <td>Remote name</td>
+              <td><code>origin</code></td>
+            </tr>
+            <tr>
+              <td>기본 브랜치</td>
+              <td><code>main</code></td>
+            </tr>
+            <tr>
+              <td>현재 확인된 최신 커밋</td>
+              <td><code>9a4bcf0 Initial donation platform workspace</code></td>
+            </tr>
+            <tr>
+              <td>Tauri updater repository</td>
+              <td><a href="https://github.com/dota-pilot1/donation-admin-tauri">https://github.com/dota-pilot1/donation-admin-tauri</a></td>
+            </tr>
+          </tbody>
+        </table>
+        <pre><code>cd /Users/terecal/milla-pilot
+
+git status --short
+git remote -v
+git branch --show-current
+git log -1 --oneline
+
+git add .
+git commit -m "..."
+git push origin main</code></pre>
+      </section>
+
+      <section>
+        <h2>포트 충돌 확인</h2>
+        <pre><code># 백엔드 4301
+lsof -nP -iTCP:4301 -sTCP:LISTEN
+
+# 웹 4300
+lsof -nP -iTCP:4300 -sTCP:LISTEN
+
+# Tauri/Vite 1422
+lsof -nP -iTCP:1422 -sTCP:LISTEN
+
+# 필요 시 PID 종료
+kill &lt;PID&gt;</code></pre>
+        <div class="warning">
+          프로세스를 종료할 때는 PID와 COMMAND를 확인한 뒤 종료한다. 다른 프로젝트 서버를 잘못 종료하지 않도록 주의한다.
+        </div>
+      </section>
+
+      <section>
+        <h2>자주 보는 문제</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>증상</th>
+              <th>확인할 것</th>
+              <th>대응</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>백엔드 시작 실패</td>
+              <td>PostgreSQL 컨테이너, 5436 포트, DB 계정.</td>
+              <td><code>docker compose ps</code>, <code>docker compose logs -f postgres</code> 확인.</td>
+            </tr>
+            <tr>
+              <td>웹에서 API 호출 실패</td>
+              <td><code>NEXT_PUBLIC_API_URL</code>, 백엔드 4301 실행 여부.</td>
+              <td>백엔드 실행 후 브라우저 새로고침.</td>
+            </tr>
+            <tr>
+              <td>Tauri 403 / CORS</td>
+              <td>백엔드 Security/CORS 허용 origin, Tauri devUrl <code>http://localhost:1422</code>.</td>
+              <td>서버 CORS 설정과 preflight 응답 확인.</td>
+            </tr>
+            <tr>
+              <td>Swagger 인증 API 실패</td>
+              <td>Bearer token 입력 여부.</td>
+              <td>로그인 API로 토큰 발급 후 Swagger Authorize에 입력.</td>
+            </tr>
+            <tr>
+              <td>메뉴가 안 보임</td>
+              <td><code>MenuSeeder</code> 실행 로그, <code>GET /api/menus</code> 응답.</td>
+              <td>서버 재시작 후 DB 메뉴 데이터와 visible 값을 확인.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>

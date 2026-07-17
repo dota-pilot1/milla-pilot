@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import {
   CheckCircle2,
+  ChevronDown,
   CircleAlert,
   Download,
   Loader2,
   LogOut,
+  RefreshCw,
   Settings,
   UserCircle,
 } from "lucide-react";
@@ -23,6 +25,7 @@ type AppSidebarProps = {
   updateState?: AppUpdateState;
   updateBusy?: boolean;
   onOpenMenu: (menu: string) => void;
+  onRefreshMenus?: () => void | Promise<void>;
   onInstallUpdate?: () => void;
   onLogout: () => void;
 };
@@ -36,11 +39,32 @@ export function AppSidebar({
   updateState,
   updateBusy = false,
   onOpenMenu,
+  onRefreshMenus,
   onInstallUpdate,
   onLogout,
 }: AppSidebarProps) {
   const [accountOpen, setAccountOpen] = useState(false);
   const accountRef = useRef<HTMLDivElement>(null);
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+  const [refreshing, setRefreshing] = useState(false);
+
+  const toggleGroup = (id: string) =>
+    setCollapsedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
+  const handleRefresh = async () => {
+    if (!onRefreshMenus || refreshing) return;
+    setRefreshing(true);
+    try {
+      await onRefreshMenus();
+    } finally {
+      setTimeout(() => setRefreshing(false), 400);
+    }
+  };
   const displayName = user.username || user.email;
   const roleName = user.role.name || user.role.code.replace("ROLE_", "");
   const showUpdateButton = updateState?.status === "available" || updateState?.status === "downloading";
@@ -87,43 +111,31 @@ export function AppSidebar({
       </div>
 
       <nav className="sidebar-menu">
-        {menus.map((menu) => {
-          const GroupIcon = menu.icon;
-
-          if (menu.children.length === 0) {
-            return (
-              <SidebarButton
-                key={menu.id}
-                menu={menu}
-                activeMenu={activeMenu}
-                onOpenMenu={onOpenMenu}
-              />
-            );
-          }
-
-          return (
-            <section key={menu.id} className="sidebar-menu-group">
-              <div className="sidebar-group-title">
-                <GroupIcon size={14} />
-                <span>{menu.label}</span>
-              </div>
-              {menu.children.map((child) => (
-                <SidebarButton
-                  key={child.id}
-                  menu={child}
-                  activeMenu={activeMenu}
-                  onOpenMenu={onOpenMenu}
-                  nested
-                />
-              ))}
-            </section>
-          );
-        })}
+        {menus.map((menu) => (
+          <MenuNode
+            key={menu.id}
+            menu={menu}
+            activeMenu={activeMenu}
+            onOpenMenu={onOpenMenu}
+            collapsedGroups={collapsedGroups}
+            onToggleGroup={toggleGroup}
+            depth={0}
+          />
+        ))}
       </nav>
 
       <div className="sidebar-footer">
         <div className="sidebar-footer-tools">
           <span className="sidebar-version">v{appVersion}</span>
+          <button
+            type="button"
+            className="sidebar-icon-action"
+            onClick={handleRefresh}
+            disabled={refreshing || !onRefreshMenus}
+            title="메뉴 새로고침"
+          >
+            <RefreshCw size={15} className={refreshing ? "spin" : ""} />
+          </button>
           <button
             type="button"
             className="sidebar-icon-action"
@@ -217,6 +229,74 @@ export function AppSidebar({
   );
 }
 
+function MenuNode({
+  menu,
+  activeMenu,
+  onOpenMenu,
+  collapsedGroups,
+  onToggleGroup,
+  depth,
+}: {
+  menu: AdminMenu;
+  activeMenu: string;
+  onOpenMenu: (menu: string) => void;
+  collapsedGroups: Set<string>;
+  onToggleGroup: (id: string) => void;
+  depth: number;
+}) {
+  // 자식이 없으면 실제 이동 가능한 메뉴 버튼
+  if (menu.children.length === 0) {
+    return (
+      <SidebarButton
+        menu={menu}
+        activeMenu={activeMenu}
+        onOpenMenu={onOpenMenu}
+        nested={depth > 0}
+      />
+    );
+  }
+
+  // 자식이 있으면 접기 가능한 그룹 헤더 + 하위 재귀 렌더 (3뎁스 이상 지원)
+  const GroupIcon = menu.icon;
+  const collapsed = collapsedGroups.has(menu.id);
+  return (
+    <section className="sidebar-menu-group">
+      <div
+        className="sidebar-group-title"
+        role="button"
+        tabIndex={0}
+        aria-expanded={!collapsed}
+        onClick={() => onToggleGroup(menu.id)}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            onToggleGroup(menu.id);
+          }
+        }}
+      >
+        <GroupIcon size={13} />
+        <span>{menu.label}</span>
+        <ChevronDown size={13} className="sidebar-chevron" data-collapsed={collapsed} />
+      </div>
+      <div className={`sidebar-group-body${collapsed ? " collapsed" : ""}`}>
+        <div className="sidebar-group-body-inner">
+          {menu.children.map((child) => (
+            <MenuNode
+              key={child.id}
+              menu={child}
+              activeMenu={activeMenu}
+              onOpenMenu={onOpenMenu}
+              collapsedGroups={collapsedGroups}
+              onToggleGroup={onToggleGroup}
+              depth={depth + 1}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function SidebarButton({
   menu,
   activeMenu,
@@ -235,11 +315,8 @@ function SidebarButton({
       onClick={() => onOpenMenu(menu.id)}
       title={`${menu.label} · ${menu.subtitle}`}
     >
-      <Icon size={17} />
-      <span>
-        <strong>{menu.label}</strong>
-        <small>{menu.subtitle}</small>
-      </span>
+      <Icon size={16} />
+      <strong>{menu.label}</strong>
     </button>
   );
 }

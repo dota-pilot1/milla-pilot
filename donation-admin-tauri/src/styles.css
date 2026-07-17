@@ -1106,7 +1106,7 @@ button:disabled {
 .sidebar-menu {
   display: grid;
   align-content: start;
-  gap: 8px;
+  gap: 5px;
   min-height: 0;
   flex: 1;
   overflow-y: auto;
@@ -1119,8 +1119,8 @@ button:disabled {
   align-items: center;
   gap: 10px;
   width: 100%;
-  min-height: 42px;
-  padding: 8px 10px;
+  min-height: 37px;
+  padding: 7px 10px;
   text-align: left;
   border: 1px solid transparent;
   border-radius: 10px;
@@ -1145,22 +1145,10 @@ button:disabled {
   color: #047857;
   border-color: #a7f3d0;
   background: #ecfdf5;
-  box-shadow:
-    inset 0 0 0 1px rgba(5, 150, 105, 0.12),
-    0 8px 16px rgba(15, 23, 42, 0.08);
-  transform: translateX(1px);
 }
 
 .sidebar-menu button.active::before {
-  position: absolute;
-  left: -13px;
-  top: 50%;
-  width: 4px;
-  height: 34px;
-  border-radius: 0 999px 999px 0;
-  background: #059669;
-  content: "";
-  transform: translateY(-50%);
+  display: none;
 }
 
 .sidebar-menu button > svg {
@@ -1168,8 +1156,39 @@ button:disabled {
 }
 
 .sidebar-menu button.nested {
-  min-height: 38px;
-  padding-left: 12px;
+  min-height: 33px;
+  padding-left: 10px;
+}
+
+/* 그룹 접기/펼치기 — grid-template-rows 0fr↔1fr 로 부드럽게 */
+.sidebar-group-body {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 220ms ease;
+}
+
+.sidebar-group-body.collapsed {
+  grid-template-rows: 0fr;
+}
+
+.sidebar-group-body-inner {
+  display: grid;
+  gap: 4px;
+  min-height: 0;
+  overflow: hidden;
+  margin: 4px 0 3px 11px;
+  padding-left: 11px;
+  border-left: 1px solid #dbe3ec;
+}
+
+.sidebar-chevron {
+  margin-left: auto;
+  color: #94a3b8;
+  transition: transform 200ms ease;
+}
+
+.sidebar-chevron[data-collapsed="true"] {
+  transform: rotate(-90deg);
 }
 
 .sidebar-menu button.nested small {
@@ -1178,19 +1197,28 @@ button:disabled {
 
 .sidebar-menu-group {
   display: grid;
-  gap: 5px;
+  gap: 2px;
 }
 
 .sidebar-group-title {
   display: flex;
   align-items: center;
   gap: 7px;
-  padding: 8px 10px 3px;
+  padding: 6px 8px;
+  margin-top: 2px;
+  border-radius: 8px;
   color: #64748b;
   font-size: 11px;
   font-weight: 900;
   letter-spacing: 0;
   text-transform: uppercase;
+  cursor: pointer;
+  user-select: none;
+}
+
+.sidebar-group-title:hover {
+  background: #eef2f7;
+  color: #334155;
 }
 
 .sidebar-menu span,

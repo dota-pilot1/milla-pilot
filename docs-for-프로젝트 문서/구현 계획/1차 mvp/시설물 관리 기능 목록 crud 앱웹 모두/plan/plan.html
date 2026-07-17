@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>1차 MVP 시설물 관리 기능 목록 CRUD 구현 계획</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f8fb;
+        --paper: #ffffff;
+        --text: #111827;
+        --muted: #667085;
+        --line: #d8e0eb;
+        --soft: #f1f5f9;
+        --green: #047857;
+        --green-soft: #ecfdf5;
+        --blue: #0369a1;
+        --blue-soft: #e0f2fe;
+        --amber: #b45309;
+        --amber-soft: #fffbeb;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--text);
+        background: var(--bg);
+        font-family:
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        line-height: 1.65;
+      }
+
+      main {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 40px 24px 72px;
+      }
+
+      header,
+      section {
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: var(--paper);
+        box-shadow: 0 16px 42px rgba(15, 23, 42, 0.05);
+      }
+
+      header {
+        padding: 30px;
+      }
+
+      section {
+        margin-top: 18px;
+        padding: 24px;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        margin-bottom: 10px;
+        font-size: 32px;
+        line-height: 1.25;
+        letter-spacing: 0;
+      }
+
+      h2 {
+        margin-bottom: 12px;
+        font-size: 22px;
+        letter-spacing: 0;
+      }
+
+      h3 {
+        margin-bottom: 8px;
+        font-size: 16px;
+      }
+
+      p {
+        margin-bottom: 12px;
+      }
+
+      code,
+      pre {
+        font-family:
+          "SFMono-Regular",
+          Consolas,
+          "Liberation Mono",
+          monospace;
+      }
+
+      code {
+        padding: 2px 5px;
+        border-radius: 6px;
+        color: #0f172a;
+        background: var(--soft);
+        font-size: 0.92em;
+      }
+
+      pre {
+        overflow-x: auto;
+        margin: 12px 0 0;
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        color: #1f2937;
+        background: #f8fafc;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      ul,
+      ol {
+        margin: 0;
+        padding-left: 22px;
+      }
+
+      li + li {
+        margin-top: 8px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        font-size: 14px;
+      }
+
+      th,
+      td {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        color: #475467;
+        background: #f8fafc;
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .lead {
+        max-width: 820px;
+        margin-bottom: 0;
+        color: var(--muted);
+        font-size: 16px;
+      }
+
+      .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 18px;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 0 10px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: #344054;
+        background: #ffffff;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .callout {
+        margin-top: 14px;
+        padding: 16px;
+        border: 1px solid #a7f3d0;
+        border-radius: 12px;
+        color: #065f46;
+        background: var(--green-soft);
+      }
+
+      .note {
+        margin-top: 14px;
+        padding: 16px;
+        border: 1px solid #bae6fd;
+        border-radius: 12px;
+        color: var(--blue);
+        background: var(--blue-soft);
+      }
+
+      .warning {
+        margin-top: 14px;
+        padding: 16px;
+        border: 1px solid #fde68a;
+        border-radius: 12px;
+        color: var(--amber);
+        background: var(--amber-soft);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .card {
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #ffffff;
+      }
+
+      .card strong {
+        display: block;
+        margin-bottom: 5px;
+      }
+
+      .card span {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      @media (max-width: 820px) {
+        main {
+          padding: 24px 14px 48px;
+        }
+
+        header,
+        section {
+          padding: 18px;
+          border-radius: 14px;
+        }
+
+        h1 {
+          font-size: 25px;
+        }
+
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="meta">
+          <span class="pill">1차 MVP</span>
+          <span class="pill">Facility CRUD</span>
+          <span class="pill">Tauri Admin + Web</span>
+        </div>
+        <h1>시설물 관리 기능 목록 CRUD 구현 계획</h1>
+        <p class="lead">
+          1차 MVP는 Tauri 관리자 앱에서 시설을 등록·관리하고, 웹에서는 후원자가 시설 목록을 조회하는 흐름으로 시작한다.
+          시설은 후원 물품과 후원 목록의 기준 데이터이므로 가장 먼저 구현한다.
+        </p>
+      </header>
+
+      <section>
+        <h2>결론</h2>
+        <p>
+          지금 바로 메뉴 한두 개를 추가하고 시설 CRUD를 구현하는 방향은 적절하다. 다만 웹과 Tauri 관리자 앱의 메뉴는
+          앞으로 계속 다르게 진화할 가능성이 높으므로, 기능 구현 전에 메뉴 테이블 분리를 먼저 하는 편이 더 깔끔하다.
+        </p>
+        <div class="callout">
+          추천 순서: <code>tauri_admin_menus</code> 신설 + 기존 메뉴를
+          <code>web_platform_menus</code>로 전환 → 메뉴 시딩 → 페이지 매핑 →
+          앱과 웹에서 테스트 → <code>Facility</code> CRUD 구현.
+        </div>
+      </section>
+
+      <section>
+        <h2>왜 시설부터인가?</h2>
+        <ul>
+          <li>후원 물품은 어느 시설이 필요로 하는 물품인지 연결되어야 한다.</li>
+          <li>후원 목록은 결국 특정 시설 또는 시설의 물품에 대한 후원 기록이다.</li>
+          <li>시설 관리자가 로그인해서 관리할 수 있는 기준 데이터가 필요하다.</li>
+          <li>웹에서 후원자가 볼 첫 화면도 시설 또는 시설별 후원 물품 목록이 자연스럽다.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>메뉴 테이블 분리 여부</h2>
+        <p>
+          현재는 <code>menus</code> 테이블 하나를 웹과 Tauri 앱이 같이 사용한다. 클라이언트에서
+          <code>ADMIN_</code> prefix로 필터링하면 당장 구현은 가능하지만, 장기적으로는 관리 포인트가 흐려진다.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>선택지</th>
+              <th>장점</th>
+              <th>단점</th>
+              <th>판단</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>기존 <code>menus</code> 유지</td>
+              <td>가장 빠르게 메뉴 추가 가능</td>
+              <td>웹/Tauri 메뉴가 한 테이블에 섞이고 클라이언트 필터에 의존</td>
+              <td>임시 MVP에는 가능</td>
+            </tr>
+            <tr>
+              <td><code>surface</code> 컬럼 추가</td>
+              <td>테이블은 하나만 유지하면서 구분 가능</td>
+              <td>웹/앱 메뉴 관리 화면과 정책이 계속 한 테이블에 묶임</td>
+              <td>중간안</td>
+            </tr>
+            <tr>
+              <td><code>web_platform_menus</code>, <code>tauri_admin_menus</code> 분리</td>
+              <td>웹 메뉴와 관리자 앱 메뉴의 책임이 명확함</td>
+              <td>엔티티/API/시더가 하나 더 필요</td>
+              <td>추천</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="note">
+          최종 명칭은 <code>web_platform_menus</code>와 <code>tauri_admin_menus</code>로 둔다.
+          기존 <code>menus</code>는 웹 플랫폼 메뉴 성격이므로 <code>web_platform_menus</code>로 전환하고,
+          Tauri 관리자 앱은 별도 <code>tauri_admin_menus</code> 테이블과 API를 사용한다.
+        </div>
+      </section>
+
+      <section>
+        <h2>메뉴 분리 후 API 명칭</h2>
+        <p>
+          테이블명을 그대로 드러내면 클라이언트 입장에서 어느 메뉴를 호출해야 하는지 명확하다.
+          기존 <code>/api/menus</code>는 모호하므로 장기적으로 deprecated 처리한다.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>테이블</th>
+              <th>API</th>
+              <th>사용 클라이언트</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>web_platform_menus</code></td>
+              <td><code>GET /api/web-platform-menus</code></td>
+              <td>웹 후원 플랫폼</td>
+            </tr>
+            <tr>
+              <td><code>tauri_admin_menus</code></td>
+              <td><code>GET /api/tauri-admin-menus</code></td>
+              <td>Tauri 관리자 앱</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="warning">
+          기존 웹 코드가 <code>/api/menus</code>를 호출하고 있으므로, 전환 시점에는
+          <code>/api/menus</code>를 잠시 유지하거나 웹 클라이언트를 동시에
+          <code>/api/web-platform-menus</code>로 바꿔야 한다.
+        </div>
+      </section>
+
+      <section>
+        <h2>Tauri 관리자 앱에 추가할 메뉴</h2>
+        <p>1차 MVP에서 Tauri 앱은 운영자가 시설 데이터를 만들고 관리하는 화면을 제공한다.</p>
+        <pre><code>대시보드
+후원 운영
+  시설 관리
+  후원 물품 관리
+  후원 목록
+시스템 관리
+  사용자 관리
+  역할 관리
+  권한 관리
+  메뉴 관리</code></pre>
+        <table>
+          <thead>
+            <tr>
+              <th>메뉴 코드</th>
+              <th>라벨</th>
+              <th>경로</th>
+              <th>권한</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>ADMIN_FACILITIES</code></td>
+              <td>시설 관리</td>
+              <td><code>/facilities</code></td>
+              <td><code>ROLE_PLATFORM_ADMIN</code></td>
+            </tr>
+            <tr>
+              <td><code>ADMIN_DONATION_ITEMS</code></td>
+              <td>후원 물품 관리</td>
+              <td><code>/donation-items</code></td>
+              <td><code>ROLE_PLATFORM_ADMIN</code></td>
+            </tr>
+            <tr>
+              <td><code>ADMIN_CONTRIBUTIONS</code></td>
+              <td>후원 목록</td>
+              <td><code>/contributions</code></td>
+              <td><code>ROLE_PLATFORM_ADMIN</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>웹에는 무엇을 추가할 것인가?</h2>
+        <p>
+          웹은 운영자 도구가 아니라 후원자가 보는 서비스 화면이다. 따라서 관리자 표현인
+          <code>시설 관리</code>보다 <code>후원 시설</code> 또는 <code>시설 둘러보기</code>가 적절하다.
+        </p>
+        <div class="grid">
+          <div class="card">
+            <strong>1차 추천 메뉴</strong>
+            <span><code>후원 시설</code> / <code>/facilities</code><br />후원자가 공개된 시설 목록을 조회한다.</span>
+          </div>
+          <div class="card">
+            <strong>2차 확장 메뉴</strong>
+            <span><code>후원 물품</code> / <code>/donation-items</code><br />시설별 필요 물품을 조회하고 후원한다.</span>
+          </div>
+        </div>
+        <div class="warning">
+          웹에서 시설 등록/수정은 넣지 않는다. 시설 등록은 Tauri 관리자 앱 또는 시설 관리자 전용 관리 화면에서 처리하고,
+          웹은 공개 조회와 후원 흐름에 집중한다.
+        </div>
+      </section>
+
+      <section>
+        <h2>Facility 도메인 기본 CRUD</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>기능</th>
+              <th>API</th>
+              <th>사용 화면</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>시설 목록 조회</td>
+              <td><code>GET /api/facilities</code></td>
+              <td>Tauri 시설 관리</td>
+            </tr>
+            <tr>
+              <td>공개 시설 목록 조회</td>
+              <td><code>GET /api/public/facilities</code></td>
+              <td>웹 후원 시설</td>
+            </tr>
+            <tr>
+              <td>시설 상세 조회</td>
+              <td><code>GET /api/facilities/{id}</code></td>
+              <td>Tauri 시설 상세</td>
+            </tr>
+            <tr>
+              <td>시설 등록</td>
+              <td><code>POST /api/facilities</code></td>
+              <td>Tauri 시설 등록</td>
+            </tr>
+            <tr>
+              <td>시설 수정</td>
+              <td><code>PATCH /api/facilities/{id}</code></td>
+              <td>Tauri 시설 수정</td>
+            </tr>
+            <tr>
+              <td>시설 비활성화</td>
+              <td><code>PATCH /api/facilities/{id}/status</code></td>
+              <td>Tauri 시설 관리</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="note">
+          실제 삭제는 초기에 비추천한다. 후원 물품이나 후원 내역이 연결될 예정이므로
+          <code>ACTIVE</code>, <code>INACTIVE</code> 같은 상태값으로 관리하는 편이 안전하다.
+        </div>
+      </section>
+
+      <section>
+        <h2>Facility 엔티티 초안</h2>
+        <pre><code>Facility
+- id
+- name
+- registrationNumber
+- representativeName
+- phone
+- email
+- address
+- detailAddress
+- description
+- status: ACTIVE | INACTIVE
+- createdAt
+- updatedAt</code></pre>
+        <p>
+          시설 관리자 계정과 시설을 연결하는 기능은 1차 CRUD 이후에 붙인다. 처음에는 플랫폼 관리자가 시설을 등록하고,
+          후원자가 웹에서 공개 시설을 조회하는 흐름만 구현한다.
+        </p>
+      </section>
+
+      <section>
+        <h2>구현 순서</h2>
+        <ol>
+          <li>
+            메뉴 반영 및 데이터 시딩 설정:
+            <code>tauri_admin_menus</code>, <code>web_platform_menus</code> 기준으로
+            엔티티/API/시더를 정리하고 <code>ADMIN_FACILITIES</code>,
+            <code>WEB_FACILITIES</code> 메뉴를 넣는다.
+          </li>
+          <li>
+            추가한 메뉴들에 페이지 설정:
+            Tauri는 <code>ADMIN_FACILITIES</code>를 시설 관리 화면에 매핑하고,
+            웹은 <code>WEB_FACILITIES</code>를 <code>/facilities</code> 공개 조회 페이지에 매핑한다.
+          </li>
+          <li>
+            앱과 웹에서 테스트:
+            Tauri 앱 사이드바에 <code>시설 관리</code>가 보이는지,
+            웹 사이드바에 <code>후원 시설</code>이 보이는지,
+            각 메뉴 클릭 시 의도한 페이지가 열리는지 확인한다.
+          </li>
+          <li>그다음 서버 <code>Facility</code> 엔티티와 CRUD API를 구현한다.</li>
+          <li>Tauri 앱 시설 목록/등록/수정 화면을 실제 API에 연결한다.</li>
+          <li>웹 공개 시설 목록을 실제 API에 연결한다.</li>
+          <li>후원 물품 등록 기능으로 연결한다.</li>
+        </ol>
+      </section>
+    </main>
+  </body>
+</html>

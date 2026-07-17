@@ -1,5 +1,6 @@
 import {
   BadgeCheck,
+  Building2,
   FileText,
   HandCoins,
   KeyRound,
@@ -72,6 +73,7 @@ export const iconByCode: Record<string, LucideIcon> = {
   ADMIN: Settings,
   ADMIN_DONATION: HandCoins,
   ADMIN_SYSTEM: Settings,
+  ADMIN_FACILITIES: Building2,
   ADMIN_DONATION_ITEMS: PackagePlus,
   ADMIN_FUNDING_CAMPAIGNS: HandCoins,
   ADMIN_CONTRIBUTIONS: ReceiptText,
@@ -92,6 +94,7 @@ const subtitles: Record<string, string> = {
   DASHBOARD: "운영 현황",
   ADMIN_DONATION: "물품 · 캠페인 · 주문",
   ADMIN_SYSTEM: "계정 · 권한 · 설정",
+  ADMIN_FACILITIES: "시설물 · 후원 물품",
   ADMIN_DONATION_ITEMS: "시설 요청 물품",
   ADMIN_FUNDING_CAMPAIGNS: "공동구매 펀딩",
   ADMIN_CONTRIBUTIONS: "후원 결제 내역",

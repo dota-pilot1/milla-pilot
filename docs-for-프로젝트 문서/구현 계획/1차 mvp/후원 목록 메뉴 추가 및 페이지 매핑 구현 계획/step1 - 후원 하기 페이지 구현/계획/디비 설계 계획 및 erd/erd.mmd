@@ -1,0 +1,59 @@
+%% Step 1 — 후원하기 페이지 DB ERD
+%% 이번 스텝: FACILITY, DONATION_ITEM (실선)
+%% 차기 스텝: CONTRIBUTION, PURCHASE_ORDER (결제 도입 시)
+
+erDiagram
+    FACILITY ||--o{ DONATION_ITEM : "has (1:N)"
+
+    FACILITY {
+        bigint    id            PK "IDENTITY"
+        varchar   code          UK "slug·시더 멱등키"
+        varchar   name          "시설명"
+        varchar   region        "지역"
+        varchar   type          "ORPHANAGE|CHILD_CENTER"
+        varchar   description    "소개 (아동정보 미포함)"
+        varchar   status        "RECRUITING|BUYING|SHIPPING"
+        boolean   verified      "자격확인 여부"
+        varchar   avatar_initial "카드 이니셜"
+        int       display_order
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    DONATION_ITEM {
+        bigint    id              PK "IDENTITY"
+        bigint    facility_id     FK "ManyToOne, ON DELETE CASCADE"
+        varchar   name            "물품명"
+        varchar   category        "LEARNING|LIVING|HYGIENE"
+        varchar   note            "수량 메모 (6종·30권)"
+        varchar   reason          "필요한 이유"
+        varchar   emoji           "썸네일"
+        bigint    goal_amount     "목표금액(원)"
+        bigint    raised_amount   "모인금액 - 표시용, 차기 Σ CONTRIBUTION"
+        int       target_quantity "목표수량"
+        varchar   status          "RECRUITING|LOCKED|BUYING|SHIPPING"
+        date      deadline        "마감일 (nullable)"
+        int       display_order
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    %% ───── 차기 스텝 (결제 도입 시) ─────
+    DONATION_ITEM ||..o{ CONTRIBUTION : "차기: 후원참여"
+    DONATION_ITEM ||..o| PURCHASE_ORDER : "차기: 통합구매"
+
+    CONTRIBUTION {
+        bigint  id              PK
+        bigint  donation_item_id FK
+        bigint  donor_user_id   FK "후원자(키아)"
+        bigint  amount          "후원 금액"
+        varchar payment_status  "PENDING|PAID|REFUNDED"
+        timestamp created_at
+    }
+
+    PURCHASE_ORDER {
+        bigint  id              PK
+        bigint  donation_item_id FK
+        varchar order_status    "ORDERED|SHIPPING|RECEIVED"
+        timestamp created_at
+    }

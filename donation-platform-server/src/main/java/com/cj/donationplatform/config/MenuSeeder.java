@@ -10,6 +10,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Set;
 import java.util.List;
 
 @Slf4j
@@ -30,10 +31,13 @@ public class MenuSeeder implements ApplicationRunner {
     public void run(ApplicationArguments args) {
         List<MenuDef> defs = List.of(
                 new MenuDef("DASHBOARD",             null,    "대시보드",      "nav.dashboard",        "/dashboard",        "LayoutDashboard", null,                    0),
+                new MenuDef("WEB_DONATE",            null,    "후원하기",      "nav.donate",           "/donate",           "HandCoins",       null,                    1),
+                new MenuDef("WEB_MY_DONATIONS",      null,    "내 후원 내역",  "nav.myDonations",      "/my-donations",     "ReceiptText",     null,                    2),
                 new MenuDef("ADMIN",                 null,    "관리",          "nav.admin",            null,                "Settings",        RoleSeeder.ROLE_PLATFORM_ADMIN,   1),
                 new MenuDef("ADMIN_DONATION",        "ADMIN", "후원 관리",     null,                   null,                "HandCoins",       RoleSeeder.ROLE_PLATFORM_ADMIN,   0),
                 new MenuDef("ADMIN_SYSTEM",          "ADMIN", "시스템 관리",   null,                   null,                "Settings",        RoleSeeder.ROLE_PLATFORM_ADMIN,   1),
-                new MenuDef("ADMIN_DONATION_ITEMS",  "ADMIN_DONATION", "후원 물품 관리", "nav.donationItems",    "/donation-items",   "PackagePlus",     RoleSeeder.ROLE_PLATFORM_ADMIN,   0),
+                new MenuDef("ADMIN_FACILITIES",      "ADMIN_DONATION", "시설 관리",     "nav.facilities",       "/facilities",       "Building2",       RoleSeeder.ROLE_PLATFORM_ADMIN,   0),
+                // ADMIN_DONATION_ITEMS(후원 물품 관리)는 시설 관리 화면 안에서 시설별로 다루므로 독립 메뉴에서 제외.
                 new MenuDef("ADMIN_FUNDING_CAMPAIGNS","ADMIN_DONATION","펀딩 캠페인",   "nav.fundingCampaigns", "/funding-campaigns","HandCoins",       RoleSeeder.ROLE_PLATFORM_ADMIN,   1),
                 new MenuDef("ADMIN_CONTRIBUTIONS",   "ADMIN_DONATION", "후원 내역",     "nav.contributions",    "/contributions",    "ReceiptText",     RoleSeeder.ROLE_PLATFORM_ADMIN,   2),
                 new MenuDef("ADMIN_PURCHASE_ORDERS", "ADMIN_DONATION", "통합 구매",     "nav.purchaseOrders",   "/purchase-orders",  "ShoppingCart",    RoleSeeder.ROLE_PLATFORM_ADMIN,   3),
@@ -64,6 +68,31 @@ public class MenuSeeder implements ApplicationRunner {
             );
             menuRepository.save(menu);
             log.info("Upserted menu: {}", def.code());
+        }
+
+        Set<String> deprecatedWebMenuCodes = Set.of(
+                "WEB_FACILITIES",
+                "WEB_DONATION_ITEMS",
+                "WEB_MY_CONTRIBUTIONS",
+                "ADMIN_DONATION_ITEMS"
+        );
+        for (String code : deprecatedWebMenuCodes) {
+            menuRepository.findByCode(code).ifPresent(menu -> {
+                menu.update(
+                        menu.getParent(),
+                        menu.getLabel(),
+                        menu.getLabelKey(),
+                        menu.getPath(),
+                        menu.getIcon(),
+                        menu.isExternal(),
+                        menu.getRequiredRole(),
+                        menu.getRequiredPermission(),
+                        false,
+                        menu.getDisplayOrder()
+                );
+                menuRepository.save(menu);
+                log.info("Deprecated menu hidden: {}", code);
+            });
         }
     }
 }

@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DonationPlatform 프론트엔드 개발 스펙 조사 및 적절성</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f8fb;
+        --paper: #ffffff;
+        --text: #111827;
+        --muted: #667085;
+        --line: #d8e0eb;
+        --soft: #f1f5f9;
+        --green: #047857;
+        --green-soft: #ecfdf5;
+        --blue: #1d4ed8;
+        --blue-soft: #eff6ff;
+        --amber: #b45309;
+        --amber-soft: #fffbeb;
+        --red: #b42318;
+        --red-soft: #fef3f2;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        color: var(--text);
+        background: var(--bg);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.65;
+      }
+
+      main {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 40px 24px 72px;
+      }
+
+      header, section {
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: var(--paper);
+        box-shadow: 0 16px 42px rgba(15, 23, 42, 0.05);
+      }
+
+      header { padding: 30px; }
+      section { margin-top: 18px; padding: 24px; }
+
+      h1, h2, h3, p { margin-top: 0; }
+      h1 { margin-bottom: 10px; font-size: 32px; line-height: 1.25; letter-spacing: 0; }
+      h2 { margin-bottom: 12px; font-size: 22px; letter-spacing: 0; }
+      h3 { margin-bottom: 8px; font-size: 16px; }
+      p { margin-bottom: 12px; }
+
+      code, pre {
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      }
+
+      code {
+        padding: 2px 5px;
+        border-radius: 6px;
+        color: #0f172a;
+        background: var(--soft);
+        font-size: 0.92em;
+      }
+
+      pre {
+        overflow-x: auto;
+        margin: 12px 0 0;
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        color: #1f2937;
+        background: #f8fafc;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      ul, ol { margin: 0; padding-left: 22px; }
+      li + li { margin-top: 8px; }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        font-size: 14px;
+      }
+
+      th, td {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        color: #475467;
+        background: #f8fafc;
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      tr:last-child td { border-bottom: 0; }
+
+      .lead {
+        max-width: 860px;
+        margin-bottom: 0;
+        color: var(--muted);
+        font-size: 16px;
+      }
+
+      .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 18px;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 0 10px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: #344054;
+        background: #fff;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .card {
+        min-height: 122px;
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #fff;
+      }
+
+      .card strong { display: block; margin-bottom: 8px; }
+      .card span { display: block; color: var(--muted); font-size: 14px; }
+
+      .callout, .warning, .danger, .note {
+        margin-top: 14px;
+        padding: 14px 16px;
+        border-radius: 12px;
+        font-size: 14px;
+      }
+
+      .callout { border: 1px solid #bbf7d0; color: #065f46; background: var(--green-soft); }
+      .warning { border: 1px solid #fed7aa; color: #92400e; background: var(--amber-soft); }
+      .danger { border: 1px solid #fecdca; color: var(--red); background: var(--red-soft); }
+      .note { border: 1px solid #bfdbfe; color: var(--blue); background: var(--blue-soft); }
+
+      @media (max-width: 860px) {
+        main { padding: 24px 14px 52px; }
+        header, section { border-radius: 14px; }
+        .grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="meta">
+          <span class="pill">Frontend Spec</span>
+          <span class="pill">Next.js 16</span>
+          <span class="pill">React 19</span>
+          <span class="pill">shadcn/ui</span>
+          <span class="pill">FSD</span>
+        </div>
+        <h1>프론트엔드 개발 스펙 조사 및 적절성</h1>
+        <p class="lead">
+          DonationPlatform 웹 프론트는 후원자가 시설과 후원 물품을 탐색하고, 관리자가 기본 운영 메뉴를 사용할 수 있는 Next.js 앱이다.
+          현재 구조는 FSD에 가깝게 구성되어 있으며, shadcn/ui 스타일을 적용하기 좋은 상태다.
+        </p>
+      </header>
+
+      <section>
+        <h2>기본 스펙</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>항목</th>
+              <th>현재 스펙</th>
+              <th>적절성 판단</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>프로젝트</td>
+              <td><code>donation-platform-front</code></td>
+              <td>웹 플랫폼 전용 앱으로 유지하는 것이 맞다. 관리자 반복 업무는 Tauri로 분리하는 방향이 좋다.</td>
+            </tr>
+            <tr>
+              <td>프레임워크</td>
+              <td>Next.js 16.1.4, App Router</td>
+              <td>라우트 기반 페이지 구성에 적합하다. 최신 버전이라 생태계 호환성은 확인하며 가야 한다.</td>
+            </tr>
+            <tr>
+              <td>React</td>
+              <td>React 19.2.3</td>
+              <td>최신 조합이다. 라이브러리 호환성 문제가 생기면 버전 고정이 중요하다.</td>
+            </tr>
+            <tr>
+              <td>언어</td>
+              <td>TypeScript 5</td>
+              <td>API 타입, 폼 값, 권한 모델을 다루기에 적절하다.</td>
+            </tr>
+            <tr>
+              <td>스타일</td>
+              <td>Tailwind v4, shadcn/ui 설정, Radix, CVA, lucide-react</td>
+              <td>모던 시크 운영형 UI를 빠르게 만들기에 적합하다.</td>
+            </tr>
+            <tr>
+              <td>서버 상태</td>
+              <td>TanStack React Query 5</td>
+              <td>API 캐시, refetch, mutation 관리에 적절하다.</td>
+            </tr>
+            <tr>
+              <td>폼/검증</td>
+              <td>react-hook-form, zod, hookform resolvers</td>
+              <td>관리자 폼과 후원 신청 폼 모두에 적합하다.</td>
+            </tr>
+            <tr>
+              <td>API 클라이언트</td>
+              <td>axios, token refresh interceptor</td>
+              <td>JWT 인증 흐름에 적합하다. SSR fetch와 혼용할 때 기준을 정해야 한다.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>현재 구조</h2>
+        <pre><code>donation-platform-front/src
+├─ app
+│  ├─ layout.tsx
+│  ├─ QueryProvider.tsx
+│  ├─ AuthInitializer.tsx
+│  ├─ dashboard
+│  ├─ donate
+│  ├─ my-donations
+│  ├─ facilities
+│  └─ users / roles / permissions / menus ...
+├─ entities
+│  ├─ menu
+│  ├─ permission
+│  ├─ permission-category
+│  ├─ site-setting
+│  └─ user
+├─ features
+│  ├─ auth
+│  ├─ menu-management
+│  ├─ permission-management
+│  ├─ role-management
+│  ├─ site-settings
+│  └─ user-management
+├─ shared
+│  ├─ api
+│  ├─ i18n
+│  ├─ lib
+│  ├─ types
+│  └─ ui
+└─ widgets
+   ├─ guards
+   └─ header</code></pre>
+        <div class="callout">
+          현재 구조는 FSD 관점에서 큰 방향이 좋다. 다음 단계에서는 <code>facility</code>, <code>donation-item</code>,
+          <code>contribution</code> 엔티티를 추가하면 후원 도메인이 더 자연스럽게 정리된다.
+        </div>
+      </section>
+
+      <section>
+        <h2>shadcn/ui 설정 평가</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>항목</th>
+              <th>현재 설정</th>
+              <th>판단</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>components.json</td>
+              <td>존재함, schema <code>https://ui.shadcn.com/schema.json</code></td>
+              <td>shadcn/ui 기반 프로젝트로 보는 것이 맞다.</td>
+            </tr>
+            <tr>
+              <td>style</td>
+              <td><code>new-york</code></td>
+              <td>모던하고 밀도 있는 UI에 적합하다.</td>
+            </tr>
+            <tr>
+              <td>baseColor</td>
+              <td><code>neutral</code></td>
+              <td>모던 시크 컨셉과 잘 맞는다.</td>
+            </tr>
+            <tr>
+              <td>ui alias</td>
+              <td><code>@/shared/ui</code></td>
+              <td>FSD에서 shared primitive를 두기 좋은 설정이다.</td>
+            </tr>
+            <tr>
+              <td>iconLibrary</td>
+              <td><code>lucide</code></td>
+              <td>현재 Header, 메뉴 아이콘과도 방향이 맞다.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>상태 관리와 인증 흐름</h2>
+        <ul>
+          <li><code>QueryProvider</code>에서 React Query를 전역 제공한다.</li>
+          <li>기본 query staleTime은 30초, window focus refetch는 꺼져 있다.</li>
+          <li><code>AuthInitializer</code>가 local storage 기반 인증 상태를 복구한다.</li>
+          <li><code>shared/api/axios.ts</code>에서 access token 자동 첨부와 refresh token 재발급 큐를 처리한다.</li>
+          <li>401이 발생하면 refresh를 시도하고, 실패 시 <code>auth:logout</code> 이벤트로 로그인 화면 이동을 유도한다.</li>
+        </ul>
+        <div class="note">
+          MVP 기준으로 충분히 좋은 구조다. 다만 후원 공개 페이지는 비로그인 접근이 가능해야 하므로, 페이지별 인증 가드를 명확히 구분해야 한다.
+        </div>
+      </section>
+
+      <section>
+        <h2>라우팅/배포 설정 평가</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>항목</th>
+              <th>현재</th>
+              <th>판단</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>개발 포트</td>
+              <td><code>next dev -p 4300</code></td>
+              <td>백엔드 4301, Tauri 1422와 충돌 없이 적절하다.</td>
+            </tr>
+            <tr>
+              <td>trailingSlash</td>
+              <td><code>true</code></td>
+              <td>정적 export/GitHub Pages 배포에 유리하다.</td>
+            </tr>
+            <tr>
+              <td>production output</td>
+              <td><code>output: "export"</code></td>
+              <td>정적 배포에는 좋지만 서버 기능이 필요한 Next 기능은 제한된다.</td>
+            </tr>
+            <tr>
+              <td>GitHub Pages</td>
+              <td><code>GITHUB_PAGES=true</code>면 <code>/DonationPlatform</code> basePath</td>
+              <td>프로토타입 공개에는 적절하다. API base URL은 별도 환경값이 필요하다.</td>
+            </tr>
+            <tr>
+              <td>Image</td>
+              <td><code>images.unoptimized=true</code></td>
+              <td>static export와 맞는다.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>MVP 화면 관점 적절성</h2>
+        <div class="grid">
+          <div class="card">
+            <strong>후원자 웹</strong>
+            <span><code>/donate</code>, <code>/my-donations</code> 중심으로 가는 방향이 적절하다.</span>
+          </div>
+          <div class="card">
+            <strong>관리자 기능</strong>
+            <span>웹에도 관리 화면이 있으나, 반복 운영 업무는 Tauri 앱으로 옮기는 것이 자연스럽다.</span>
+          </div>
+          <div class="card">
+            <strong>DB 메뉴</strong>
+            <span>웹 사이드바를 DB 메뉴로 출력하는 현재 방향은 유지 가능하다.</span>
+          </div>
+        </div>
+        <div class="warning">
+          웹은 후원 플랫폼 역할이므로 시설 CRUD, 권한 관리, 메뉴 관리 같은 운영 메뉴가 후원자 화면에 과하게 노출되지 않도록
+          메뉴 데이터와 권한 필터를 분리해야 한다.
+        </div>
+      </section>
+
+      <section>
+        <h2>현 스택의 장점과 리스크</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>구분</th>
+              <th>내용</th>
+              <th>판단</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>장점</td>
+              <td>Next App Router, TypeScript, React Query, shadcn/ui 조합</td>
+              <td>CRUD, 대시보드, 후원 목록 UI를 빠르게 만들기 좋다.</td>
+            </tr>
+            <tr>
+              <td>장점</td>
+              <td>FSD에 가까운 디렉터리 구조</td>
+              <td>도메인 확장 시 파일 위치 판단이 쉽다.</td>
+            </tr>
+            <tr>
+              <td>리스크</td>
+              <td>Next 16, React 19처럼 최신 버전 사용</td>
+              <td>일부 라이브러리 호환성 문제는 빌드에서 조기 확인해야 한다.</td>
+            </tr>
+            <tr>
+              <td>리스크</td>
+              <td>static export 설정</td>
+              <td>서버 액션, 동적 서버 렌더링이 필요한 기능은 쓰기 어렵다. 현재처럼 클라이언트 API 호출 중심이면 문제 없다.</td>
+            </tr>
+            <tr>
+              <td>리스크</td>
+              <td>웹과 관리자 기능 혼재</td>
+              <td>웹은 후원자 중심, Tauri는 관리자 중심으로 메뉴와 라우트를 점진 분리해야 한다.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>권장 FSD 보강</h2>
+        <pre><code>src
+├─ entities
+│  ├─ facility
+│  │  ├─ api
+│  │  ├─ model
+│  │  └─ ui/FacilityCard.tsx
+│  ├─ donation-item
+│  │  ├─ api
+│  │  ├─ model
+│  │  └─ ui/DonationItemCard.tsx
+│  └─ contribution
+│     ├─ api
+│     ├─ model
+│     └─ ui/ContributionStatusBadge.tsx
+├─ features
+│  ├─ facility-search
+│  └─ donation-flow
+├─ widgets
+│  ├─ donation-sidebar
+│  └─ donation-list
+└─ app
+   ├─ donate
+   ├─ donate/facilities/[facilityId]
+   └─ my-donations</code></pre>
+      </section>
+
+      <section>
+        <h2>적절성 결론</h2>
+        <div class="callout">
+          현재 프론트 스택은 1차 MVP에 적절하다. 특히 shadcn/ui + Tailwind + FSD 구조는 후원자 화면과 관리자성 화면을 모두 빠르게 만들 수 있다.
+          다만 웹의 역할은 후원 플랫폼으로 좁히고, 운영자 반복 업무는 Tauri 관리자 앱으로 분리하는 쪽이 장기적으로 더 깔끔하다.
+        </div>
+      </section>
+
+      <section>
+        <h2>권장 보강 순서</h2>
+        <ol>
+          <li>웹 메뉴를 후원자 중심으로 정리한다: 대시보드, 후원하기, 내 후원 내역.</li>
+          <li><code>facility</code>, <code>donation-item</code>, <code>contribution</code> entity 레이어를 추가한다.</li>
+          <li><code>/donate</code>에 시설 목록과 물품 미리보기 UI를 실제 컴포넌트로 구현한다.</li>
+          <li>관리자 전용 CRUD는 Tauri 앱으로 옮기고 웹에서는 노출을 줄인다.</li>
+          <li>공통 UI primitive를 <code>shared/ui</code>에 shadcn 스타일로 정리한다.</li>
+        </ol>
+      </section>
+    </main>
+  </body>
+</html>

@@ -30,6 +30,9 @@ public enum ErrorCode {
     MENU_NOT_FOUND(HttpStatus.NOT_FOUND, "MENU_001", "메뉴를 찾을 수 없습니다."),
     MENU_CODE_DUPLICATE(HttpStatus.CONFLICT, "MENU_002", "이미 존재하는 메뉴 코드입니다."),
     MENU_PARENT_NOT_FOUND(HttpStatus.NOT_FOUND, "MENU_003", "부모 메뉴를 찾을 수 없습니다."),
+    FACILITY_NOT_FOUND(HttpStatus.NOT_FOUND, "FAC_001", "시설을 찾을 수 없습니다."),
+    FACILITY_CODE_DUPLICATE(HttpStatus.CONFLICT, "FAC_002", "이미 존재하는 시설 코드입니다."),
+    DONATION_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "DITEM_001", "후원 물품을 찾을 수 없습니다."),
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "COMMON_999", "서버 오류가 발생했습니다.");
 
     private final HttpStatus status;
