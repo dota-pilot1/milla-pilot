@@ -1,11 +1,13 @@
 "use client";
 
+import { Suspense } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, PackageOpen } from "lucide-react";
 import { Badge } from "@/shared/ui/Badge";
 import { Progress } from "@/shared/ui/Progress";
+import { StatusTimeline } from "@/shared/ui/StatusTimeline";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { pctOf } from "@/shared/lib/format";
 import { facilityApi } from "@/entities/facility/api/facilityApi";
@@ -15,12 +17,14 @@ import {
   ITEM_STATUS_LABEL,
   ITEM_STATUS_VARIANT,
 } from "@/entities/donation-item/model/types";
+import { purchaseOrderApi } from "@/entities/purchase-order/api/purchaseOrderApi";
+import { PurchaseStatusCard } from "@/entities/purchase-order/ui/PurchaseStatusCard";
 import { DonatePanel } from "@/features/donate/ui/DonatePanel";
 
-export default function DonationItemDetailPage() {
-  const params = useParams<{ id: string }>();
-  const id = Number(params.id);
-  const valid = Number.isFinite(id);
+function DonationItemDetail() {
+  const searchParams = useSearchParams();
+  const id = Number(searchParams.get("id"));
+  const valid = Number.isFinite(id) && id > 0;
 
   const itemQuery = useQuery({
     queryKey: ["donation-item", id],
@@ -36,7 +40,16 @@ export default function DonationItemDetailPage() {
   });
   const facility = facilityQuery.data;
 
-  const backHref = item ? `/donate/facilities/${item.facilityId}` : "/donate";
+  const purchased =
+    !!item && item.status !== "RECRUITING" && item.status !== "LOCKED";
+  const purchaseQuery = useQuery({
+    queryKey: ["purchase-order", id],
+    queryFn: () => purchaseOrderApi.getByItem(id),
+    enabled: valid && purchased,
+  });
+  const purchaseOrder = purchaseQuery.data;
+
+  const backHref = item ? `/donate/facility?id=${item.facilityId}` : "/donate";
   const pct = item ? pctOf(item.raisedAmount, item.goalAmount) : 0;
   const full = item ? item.raisedAmount >= item.goalAmount : false;
 
@@ -93,6 +106,13 @@ export default function DonationItemDetailPage() {
                 </div>
                 <Progress value={pct} complete={full} />
               </div>
+
+              <div className="rounded-xl border bg-card p-5 shadow-sm">
+                <p className="mb-4 text-sm font-medium">후원 진행 단계</p>
+                <StatusTimeline status={item.status} />
+              </div>
+
+              {purchaseOrder ? <PurchaseStatusCard order={purchaseOrder} /> : null}
             </div>
 
             <DonatePanel item={item} />
@@ -100,5 +120,13 @@ export default function DonationItemDetailPage() {
         )}
       </div>
     </main>
+  );
+}
+
+export default function DonationItemDetailPage() {
+  return (
+    <Suspense fallback={<div className="mx-auto max-w-4xl px-4 py-8" />}>
+      <DonationItemDetail />
+    </Suspense>
   );
 }

@@ -11,7 +11,7 @@ import {
 
 export function FacilityCard({ facility }: { facility: Facility }) {
   return (
-    <Link href={`/donate/facilities/${facility.id}`} className="group block h-full">
+    <Link href={`/donate/facility?id=${facility.id}`} className="group block h-full">
       <Card className="flex h-full flex-col p-5 transition-colors group-hover:border-primary/40">
         <div className="flex items-start gap-3">
           <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-base font-bold text-primary">

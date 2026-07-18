@@ -1,5 +1,11 @@
 export type ItemCategory = "LEARNING" | "LIVING" | "HYGIENE";
-export type ItemStatus = "RECRUITING" | "LOCKED" | "BUYING" | "SHIPPING";
+export type ItemStatus =
+  | "RECRUITING"
+  | "LOCKED"
+  | "BUYING"
+  | "SHIPPING"
+  | "RECEIVED"
+  | "RECEIPTED";
 
 export interface DonationItem {
   id: number;
@@ -28,15 +34,19 @@ export const ITEM_STATUS_LABEL: Record<ItemStatus, string> = {
   LOCKED: "목표달성",
   BUYING: "통합 구매 진행",
   SHIPPING: "배송중",
+  RECEIVED: "수령확인",
+  RECEIPTED: "영수증 발급",
 };
 
 // Badge variant 매핑 (상태색은 Badge 단일 출처)
 export const ITEM_STATUS_VARIANT: Record<
   ItemStatus,
-  "recruiting" | "locked" | "buying" | "shipping"
+  "recruiting" | "locked" | "buying" | "shipping" | "verified"
 > = {
   RECRUITING: "recruiting",
   LOCKED: "locked",
   BUYING: "buying",
   SHIPPING: "shipping",
+  RECEIVED: "shipping",
+  RECEIPTED: "verified",
 };
