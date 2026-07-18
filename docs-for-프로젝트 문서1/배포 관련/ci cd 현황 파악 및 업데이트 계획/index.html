@@ -200,24 +200,26 @@
       <header>
         <div class="meta">
           <span class="pill">배포 문서</span>
-          <span class="pill r">CI/CD 공백 큼</span>
-          <span class="pill a">우선순위: PR CI 먼저</span>
-          <span class="pill b">작성 기준: 현재 repo 조사</span>
+          <span class="pill b">CI active</span>
+          <span class="pill b">Deploy active</span>
+          <span class="pill a">배포는 수동 실행</span>
         </div>
         <h1>CI/CD 현황 파악 및 업데이트 계획</h1>
         <p class="lead">
           밀라 프로젝트는 Spring 백엔드, donor-facing Next.js 웹, 관리자 Tauri 앱이 분리되어 있다.
-          현재 배포 문서는 존재하지만, repo 루트에서 자동으로 검증·빌드·릴리스하는 파이프라인은 거의 없는 상태다.
-          따라서 지금 필요한 것은 대규모 DevOps 전환이 아니라, <b>main 브랜치에 깨진 코드가 들어가지 않게 하는 최소 CI</b>부터 세우는 것이다.
+          2026-07-18 기준으로 repo 루트에 <code>CI</code>와 <code>Deploy</code> GitHub Actions workflow를 추가했다.
+          <b>CI는 push/PR에서 자동 실행</b>되고, <b>Deploy는 GitHub Actions 화면에서 수동 실행</b>한다.
+          첫 CI에서 발견된 Next.js 정적 export 문제는 라우트 전환 후 해결되어 최신 CI가 통과했다.
         </p>
       </header>
 
       <section>
         <h2>1. 결론</h2>
-        <div class="danger">
-          <b>개선 필요.</b>
-          현재 상태는 “CI/CD가 조금 부족하다”가 아니라, 실제 개발·배포 위험을 막아줄 자동 관문이 없는 상태에 가깝다.
-          MVP 쇼케이스 단계라면 수동 배포가 가능하지만, 기능이 계속 늘어나는 지금부터는 최소 CI를 먼저 넣어야 한다.
+        <div class="note">
+          <b>1차 개선 완료.</b>
+          이전에는 자동 검증/배포 workflow가 없었지만, 현재는 <code>.github/workflows/ci.yml</code>과
+          <code>.github/workflows/deploy.yml</code>이 <b>main</b>에 반영되어 GitHub Actions에서 활성화되어 있다.
+          운영 배포는 사고 방지를 위해 자동 push 배포가 아니라 <code>workflow_dispatch</code> 수동 실행으로 둔다.
         </div>
         <table>
           <thead>
@@ -230,35 +232,80 @@
           <tbody>
             <tr>
               <td>GitHub Actions workflow</td>
-              <td>루트 <code>.github/workflows</code> 없음. 확인된 파일은 <code>.github/modernize/java-upgrade/.gitignore</code>뿐.</td>
-              <td class="bad">자동 검증 공백</td>
+              <td><code>.github/workflows/ci.yml</code>, <code>.github/workflows/deploy.yml</code> 추가됨. GitHub 기준 <code>CI</code>, <code>Deploy</code> 모두 active.</td>
+              <td class="ok">1차 완료</td>
             </tr>
             <tr>
               <td>백엔드 검증</td>
-              <td><code>donation-platform-server</code>에 Gradle/JUnit 설정은 있음. 테스트 파일은 기본 context test 중심.</td>
-              <td class="warn">CI 연결 필요</td>
+              <td><code>CI / backend</code> job에서 Java 21 + Gradle test 실행. 최신 run 성공.</td>
+              <td class="ok">자동 검증 연결</td>
             </tr>
             <tr>
               <td>웹 프론트 검증</td>
-              <td><code>npm run lint</code>, <code>npm run build</code> 스크립트는 있음. 자동 실행은 없음.</td>
-              <td class="warn">CI 연결 필요</td>
+              <td><code>CI / web</code> job에서 <code>npm ci</code>, <code>npm run lint</code>, <code>npm run build</code> 실행. 정적 export 라우트 수정 후 최신 run 성공.</td>
+              <td class="ok">자동 검증 연결</td>
             </tr>
             <tr>
               <td>관리자 Tauri 검증</td>
-              <td><code>npm run build</code>는 있음. Tauri release workflow는 하위 폴더에 있으나 모노레포 루트 Actions로는 동작하지 않는 구조.</td>
-              <td class="bad">릴리스 전략 정리 필요</td>
+              <td><code>CI / admin</code> job에서 <code>npm ci</code>, <code>npm run build</code> 실행. 최신 run 성공. Native Tauri packaging/release는 아직 별도 과제.</td>
+              <td class="warn">빌드 검증 완료 · 릴리스 별도</td>
             </tr>
             <tr>
               <td>배포 자동화</td>
-              <td>EC2 systemd, S3, CloudFront 재배포 명령은 문서화되어 있음. 자동 배포 파이프라인은 없음.</td>
-              <td class="warn">수동 배포 단계</td>
+              <td><code>Deploy</code> workflow 추가. <code>all</code>, <code>backend</code>, <code>frontend</code> 중 선택해 수동 실행. 필요한 GitHub Secrets 9개 등록 완료.</td>
+              <td class="ok">수동 승인형 CD 준비</td>
             </tr>
           </tbody>
         </table>
       </section>
 
       <section>
-        <h2>2. 왜 지금 해야 하는가</h2>
+        <h2>2. 적용 결과</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>항목</th>
+              <th>결과</th>
+              <th>비고</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>workflow 등록</td>
+              <td class="ok"><code>CI</code> active · <code>Deploy</code> active</td>
+              <td>GitHub repo: <code>dota-pilot1/milla-pilot</code></td>
+            </tr>
+            <tr>
+              <td>Secrets 등록</td>
+              <td class="ok">9개 등록 완료</td>
+              <td><code>EC2_HOST</code>, <code>EC2_USER</code>, <code>EC2_SSH_KEY</code>, <code>AWS_ACCESS_KEY_ID</code>, <code>AWS_SECRET_ACCESS_KEY</code>, <code>AWS_REGION</code>, <code>FRONT_S3_BUCKET</code>, <code>CLOUDFRONT_DISTRIBUTION_ID</code>, <code>NEXT_PUBLIC_API_URL</code></td>
+            </tr>
+            <tr>
+              <td>첫 CI run</td>
+              <td class="warn">web 실패</td>
+              <td><code>/donate/facilities/[id]</code> 동적 라우트가 <code>output: export</code>와 충돌.</td>
+            </tr>
+            <tr>
+              <td>수정</td>
+              <td class="ok">정적 export 호환 라우트로 전환</td>
+              <td><code>/donate/facility?id=...</code>, <code>/donate/item?id=...</code> 사용.</td>
+            </tr>
+            <tr>
+              <td>최신 CI run</td>
+              <td class="ok">backend · web · admin 모두 성공</td>
+              <td>run: <code>29646737770</code> · commit <code>4545972</code></td>
+            </tr>
+            <tr>
+              <td>남은 경고</td>
+              <td class="warn">빌드는 성공하나 annotation 존재</td>
+              <td>Actions Node 20 deprecation 경고, <code>PurchaseStatusCard.tsx</code>의 <code>&lt;img&gt;</code> 사용 경고.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>3. 왜 이렇게 했는가</h2>
         <div class="grid two">
           <div class="card">
             <h3>1) 프로젝트가 단일 앱이 아니다</h3>
@@ -292,7 +339,7 @@
       </section>
 
       <section>
-        <h2>3. 현재 스크립트 기준으로 가능한 최소 CI</h2>
+        <h2>4. 현재 CI 구성</h2>
         <table>
           <thead>
             <tr>
@@ -330,7 +377,7 @@
       </section>
 
       <section>
-        <h2>4. 권장 단계별 업데이트 계획</h2>
+        <h2>5. 단계별 업데이트 현황</h2>
         <table>
           <thead>
             <tr>
@@ -345,31 +392,31 @@
               <td>1단계</td>
               <td>루트 <code>.github/workflows/ci.yml</code> 추가</td>
               <td>PR/Push 시 백엔드·웹·관리자 빌드 검증</td>
-              <td>세 job이 모두 초록색으로 통과</td>
+              <td class="ok">완료 · 최신 CI 통과</td>
             </tr>
             <tr>
               <td>2단계</td>
               <td>path filter 적용</td>
               <td>변경된 영역만 CI 실행해 시간 절약</td>
-              <td>백엔드만 바꾸면 백엔드 job만 실행</td>
+              <td class="warn">미적용 · 현재는 세 job 모두 실행</td>
             </tr>
             <tr>
               <td>3단계</td>
               <td>브랜치 보호 설정</td>
               <td>CI 실패 코드가 main에 들어가는 것 차단</td>
-              <td>required checks 설정</td>
+              <td class="warn">GitHub Settings에서 별도 설정 필요</td>
             </tr>
             <tr>
               <td>4단계</td>
               <td>백엔드 main 배포 workflow 추가</td>
               <td>JAR 빌드, EC2 업로드, systemd restart 재현성 확보</td>
-              <td>수동 승인 후 운영 서버 재시작 성공</td>
+              <td class="ok">workflow 추가 · 실제 실행은 아직 별도</td>
             </tr>
             <tr>
               <td>5단계</td>
               <td>웹 main 배포 workflow 추가</td>
               <td>Next 정적 빌드, S3 sync, CloudFront invalidation 자동화</td>
-              <td>운영 URL smoke check HTTP 200</td>
+              <td class="ok">workflow 추가 · 실제 실행은 아직 별도</td>
             </tr>
             <tr>
               <td>6단계</td>
@@ -382,16 +429,17 @@
       </section>
 
       <section>
-        <h2>5. CI 초안</h2>
+        <h2>6. 현재 CI workflow</h2>
         <p>
-          아래는 현재 repo 구조에 맞춘 최소 형태다. 실제 적용 시에는 GitHub branch protection과 함께 사용한다.
+          현재 <code>.github/workflows/ci.yml</code>의 구조는 아래와 같다. push/PR/수동 실행을 지원한다.
         </p>
-        <pre>name: ci
+        <pre>name: CI
 
 on:
   pull_request:
   push:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   backend:
@@ -439,13 +487,49 @@ jobs:
       - run: npm ci
       - run: npm run build</pre>
         <div class="warning">
-          <b>주의:</b> 이 초안은 “검증 CI”다. 운영 서버 재시작, S3 sync, CloudFront invalidation, Tauri packaging은 의도적으로 제외한다.
-          검증 CI가 안정화된 뒤 CD를 분리해서 붙이는 편이 장애 범위를 줄인다.
+          <b>주의:</b> 이 workflow는 검증용이다. 운영 서버 재시작, S3 sync, CloudFront invalidation은 <code>Deploy</code> workflow에서 수동 실행한다.
         </div>
       </section>
 
       <section>
-        <h2>6. CD를 바로 붙이지 않는 이유</h2>
+        <h2>7. 현재 Deploy workflow</h2>
+        <p>
+          <code>.github/workflows/deploy.yml</code>은 자동 배포가 아니라 GitHub Actions 화면에서 직접 실행한다.
+          실행 시 <code>target</code>을 <code>all</code>, <code>backend</code>, <code>frontend</code> 중 선택한다.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>target</th>
+              <th>동작</th>
+              <th>검증</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>backend</code></td>
+              <td>Gradle build → JAR 백업/업로드 → <code>milla-server</code> restart</td>
+              <td><code>/api/site-settings</code> smoke check</td>
+            </tr>
+            <tr>
+              <td><code>frontend</code></td>
+              <td>Next 정적 build → S3 sync → CloudFront invalidation</td>
+              <td>운영 루트 URL smoke check</td>
+            </tr>
+            <tr>
+              <td><code>all</code></td>
+              <td>backend와 frontend job을 함께 실행</td>
+              <td>각 job smoke check</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="warning">
+          <b>운영 기준:</b> push 즉시 자동 배포하지 않는다. CI가 성공한 commit을 기준으로 사람이 Actions에서 Deploy를 눌러 배포한다.
+        </div>
+      </section>
+
+      <section>
+        <h2>8. 왜 자동 push 배포로 두지 않았는가</h2>
         <ul>
           <li>현재 repo에는 이미 수동 배포 문서가 있어, 당장 배포 방법이 없는 상태는 아니다.</li>
           <li>CD는 AWS 권한, SSH 키, 운영 env, CloudFront ID, systemd 권한을 다루므로 실수 비용이 CI보다 크다.</li>
@@ -455,7 +539,7 @@ jobs:
       </section>
 
       <section>
-        <h2>7. 배포 자동화 설계 시 필요한 Secret</h2>
+        <h2>9. 등록된 GitHub Actions Secrets</h2>
         <table>
           <thead>
             <tr>
@@ -493,12 +577,13 @@ jobs:
           </tbody>
         </table>
         <div class="danger">
-          <b>원칙:</b> 운영 비밀값은 문서나 git에 쓰지 않는다. GitHub Secrets 또는 서버의 권한 제한된 env 파일에만 둔다.
+          <b>원칙:</b> 운영 비밀값은 문서나 git에 쓰지 않는다. 현재 실제 값은 GitHub Actions Secrets에 등록되어 있으며,
+          문서에는 이름과 용도만 남긴다. 자세한 복붙용 안내는 <code>배포 자동화 관련 깃허브 액션 변수</code> 문서를 참고한다.
         </div>
       </section>
 
       <section>
-        <h2>8. 권장 운영 기준</h2>
+        <h2>10. 권장 운영 기준</h2>
         <ol>
           <li>PR은 CI 통과 전 merge하지 않는다.</li>
           <li>main push 배포는 초기에는 자동 실행보다 <code>workflow_dispatch</code> 수동 승인으로 시작한다.</li>
@@ -509,7 +594,7 @@ jobs:
       </section>
 
       <section>
-        <h2>9. 다음 액션</h2>
+        <h2>11. 다음 액션</h2>
         <table>
           <thead>
             <tr>
@@ -521,23 +606,23 @@ jobs:
           <tbody>
             <tr>
               <td>상</td>
-              <td><code>.github/workflows/ci.yml</code> 추가</td>
-              <td>깨진 빌드가 main에 들어가는 문제를 즉시 줄임</td>
+              <td>GitHub branch protection 설정</td>
+              <td>CI 실패 상태로 main merge/push되는 것을 제도적으로 차단</td>
             </tr>
             <tr>
               <td>상</td>
-              <td>브랜치 보호와 required check 설정</td>
-              <td>CI가 단순 참고가 아니라 실제 gate가 됨</td>
+              <td>Deploy workflow 실제 1회 실행</td>
+              <td>Secrets, SSH, S3, CloudFront 권한이 실제 운영 배포에서 맞는지 검증</td>
+            </tr>
+            <tr>
+              <td>중</td>
+              <td>path filter 적용</td>
+              <td>변경 영역별 job 실행으로 CI 대기 시간 절감</td>
             </tr>
             <tr>
               <td>중</td>
               <td>백엔드 테스트를 context test 외 주요 API/service 테스트로 확장</td>
               <td>인증, 후원, 구매, 비밀번호 재설정 회귀 방지</td>
-            </tr>
-            <tr>
-              <td>중</td>
-              <td>수동 승인형 backend/web deploy workflow 추가</td>
-              <td>배포 재현성 확보, 운영 명령 실수 감소</td>
             </tr>
             <tr>
               <td>하</td>
