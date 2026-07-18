@@ -1,6 +1,11 @@
 name: Deploy
 
 on:
+  workflow_run:
+    workflows:
+      - CI
+    types:
+      - completed
   workflow_dispatch:
     inputs:
       target:
@@ -21,10 +26,21 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: deploy-main
+  cancel-in-progress: true
+
 jobs:
   backend:
     name: deploy backend
-    if: ${{ inputs.target == 'all' || inputs.target == 'backend' }}
+    if: >-
+      ${{
+        (github.event_name == 'workflow_run' &&
+          github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.head_branch == 'main') ||
+        (github.event_name == 'workflow_dispatch' &&
+          (inputs.target == 'all' || inputs.target == 'backend'))
+      }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -32,6 +48,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -44,10 +62,10 @@ jobs:
 
       - name: Build JAR
         run: |
-          if [ "${{ inputs.skip_backend_tests }}" = "true" ]; then
-            ./gradlew build -x test
-          else
+          if [ "${{ github.event_name == 'workflow_dispatch' && inputs.skip_backend_tests == false }}" = "true" ]; then
             ./gradlew build
+          else
+            ./gradlew build -x test
           fi
 
       - name: Prepare SSH key
@@ -69,15 +87,29 @@ jobs:
       - name: Restart backend
         run: |
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}" \
-            "sudo systemctl restart milla-server && sleep 3 && systemctl is-active milla-server"
+            "sudo systemctl restart milla-server && systemctl is-active milla-server"
 
       - name: Smoke check API
         run: |
-          curl --fail --silent --show-error --max-time 20 "${{ secrets.NEXT_PUBLIC_API_URL }}/api/site-settings" >/dev/null
+          for i in {1..12}; do
+            if curl --fail --silent --show-error --max-time 20 "${{ secrets.NEXT_PUBLIC_API_URL }}/api/site-settings" >/dev/null; then
+              exit 0
+            fi
+            echo "API smoke check failed. retry=$i"
+            sleep 5
+          done
+          exit 1
 
   frontend:
     name: deploy frontend
-    if: ${{ inputs.target == 'all' || inputs.target == 'frontend' }}
+    if: >-
+      ${{
+        (github.event_name == 'workflow_run' &&
+          github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.head_branch == 'main') ||
+        (github.event_name == 'workflow_dispatch' &&
+          (inputs.target == 'all' || inputs.target == 'frontend'))
+      }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -85,6 +117,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -116,4 +150,11 @@ jobs:
 
       - name: Smoke check frontend
         run: |
-          curl --fail --silent --show-error --max-time 20 "${{ secrets.NEXT_PUBLIC_API_URL }}/" >/dev/null
+          for i in {1..6}; do
+            if curl --fail --silent --show-error --max-time 20 "${{ secrets.NEXT_PUBLIC_API_URL }}/" >/dev/null; then
+              exit 0
+            fi
+            echo "Frontend smoke check failed. retry=$i"
+            sleep 5
+          done
+          exit 1
