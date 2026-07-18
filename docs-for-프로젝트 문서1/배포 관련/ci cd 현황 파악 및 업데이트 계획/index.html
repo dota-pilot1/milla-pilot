@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CI/CD 현황 파악 및 업데이트 계획</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f8fb;
+        --paper: #fff;
+        --text: #111827;
+        --muted: #667085;
+        --line: #d8e0eb;
+        --soft: #f1f5f9;
+        --green: #047857;
+        --green-soft: #ecfdf5;
+        --blue: #0369a1;
+        --blue-soft: #e0f2fe;
+        --amber: #b45309;
+        --amber-soft: #fffbeb;
+        --red: #b42318;
+        --red-soft: #fff1f3;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        color: var(--text);
+        background: var(--bg);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.65;
+      }
+      main {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 40px 24px 72px;
+      }
+      header,
+      section {
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: var(--paper);
+        box-shadow: 0 16px 42px rgba(15, 23, 42, .05);
+      }
+      header { padding: 30px; }
+      section {
+        margin-top: 18px;
+        padding: 24px;
+      }
+      h1,
+      h2,
+      h3,
+      p { margin-top: 0; }
+      h1 {
+        margin-bottom: 10px;
+        font-size: 28px;
+        letter-spacing: -.01em;
+      }
+      h2 {
+        margin-bottom: 14px;
+        font-size: 20px;
+      }
+      h3 {
+        margin: 18px 0 8px;
+        font-size: 14px;
+      }
+      p { margin-bottom: 12px; }
+      ul,
+      ol {
+        margin: 0;
+        padding-left: 20px;
+      }
+      li + li { margin-top: 5px; }
+      table {
+        width: 100%;
+        margin-top: 6px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-collapse: collapse;
+        border-radius: 12px;
+        font-size: 13.5px;
+      }
+      th,
+      td {
+        padding: 9px 12px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        color: #475467;
+        background: #f8fafc;
+        font-size: 11.5px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+      tr:last-child td { border-bottom: 0; }
+      code {
+        padding: 2px 6px;
+        border-radius: 6px;
+        color: #0f172a;
+        background: var(--soft);
+        font-family: "SFMono-Regular", Consolas, monospace;
+        font-size: .86em;
+      }
+      pre {
+        overflow-x: auto;
+        margin: 10px 0 0;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        color: #1f2937;
+        background: #f8fafc;
+        font-family: "SFMono-Regular", Consolas, monospace;
+        font-size: 12.5px;
+        line-height: 1.7;
+      }
+      .lead {
+        max-width: 880px;
+        margin-bottom: 0;
+        color: var(--muted);
+        font-size: 15.5px;
+      }
+      .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 0 11px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: #344054;
+        background: #fff;
+        font-size: 12px;
+        font-weight: 800;
+      }
+      .pill.r {
+        color: var(--red);
+        background: var(--red-soft);
+        border-color: #fecdd3;
+      }
+      .pill.a {
+        color: var(--amber);
+        background: var(--amber-soft);
+        border-color: #fde68a;
+      }
+      .pill.b {
+        color: var(--blue);
+        background: var(--blue-soft);
+        border-color: #bae6fd;
+      }
+      .ok { color: var(--green); font-weight: 800; }
+      .warn { color: var(--amber); font-weight: 800; }
+      .bad { color: var(--red); font-weight: 800; }
+      .note,
+      .warning,
+      .danger {
+        margin-top: 14px;
+        padding: 15px;
+        border-radius: 12px;
+      }
+      .note {
+        border: 1px solid #bae6fd;
+        color: var(--blue);
+        background: var(--blue-soft);
+      }
+      .warning {
+        border: 1px solid #fde68a;
+        color: var(--amber);
+        background: var(--amber-soft);
+      }
+      .danger {
+        border: 1px solid #fecdd3;
+        color: var(--red);
+        background: var(--red-soft);
+      }
+      .grid {
+        display: grid;
+        gap: 14px;
+      }
+      @media (min-width: 820px) {
+        .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      }
+      .card {
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #fff;
+      }
+      .card h3 { margin-top: 0; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="meta">
+          <span class="pill">배포 문서</span>
+          <span class="pill r">CI/CD 공백 큼</span>
+          <span class="pill a">우선순위: PR CI 먼저</span>
+          <span class="pill b">작성 기준: 현재 repo 조사</span>
+        </div>
+        <h1>CI/CD 현황 파악 및 업데이트 계획</h1>
+        <p class="lead">
+          밀라 프로젝트는 Spring 백엔드, donor-facing Next.js 웹, 관리자 Tauri 앱이 분리되어 있다.
+          현재 배포 문서는 존재하지만, repo 루트에서 자동으로 검증·빌드·릴리스하는 파이프라인은 거의 없는 상태다.
+          따라서 지금 필요한 것은 대규모 DevOps 전환이 아니라, <b>main 브랜치에 깨진 코드가 들어가지 않게 하는 최소 CI</b>부터 세우는 것이다.
+        </p>
+      </header>
+
+      <section>
+        <h2>1. 결론</h2>
+        <div class="danger">
+          <b>개선 필요.</b>
+          현재 상태는 “CI/CD가 조금 부족하다”가 아니라, 실제 개발·배포 위험을 막아줄 자동 관문이 없는 상태에 가깝다.
+          MVP 쇼케이스 단계라면 수동 배포가 가능하지만, 기능이 계속 늘어나는 지금부터는 최소 CI를 먼저 넣어야 한다.
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>판단 항목</th>
+              <th>현재 상태</th>
+              <th>평가</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>GitHub Actions workflow</td>
+              <td>루트 <code>.github/workflows</code> 없음. 확인된 파일은 <code>.github/modernize/java-upgrade/.gitignore</code>뿐.</td>
+              <td class="bad">자동 검증 공백</td>
+            </tr>
+            <tr>
+              <td>백엔드 검증</td>
+              <td><code>donation-platform-server</code>에 Gradle/JUnit 설정은 있음. 테스트 파일은 기본 context test 중심.</td>
+              <td class="warn">CI 연결 필요</td>
+            </tr>
+            <tr>
+              <td>웹 프론트 검증</td>
+              <td><code>npm run lint</code>, <code>npm run build</code> 스크립트는 있음. 자동 실행은 없음.</td>
+              <td class="warn">CI 연결 필요</td>
+            </tr>
+            <tr>
+              <td>관리자 Tauri 검증</td>
+              <td><code>npm run build</code>는 있음. Tauri release workflow는 하위 폴더에 있으나 모노레포 루트 Actions로는 동작하지 않는 구조.</td>
+              <td class="bad">릴리스 전략 정리 필요</td>
+            </tr>
+            <tr>
+              <td>배포 자동화</td>
+              <td>EC2 systemd, S3, CloudFront 재배포 명령은 문서화되어 있음. 자동 배포 파이프라인은 없음.</td>
+              <td class="warn">수동 배포 단계</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>2. 왜 지금 해야 하는가</h2>
+        <div class="grid two">
+          <div class="card">
+            <h3>1) 프로젝트가 단일 앱이 아니다</h3>
+            <p>
+              이 repo는 백엔드, 웹, 관리자 앱이 함께 움직인다. 한쪽 타입·API·빌드가 깨져도 다른 쪽에서 바로 눈치채기 어렵다.
+              자동 CI가 없으면 “내 로컬에서는 됨” 상태로 main이 깨질 가능성이 높다.
+            </p>
+          </div>
+          <div class="card">
+            <h3>2) 배포 대상이 이미 운영형 구조다</h3>
+            <p>
+              EC2, systemd, S3, CloudFront, Tauri updater 문서가 이미 있다.
+              이 정도 인프라를 수동으로만 관리하면 배포 재현성과 롤백 판단이 사람 기억에 의존한다.
+            </p>
+          </div>
+          <div class="card">
+            <h3>3) 후원 도메인은 신뢰가 중요하다</h3>
+            <p>
+              결제 전 단계의 MVP라도 사용자·시설·후원 이력·비밀번호 재설정 같은 민감한 흐름이 있다.
+              최소한 빌드 실패, 보안 설정 누락, API 계약 깨짐은 merge 전에 잡아야 한다.
+            </p>
+          </div>
+          <div class="card">
+            <h3>4) 수동 배포는 속도보다 사고 비용이 커진다</h3>
+            <p>
+              지금은 기능 추가 속도가 빠르기 때문에 수동 체크리스트가 누락되기 쉽다.
+              CI는 개발 속도를 늦추는 장치가 아니라, 같은 실수를 반복해서 확인하지 않게 만드는 기본 장치다.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>3. 현재 스크립트 기준으로 가능한 최소 CI</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>대상</th>
+              <th>현재 명령</th>
+              <th>CI에서 할 일</th>
+              <th>비고</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>백엔드</td>
+              <td><code>cd donation-platform-server && ./gradlew test</code></td>
+              <td>Java 21 toolchain으로 테스트 실행</td>
+              <td>서버를 띄우지 않는다. 테스트만 수행.</td>
+            </tr>
+            <tr>
+              <td>웹</td>
+              <td><code>cd donation-platform-front && npm ci && npm run lint && npm run build</code></td>
+              <td>Next.js lint/build 확인</td>
+              <td><code>NEXT_PUBLIC_API_URL</code> 기본값이 localhost라도 정적 빌드가 되는지 확인.</td>
+            </tr>
+            <tr>
+              <td>관리자</td>
+              <td><code>cd donation-admin-tauri && npm ci && npm run build</code></td>
+              <td>TypeScript + Vite build 확인</td>
+              <td>Tauri native packaging은 별도 release 단계로 분리.</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="note">
+          <b>핵심:</b> 처음부터 서버 배포, 프론트 배포, Tauri 릴리스까지 한 번에 자동화하지 않는다.
+          먼저 PR에서 “빌드 가능한 코드인가”를 보장하고, 그 다음 main 배포를 붙이는 순서가 안정적이다.
+        </div>
+      </section>
+
+      <section>
+        <h2>4. 권장 단계별 업데이트 계획</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>단계</th>
+              <th>작업</th>
+              <th>목적</th>
+              <th>완료 기준</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1단계</td>
+              <td>루트 <code>.github/workflows/ci.yml</code> 추가</td>
+              <td>PR/Push 시 백엔드·웹·관리자 빌드 검증</td>
+              <td>세 job이 모두 초록색으로 통과</td>
+            </tr>
+            <tr>
+              <td>2단계</td>
+              <td>path filter 적용</td>
+              <td>변경된 영역만 CI 실행해 시간 절약</td>
+              <td>백엔드만 바꾸면 백엔드 job만 실행</td>
+            </tr>
+            <tr>
+              <td>3단계</td>
+              <td>브랜치 보호 설정</td>
+              <td>CI 실패 코드가 main에 들어가는 것 차단</td>
+              <td>required checks 설정</td>
+            </tr>
+            <tr>
+              <td>4단계</td>
+              <td>백엔드 main 배포 workflow 추가</td>
+              <td>JAR 빌드, EC2 업로드, systemd restart 재현성 확보</td>
+              <td>수동 승인 후 운영 서버 재시작 성공</td>
+            </tr>
+            <tr>
+              <td>5단계</td>
+              <td>웹 main 배포 workflow 추가</td>
+              <td>Next 정적 빌드, S3 sync, CloudFront invalidation 자동화</td>
+              <td>운영 URL smoke check HTTP 200</td>
+            </tr>
+            <tr>
+              <td>6단계</td>
+              <td>Tauri release 전략 확정</td>
+              <td>관리자 앱 자동 업데이트 체계 정리</td>
+              <td>독립 repo 또는 모노레포 release 방식 중 하나로 고정</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>5. CI 초안</h2>
+        <p>
+          아래는 현재 repo 구조에 맞춘 최소 형태다. 실제 적용 시에는 GitHub branch protection과 함께 사용한다.
+        </p>
+        <pre>name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: donation-platform-server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - run: chmod +x ./gradlew
+      - run: ./gradlew test
+
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: donation-platform-front
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: donation-platform-front/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+
+  admin:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: donation-admin-tauri
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: donation-admin-tauri/package-lock.json
+      - run: npm ci
+      - run: npm run build</pre>
+        <div class="warning">
+          <b>주의:</b> 이 초안은 “검증 CI”다. 운영 서버 재시작, S3 sync, CloudFront invalidation, Tauri packaging은 의도적으로 제외한다.
+          검증 CI가 안정화된 뒤 CD를 분리해서 붙이는 편이 장애 범위를 줄인다.
+        </div>
+      </section>
+
+      <section>
+        <h2>6. CD를 바로 붙이지 않는 이유</h2>
+        <ul>
+          <li>현재 repo에는 이미 수동 배포 문서가 있어, 당장 배포 방법이 없는 상태는 아니다.</li>
+          <li>CD는 AWS 권한, SSH 키, 운영 env, CloudFront ID, systemd 권한을 다루므로 실수 비용이 CI보다 크다.</li>
+          <li>CI가 먼저 안정되어야 “배포해도 되는 아티팩트”와 “배포하면 안 되는 코드”를 구분할 수 있다.</li>
+          <li>관리자 Tauri 앱은 updater 서명, GitHub Release, 앱별 repo 전략이 걸려 있어 웹/서버 CD와 분리해야 한다.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>7. 배포 자동화 설계 시 필요한 Secret</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>영역</th>
+              <th>Secret 예시</th>
+              <th>용도</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>백엔드 EC2</td>
+              <td><code>EC2_HOST</code>, <code>EC2_USER</code>, <code>EC2_SSH_KEY</code></td>
+              <td>JAR 업로드와 <code>milla-server</code> 재시작</td>
+            </tr>
+            <tr>
+              <td>프론트 AWS</td>
+              <td><code>AWS_ACCESS_KEY_ID</code>, <code>AWS_SECRET_ACCESS_KEY</code>, <code>AWS_REGION</code></td>
+              <td>S3 sync, CloudFront invalidation</td>
+            </tr>
+            <tr>
+              <td>프론트 배포 대상</td>
+              <td><code>FRONT_S3_BUCKET</code>, <code>CLOUDFRONT_DISTRIBUTION_ID</code>, <code>NEXT_PUBLIC_API_URL</code></td>
+              <td>정적 파일 업로드와 API URL 주입</td>
+            </tr>
+            <tr>
+              <td>Tauri updater</td>
+              <td><code>TAURI_SIGNING_PRIVATE_KEY</code>, <code>TAURI_SIGNING_PRIVATE_KEY_PASSWORD</code></td>
+              <td>자동 업데이트 아티팩트 서명</td>
+            </tr>
+            <tr>
+              <td>macOS 공증</td>
+              <td><code>APPLE_CERTIFICATE</code>, <code>APPLE_ID</code>, <code>APPLE_PASSWORD</code>, <code>APPLE_TEAM_ID</code></td>
+              <td>외부 배포용 macOS 신뢰 경고 최소화</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="danger">
+          <b>원칙:</b> 운영 비밀값은 문서나 git에 쓰지 않는다. GitHub Secrets 또는 서버의 권한 제한된 env 파일에만 둔다.
+        </div>
+      </section>
+
+      <section>
+        <h2>8. 권장 운영 기준</h2>
+        <ol>
+          <li>PR은 CI 통과 전 merge하지 않는다.</li>
+          <li>main push 배포는 초기에는 자동 실행보다 <code>workflow_dispatch</code> 수동 승인으로 시작한다.</li>
+          <li>백엔드 배포 전 <code>./gradlew test</code>, 프론트 배포 전 <code>npm run build</code> 산출물을 기준으로 한다.</li>
+          <li>배포 후 smoke check는 최소 <code>/api/site-settings</code> HTTP 200과 프론트 루트 HTTP 200을 확인한다.</li>
+          <li>롤백은 “이전 JAR 보관”과 “이전 S3 artifact 보관”이 생긴 뒤 자동화한다.</li>
+        </ol>
+      </section>
+
+      <section>
+        <h2>9. 다음 액션</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>우선순위</th>
+              <th>액션</th>
+              <th>예상 효과</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>상</td>
+              <td><code>.github/workflows/ci.yml</code> 추가</td>
+              <td>깨진 빌드가 main에 들어가는 문제를 즉시 줄임</td>
+            </tr>
+            <tr>
+              <td>상</td>
+              <td>브랜치 보호와 required check 설정</td>
+              <td>CI가 단순 참고가 아니라 실제 gate가 됨</td>
+            </tr>
+            <tr>
+              <td>중</td>
+              <td>백엔드 테스트를 context test 외 주요 API/service 테스트로 확장</td>
+              <td>인증, 후원, 구매, 비밀번호 재설정 회귀 방지</td>
+            </tr>
+            <tr>
+              <td>중</td>
+              <td>수동 승인형 backend/web deploy workflow 추가</td>
+              <td>배포 재현성 확보, 운영 명령 실수 감소</td>
+            </tr>
+            <tr>
+              <td>하</td>
+              <td>Tauri 앱 repo 전략 확정 후 release workflow 정리</td>
+              <td>관리자 앱 자동 업데이트 체계 완성</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>

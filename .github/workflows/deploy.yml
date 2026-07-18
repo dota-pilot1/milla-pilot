@@ -1,0 +1,119 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Deployment target
+        required: true
+        default: all
+        type: choice
+        options:
+          - all
+          - backend
+          - frontend
+      skip_backend_tests:
+        description: Skip backend tests before building the JAR
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: deploy backend
+    if: ${{ inputs.target == 'all' || inputs.target == 'backend' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: donation-platform-server
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build JAR
+        run: |
+          if [ "${{ inputs.skip_backend_tests }}" = "true" ]; then
+            ./gradlew build -x test
+          else
+            ./gradlew build
+          fi
+
+      - name: Prepare SSH key
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+      - name: Upload JAR
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}" \
+            "mkdir -p /home/ubuntu/milla && if [ -f /home/ubuntu/milla/app.jar ]; then cp /home/ubuntu/milla/app.jar /home/ubuntu/milla/app.jar.prev; fi"
+          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new \
+            build/libs/donation-platform-server-0.0.1-SNAPSHOT.jar \
+            "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/ubuntu/milla/app.jar"
+
+      - name: Restart backend
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}" \
+            "sudo systemctl restart milla-server && sleep 3 && systemctl is-active milla-server"
+
+      - name: Smoke check API
+        run: |
+          curl --fail --silent --show-error --max-time 20 "${{ secrets.NEXT_PUBLIC_API_URL }}/api/site-settings" >/dev/null
+
+  frontend:
+    name: deploy frontend
+    if: ${{ inputs.target == 'all' || inputs.target == 'frontend' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: donation-platform-front
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: donation-platform-front/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build static frontend
+        env:
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+        run: npm run build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Sync S3
+        run: aws s3 sync out/ "s3://${{ secrets.FRONT_S3_BUCKET }}" --delete --region "${{ secrets.AWS_REGION }}"
+
+      - name: Invalidate CloudFront
+        run: aws cloudfront create-invalidation --distribution-id "${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}" --paths "/*"
+
+      - name: Smoke check frontend
+        run: |
+          curl --fail --silent --show-error --max-time 20 "${{ secrets.NEXT_PUBLIC_API_URL }}/" >/dev/null
