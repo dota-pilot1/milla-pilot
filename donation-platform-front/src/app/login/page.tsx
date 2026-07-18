@@ -2,21 +2,14 @@
 
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { useTranslation } from "react-i18next";
-import { LoginForm } from "@/features/auth/login/LoginForm";
-import { AuthLayout } from "@/shared/ui/AuthLayout";
+import { AuthModeShell } from "@/features/auth/ui/AuthModeShell";
 
 function LoginPageInner() {
-  const { t } = useTranslation("auth");
   const params = useSearchParams();
   const nextParam = params.get("next");
   const nextPath = nextParam ?? undefined;
 
-  return (
-    <AuthLayout title={t("signInTitle")} subtitle={t("signInSubtitle")}>
-      <LoginForm nextPath={nextPath} />
-    </AuthLayout>
-  );
+  return <AuthModeShell initialMode="login" nextPath={nextPath} />;
 }
 
 export default function LoginPage() {

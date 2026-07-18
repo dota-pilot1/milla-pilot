@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, ReceiptText, Trash2 } from "lucide-react";
 import { Button } from "../../../shared/ui/Button";
 import {
   DataTable,
@@ -8,9 +8,9 @@ import {
   DataTableHeaderCell,
   DataTableRow,
 } from "../../../shared/ui/DataTable";
+import { Drawer } from "../../../shared/ui/Drawer";
 import { EmptyState } from "../../../shared/ui/EmptyState";
 import { FormField } from "../../../shared/ui/FormField";
-import { FormSection } from "../../../shared/ui/FormSection";
 import { Input } from "../../../shared/ui/Input";
 import { Panel, PanelHeader } from "../../../shared/ui/Panel";
 import { Select } from "../../../shared/ui/Select";
@@ -31,6 +31,7 @@ import {
   type ItemCategory,
   type ItemStatus,
 } from "../../../entities/donation-item/model/types";
+import { ContributionLedgerDrawer } from "../../contribution-ledger/ui/ContributionLedgerDrawer";
 
 type ItemForm = {
   name: string;
@@ -68,6 +69,8 @@ const itemStatusTone: Record<ItemStatus, "success" | "warning" | "info" | "neutr
   LOCKED: "neutral",
   BUYING: "warning",
   SHIPPING: "info",
+  RECEIVED: "info",
+  RECEIPTED: "success",
 };
 
 export function DonationItemPanel({ token, facility }: { token: string; facility: Facility }) {
@@ -78,6 +81,7 @@ export function DonationItemPanel({ token, facility }: { token: string; facility
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState<ItemForm>(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [ledgerItem, setLedgerItem] = useState<DonationItem | null>(null);
 
   const load = () => {
     setLoading(true);
@@ -161,143 +165,164 @@ export function DonationItemPanel({ token, facility }: { token: string; facility
   };
 
   return (
-    <Panel className="mt-4">
-      <PanelHeader
-        title={`${facility.name} · 후원 물품`}
-        description={`이 시설의 준비물 목표를 관리합니다. 총 ${items.length}종`}
-        action={
-          <Button size="sm" onClick={openCreate}>
-            <Plus size={15} /> 물품 추가
-          </Button>
-        }
-      />
-
-      {formOpen && (
-        <FormSection>
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <FormField label="물품명" className="md:col-span-2">
-              <Input
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-              />
-            </FormField>
-            <FormField label="카테고리">
-              <Select
-                value={form.category}
-                onChange={(e) => setForm({ ...form, category: e.target.value as ItemCategory })}
-              >
-                {Object.entries(ITEM_CATEGORY_LABEL).map(([v, l]) => (
-                  <option key={v} value={v}>{l}</option>
-                ))}
-              </Select>
-            </FormField>
-            <FormField label="상태">
-              <Select
-                value={form.status}
-                onChange={(e) => setForm({ ...form, status: e.target.value as ItemStatus })}
-              >
-                {Object.entries(ITEM_STATUS_LABEL).map(([v, l]) => (
-                  <option key={v} value={v}>{l}</option>
-                ))}
-              </Select>
-            </FormField>
-            <FormField label="수량 메모 (예: 6종·30권)">
-              <Input value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} />
-            </FormField>
-            <FormField label="이모지">
-              <Input value={form.emoji} onChange={(e) => setForm({ ...form, emoji: e.target.value })} />
-            </FormField>
-            <FormField label="목표금액(원)">
-              <Input type="number" value={form.goalAmount} onChange={(e) => setForm({ ...form, goalAmount: e.target.value })} />
-            </FormField>
-            <FormField label="모인금액(원) · 표시용">
-              <Input type="number" value={form.raisedAmount} onChange={(e) => setForm({ ...form, raisedAmount: e.target.value })} />
-            </FormField>
-            <FormField label="목표수량">
-              <Input type="number" value={form.targetQuantity} onChange={(e) => setForm({ ...form, targetQuantity: e.target.value })} />
-            </FormField>
-            <FormField label="마감일">
-              <Input type="date" value={form.deadline} onChange={(e) => setForm({ ...form, deadline: e.target.value })} />
-            </FormField>
-            <FormField label="필요한 이유" className="md:col-span-2">
-              <Textarea
-                rows={2}
-                value={form.reason}
-                onChange={(e) => setForm({ ...form, reason: e.target.value })}
-              />
-            </FormField>
-          </div>
-          <div className="mt-5 flex justify-end gap-2">
-            <Button size="sm" onClick={submit} disabled={saving || !form.name.trim()}>
-              {editingId == null ? "추가" : "저장"}
-            </Button>
-            <Button size="sm" variant="outline" onClick={() => setFormOpen(false)}>
-              취소
-            </Button>
-          </div>
-        </FormSection>
-      )}
-
-      {error && <p className="text-[13px] font-semibold text-red-600">{error}</p>}
-      {loading ? (
-        <p className="text-[13px] text-zinc-500">불러오는 중...</p>
-      ) : items.length === 0 ? (
-        <EmptyState
-          title="등록된 물품이 없습니다."
-          description="물품 추가로 이 시설의 후원 목표를 등록하세요."
+    <>
+      <Panel className="mt-4">
+        <PanelHeader
+          title={`${facility.name} · 후원 물품`}
+          description={`이 시설의 준비물 목표를 관리합니다. 총 ${items.length}종`}
           action={
             <Button size="sm" onClick={openCreate}>
               <Plus size={15} /> 물품 추가
             </Button>
           }
         />
-      ) : (
-        <DataTable>
-          <DataTableHead>
-            <tr>
-              <DataTableHeaderCell>물품</DataTableHeaderCell>
-              <DataTableHeaderCell>카테고리</DataTableHeaderCell>
-              <DataTableHeaderCell className="text-right">진행률</DataTableHeaderCell>
-              <DataTableHeaderCell>상태</DataTableHeaderCell>
-              <DataTableHeaderCell className="text-right">관리</DataTableHeaderCell>
-            </tr>
-          </DataTableHead>
-          <tbody>
-            {items.map((it) => (
-              <DataTableRow key={it.id}>
-                <DataTableCell>
-                  <div className="font-bold text-zinc-900">
-                    {it.emoji} {it.name}
-                  </div>
-                  <div className="text-[11px] text-zinc-400">{it.note}</div>
-                </DataTableCell>
-                <DataTableCell>{ITEM_CATEGORY_LABEL[it.category]}</DataTableCell>
-                <DataTableCell className="text-right">
-                  <div className="font-bold text-zinc-900">{pct(it.raisedAmount, it.goalAmount)}%</div>
-                  <div className="text-[11px] text-zinc-400">
-                    {won(it.raisedAmount)} / {won(it.goalAmount)}
-                  </div>
-                </DataTableCell>
-                <DataTableCell>
-                  <StatusBadge tone={itemStatusTone[it.status]}>
-                    {ITEM_STATUS_LABEL[it.status]}
-                  </StatusBadge>
-                </DataTableCell>
-                <DataTableCell>
-                  <div className="flex justify-end gap-1">
-                    <Button size="sm" variant="ghost" onClick={() => openEdit(it)}>
-                      <Pencil size={14} />
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={() => remove(it)}>
-                      <Trash2 size={14} className="text-red-600" />
-                    </Button>
-                  </div>
-                </DataTableCell>
-              </DataTableRow>
-            ))}
-          </tbody>
-        </DataTable>
-      )}
-    </Panel>
+
+        {error && <p className="text-[13px] font-semibold text-red-600">{error}</p>}
+        {loading ? (
+          <p className="text-[13px] text-zinc-500">불러오는 중...</p>
+        ) : items.length === 0 ? (
+          <EmptyState
+            title="등록된 물품이 없습니다."
+            description="물품 추가로 이 시설의 후원 목표를 등록하세요."
+            action={
+              <Button size="sm" onClick={openCreate}>
+                <Plus size={15} /> 물품 추가
+              </Button>
+            }
+          />
+        ) : (
+          <DataTable>
+            <DataTableHead>
+              <tr>
+                <DataTableHeaderCell>물품</DataTableHeaderCell>
+                <DataTableHeaderCell>카테고리</DataTableHeaderCell>
+                <DataTableHeaderCell className="text-right">진행률</DataTableHeaderCell>
+                <DataTableHeaderCell>상태</DataTableHeaderCell>
+                <DataTableHeaderCell className="text-right">관리</DataTableHeaderCell>
+              </tr>
+            </DataTableHead>
+            <tbody>
+              {items.map((it) => (
+                <DataTableRow key={it.id}>
+                  <DataTableCell>
+                    <div className="font-bold text-zinc-900">
+                      {it.emoji} {it.name}
+                    </div>
+                    <div className="text-[11px] text-zinc-400">{it.note}</div>
+                  </DataTableCell>
+                  <DataTableCell>{ITEM_CATEGORY_LABEL[it.category]}</DataTableCell>
+                  <DataTableCell className="text-right">
+                    <div className="font-bold text-zinc-900">{pct(it.raisedAmount, it.goalAmount)}%</div>
+                    <div className="text-[11px] text-zinc-400">
+                      {won(it.raisedAmount)} / {won(it.goalAmount)}
+                    </div>
+                  </DataTableCell>
+                  <DataTableCell>
+                    <StatusBadge tone={itemStatusTone[it.status]}>
+                      {ITEM_STATUS_LABEL[it.status]}
+                    </StatusBadge>
+                  </DataTableCell>
+                  <DataTableCell>
+                    <div className="flex justify-end gap-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        title="후원 내역"
+                        onClick={() => setLedgerItem(it)}
+                      >
+                        <ReceiptText size={14} />
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => openEdit(it)}>
+                        <Pencil size={14} />
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => remove(it)}>
+                        <Trash2 size={14} className="text-red-600" />
+                      </Button>
+                    </div>
+                  </DataTableCell>
+                </DataTableRow>
+              ))}
+            </tbody>
+          </DataTable>
+        )}
+      </Panel>
+
+      <Drawer
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        title={editingId == null ? "물품 추가" : "물품 수정"}
+        description={`${facility.name}의 후원 물품 정보를 관리합니다.`}
+        footer={
+          <>
+            <Button size="sm" variant="outline" onClick={() => setFormOpen(false)}>
+              취소
+            </Button>
+            <Button size="sm" onClick={submit} disabled={saving || !form.name.trim()}>
+              {editingId == null ? "추가" : "저장"}
+            </Button>
+          </>
+        }
+      >
+        <div className="grid gap-4">
+          <FormField label="물품명">
+            <Input
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+            />
+          </FormField>
+          <FormField label="카테고리">
+            <Select
+              value={form.category}
+              onChange={(e) => setForm({ ...form, category: e.target.value as ItemCategory })}
+            >
+              {Object.entries(ITEM_CATEGORY_LABEL).map(([v, l]) => (
+                <option key={v} value={v}>{l}</option>
+              ))}
+            </Select>
+          </FormField>
+          <FormField label="상태">
+            <Select
+              value={form.status}
+              onChange={(e) => setForm({ ...form, status: e.target.value as ItemStatus })}
+            >
+              {Object.entries(ITEM_STATUS_LABEL).map(([v, l]) => (
+                <option key={v} value={v}>{l}</option>
+              ))}
+            </Select>
+          </FormField>
+          <FormField label="수량 메모 (예: 6종·30권)">
+            <Input value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} />
+          </FormField>
+          <FormField label="이모지">
+            <Input value={form.emoji} onChange={(e) => setForm({ ...form, emoji: e.target.value })} />
+          </FormField>
+          <FormField label="목표금액(원)">
+            <Input type="number" value={form.goalAmount} onChange={(e) => setForm({ ...form, goalAmount: e.target.value })} />
+          </FormField>
+          <FormField label="모인금액(원) · 표시용">
+            <Input type="number" value={form.raisedAmount} onChange={(e) => setForm({ ...form, raisedAmount: e.target.value })} />
+          </FormField>
+          <FormField label="목표수량">
+            <Input type="number" value={form.targetQuantity} onChange={(e) => setForm({ ...form, targetQuantity: e.target.value })} />
+          </FormField>
+          <FormField label="마감일">
+            <Input type="date" value={form.deadline} onChange={(e) => setForm({ ...form, deadline: e.target.value })} />
+          </FormField>
+          <FormField label="필요한 이유">
+            <Textarea
+              rows={4}
+              value={form.reason}
+              onChange={(e) => setForm({ ...form, reason: e.target.value })}
+            />
+          </FormField>
+        </div>
+      </Drawer>
+
+      <ContributionLedgerDrawer
+        token={token}
+        item={ledgerItem}
+        onClose={() => setLedgerItem(null)}
+      />
+    </>
   );
 }

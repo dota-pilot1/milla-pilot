@@ -26,7 +26,7 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDlDOUNFQ0MwNjlDNENBMTYKUldRV3lzUnB3T3ljbkRoUENXeDJGYkwxeDAreUxLMk94cTZpVGI0TDVMQ1JZdzNwSVF6SGVSLzcK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDEwNDZBOTQ5MEY0NDAyNzkKUldSNUFrUVBTYWxHRUsydHF3ZHFCRHVkNFlEZmo0dkxHNWtaMEJ0QTV4bnc1QkNaekc3bzYwTXQK",
       "endpoints": [
       "https://github.com/dota-pilot1/donation-admin-tauri/releases/latest/download/latest.json"
       ]
@@ -43,7 +43,13 @@
         "minHeight": 700,
         "resizable": true,
         "fullscreen": false,
-        "decorations": false,
+        "decorations": true,
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true,
+        "trafficLightPosition": {
+          "x": -100,
+          "y": 0
+        },
         "dragDropEnabled": false
       }
     ],

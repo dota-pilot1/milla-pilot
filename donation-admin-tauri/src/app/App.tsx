@@ -7,6 +7,8 @@ import type { UserSummary } from "../entities/user/model/types";
 import { login, logout, me, signup } from "../features/auth/api/authApi";
 import { fetchMenus } from "../features/menu/api/menuApi";
 import { FacilityManagementScreen } from "../features/facility-management/ui/FacilityManagementScreen";
+import { ContributionsScreen } from "../features/contribution-ledger/ui/ContributionsScreen";
+import { PurchaseOrdersScreen } from "../features/purchase-management/ui/PurchaseOrdersScreen";
 import { API_BASE_URL, SERVER_ROOT_PATH } from "../shared/config/server";
 import { AppSidebar } from "../widgets/app-shell/ui/AppSidebar";
 import { AppTopbar } from "../widgets/app-shell/ui/AppTopbar";
@@ -215,6 +217,14 @@ function AdminWorkspace({
 
   if (activeMenu === "ADMIN_FACILITIES") {
     return <FacilityManagementScreen token={token} />;
+  }
+
+  if (activeMenu === "ADMIN_CONTRIBUTIONS") {
+    return <ContributionsScreen token={token} />;
+  }
+
+  if (activeMenu === "ADMIN_PURCHASE_ORDERS") {
+    return <PurchaseOrdersScreen token={token} />;
   }
 
   const Icon = activeWebMenu.icon;

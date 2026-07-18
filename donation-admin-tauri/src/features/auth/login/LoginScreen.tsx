@@ -181,7 +181,7 @@ export function LoginScreen({ onLogin, onSignup }: LoginScreenProps) {
                   <Input
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
-                    placeholder="terecal@daum.net"
+                    placeholder="admin@milla.im"
                     type="email"
                     autoComplete="email"
                   />
@@ -233,7 +233,7 @@ export function LoginScreen({ onLogin, onSignup }: LoginScreenProps) {
                   <Input
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
-                    placeholder="terecal@daum.net"
+                    placeholder="admin@milla.im"
                     type="email"
                     autoComplete="email"
                   />

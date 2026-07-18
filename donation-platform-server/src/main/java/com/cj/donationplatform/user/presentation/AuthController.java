@@ -23,6 +23,7 @@ public class AuthController {
 
     private final AuthService authService;
     private final UserRepository userRepository;
+    private final com.cj.donationplatform.user.application.PasswordResetService passwordResetService;
 
     @PostMapping("/signup")
     public ResponseEntity<SignupResponse> signup(@Valid @RequestBody SignupRequest req) {
@@ -49,6 +50,18 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(@AuthenticationPrincipal UserPrincipal principal) {
         authService.logout(principal.getId());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/password-reset/request")
+    public ResponseEntity<Void> passwordResetRequest(@Valid @RequestBody PasswordResetRequestDto req) {
+        passwordResetService.requestReset(req.email());
+        return ResponseEntity.noContent().build(); // 유저 열거 방지 — 항상 성공
+    }
+
+    @PostMapping("/password-reset/confirm")
+    public ResponseEntity<Void> passwordResetConfirm(@Valid @RequestBody PasswordResetConfirmDto req) {
+        passwordResetService.confirmReset(req.token(), req.newPassword());
         return ResponseEntity.noContent().build();
     }
 

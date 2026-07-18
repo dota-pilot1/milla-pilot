@@ -46,7 +46,7 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VITE_API_BASE_URL: https://api.hibot-docu.com
+          VITE_API_BASE_URL: https://dxline-tallent.com
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
@@ -57,7 +57,7 @@ jobs:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         with:
           tagName: ${{ github.ref_name }}
-          releaseName: "Towercrane Dev Interview ${{ github.ref_name }}"
+          releaseName: "Donation Admin ${{ github.ref_name }}"
           releaseBody: "자동 빌드된 릴리스입니다. macOS는 .dmg, Windows는 .exe 설치 파일을 받아 설치하세요."
           releaseDraft: false
           prerelease: true

@@ -1,20 +1,62 @@
 "use client";
 
+import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
 import { ReceiptText } from "lucide-react";
-import { AdminPlaceholderPage } from "@/shared/ui/AdminPlaceholderPage";
+import { RequireAuth } from "@/widgets/guards/RequireAuth";
+import { PageHeader } from "@/shared/ui/PageHeader";
+import { EmptyState } from "@/shared/ui/EmptyState";
+import { buttonVariants } from "@/shared/ui/Button";
+import { contributionApi } from "@/entities/contribution/api/contributionApi";
+import { MyDonationsList } from "@/features/my-donations/ui/MyDonationsList";
 
 export default function MyDonationsPage() {
   return (
-    <AdminPlaceholderPage
-      title="내 후원 내역"
-      description="내가 참여한 후원과 결제 상태, 목표 달성 여부를 확인합니다."
-      icon={ReceiptText}
-      tasks={[
-        "내 후원 목록 조회",
-        "결제 상태와 후원 금액 확인",
-        "후원 물품의 목표 달성 상태 확인",
-        "영수증과 증빙 자료 연결",
-      ]}
-    />
+    <RequireAuth>
+      <MyDonationsInner />
+    </RequireAuth>
+  );
+}
+
+function MyDonationsInner() {
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["contributions", "me"],
+    queryFn: contributionApi.getMine,
+    refetchOnWindowFocus: true,
+  });
+
+  return (
+    <main className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="space-y-6">
+        <PageHeader
+          icon={ReceiptText}
+          title="내 후원 내역"
+          description="내가 참여한 후원과 물품의 진행 단계를 시설별로 확인합니다."
+        />
+
+        {isLoading ? (
+          <div className="space-y-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="h-24 animate-pulse rounded-xl border bg-card" />
+            ))}
+          </div>
+        ) : isError ? (
+          <EmptyState icon={ReceiptText} title="후원 내역을 불러오지 못했습니다" />
+        ) : !data?.length ? (
+          <EmptyState
+            icon={ReceiptText}
+            title="아직 후원 내역이 없어요"
+            description="마음에 드는 시설의 준비물에 참여해 보세요."
+            action={
+              <Link href="/donate" className={buttonVariants({ size: "sm" })}>
+                후원하러 가기
+              </Link>
+            }
+          />
+        ) : (
+          <MyDonationsList contributions={data} />
+        )}
+      </div>
+    </main>
   );
 }

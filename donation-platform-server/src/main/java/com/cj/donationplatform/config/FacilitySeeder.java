@@ -110,10 +110,12 @@ public class FacilitySeeder implements ApplicationRunner {
 
             if (!donationItemRepository.existsByFacility_Id(facility.getId())) {
                 for (ItemDef it : def.items()) {
+                    // 진행 상태는 0/RECRUITING 에서 시작 — raisedAmount 는 실제 Contribution 으로만 쌓인다.
+                    // (ItemDef 의 raisedAmount/status 는 참고용, 실제 시드값 아님)
                     donationItemRepository.save(DonationItem.create(
                             facility, it.name(), it.category(), it.note(), it.reason(), it.emoji(),
-                            it.goalAmount(), it.raisedAmount(), it.targetQuantity(),
-                            it.status(), it.deadline(), it.displayOrder()
+                            it.goalAmount(), 0L, it.targetQuantity(),
+                            ItemStatus.RECRUITING, it.deadline(), it.displayOrder()
                     ));
                 }
             }

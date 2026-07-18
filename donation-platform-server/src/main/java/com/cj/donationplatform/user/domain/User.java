@@ -63,4 +63,9 @@ public class User {
         this.email = email;
         this.username = username;
     }
+
+    /** 비밀번호 재설정 — 이미 인코딩된 해시를 받아 교체 (step7). */
+    public void changePassword(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
 }

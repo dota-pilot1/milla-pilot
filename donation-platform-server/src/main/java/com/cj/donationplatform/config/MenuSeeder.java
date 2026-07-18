@@ -74,7 +74,9 @@ public class MenuSeeder implements ApplicationRunner {
                 "WEB_FACILITIES",
                 "WEB_DONATION_ITEMS",
                 "WEB_MY_CONTRIBUTIONS",
-                "ADMIN_DONATION_ITEMS"
+                "ADMIN_DONATION_ITEMS",
+                // 펀딩 캠페인 = 기획 밖(§10 캠페인/확산은 파일럿 이후 후보). 숨김(제거 아님, 되살리기 쉽게)
+                "ADMIN_FUNDING_CAMPAIGNS"
         );
         for (String code : deprecatedWebMenuCodes) {
             menuRepository.findByCode(code).ifPresent(menu -> {

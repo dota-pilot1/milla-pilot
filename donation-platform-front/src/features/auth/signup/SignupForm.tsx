@@ -11,11 +11,16 @@ import { useTranslation } from "react-i18next";
 import { signupSchema, type SignupFormValues } from "@/shared/lib/validation/auth.schema";
 import { authApi } from "@/entities/user/api/authApi";
 import { getApiError, getFieldErrors } from "@/shared/api/errors";
+import { Button } from "@/shared/ui/Button";
 import { FormField } from "@/shared/ui/FormField";
 import { TextInput } from "@/shared/ui/TextInput";
 import { PasswordInput } from "@/shared/ui/PasswordInput";
 
-export function SignupForm() {
+type SignupFormProps = {
+  showModeLink?: boolean;
+};
+
+export function SignupForm({ showModeLink = true }: SignupFormProps) {
   const router = useRouter();
   const { t } = useTranslation("auth");
   const [formError, setFormError] = useState<string | null>(null);
@@ -128,21 +133,23 @@ export function SignupForm() {
         />
       </FormField>
 
-      <button
+      <Button
         type="submit"
         disabled={isSubmitting}
-        className="w-full inline-flex items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground py-2.5 text-sm font-medium disabled:opacity-60 hover:opacity-90 transition-opacity"
+        className="w-full"
       >
         <UserPlus className="h-4 w-4" />
         {isSubmitting ? t("signingUp") : t("signUpButton")}
-      </button>
+      </Button>
 
-      <p className="text-center text-sm text-muted-foreground">
-        {t("haveAccount")}{" "}
-        <Link href="/login" className="underline hover:text-foreground">
-          {t("signInLink")}
-        </Link>
-      </p>
+      {showModeLink ? (
+        <p className="text-center text-sm text-muted-foreground">
+          {t("haveAccount")}{" "}
+          <Link href="/login" className="underline hover:text-foreground">
+            {t("signInLink")}
+          </Link>
+        </p>
+      ) : null}
     </form>
   );
 }

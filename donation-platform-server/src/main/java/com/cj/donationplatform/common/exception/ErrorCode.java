@@ -13,6 +13,7 @@ public enum ErrorCode {
     ACCOUNT_INACTIVE(HttpStatus.FORBIDDEN, "AUTH_004", "비활성화된 계정입니다."),
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH_005", "유효하지 않은 토큰입니다."),
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH_006", "유효하지 않은 리프레시 토큰입니다."),
+    INVALID_PASSWORD_RESET_TOKEN(HttpStatus.BAD_REQUEST, "AUTH_007", "유효하지 않거나 만료된 재설정 링크입니다."),
     ROLE_NOT_FOUND(HttpStatus.NOT_FOUND, "ROLE_001", "롤을 찾을 수 없습니다."),
     ROLE_CODE_DUPLICATE(HttpStatus.CONFLICT, "ROLE_002", "이미 존재하는 롤 코드입니다."),
     ROLE_SYSTEM_READONLY(HttpStatus.BAD_REQUEST, "ROLE_003", "시스템 롤은 수정 또는 삭제할 수 없습니다."),
@@ -33,6 +34,13 @@ public enum ErrorCode {
     FACILITY_NOT_FOUND(HttpStatus.NOT_FOUND, "FAC_001", "시설을 찾을 수 없습니다."),
     FACILITY_CODE_DUPLICATE(HttpStatus.CONFLICT, "FAC_002", "이미 존재하는 시설 코드입니다."),
     DONATION_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "DITEM_001", "후원 물품을 찾을 수 없습니다."),
+    CONTRIBUTION_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "CONTRIB_001", "이 물품은 지금 후원할 수 없습니다(모집중 아님·목표 달성·금액 오류)."),
+    CONTRIBUTION_EXCEEDS_REMAINING(HttpStatus.BAD_REQUEST, "CONTRIB_002", "남은 금액을 초과했습니다."),
+    PURCHASE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "PO_001", "목표달성(잠금) 물품만 통합구매할 수 있습니다."),
+    PURCHASE_ALREADY_DONE(HttpStatus.CONFLICT, "PO_002", "이미 통합구매된 물품입니다."),
+    PURCHASE_ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "PO_003", "통합구매 기록을 찾을 수 없습니다."),
+    SHIPMENT_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "PO_004", "통합구매(구매 진행) 이후에만 송장을 등록할 수 있습니다."),
+    RECEIVE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "PO_005", "배송중 물품만 수령확인할 수 있습니다."),
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "COMMON_999", "서버 오류가 발생했습니다.");
 
     private final HttpStatus status;

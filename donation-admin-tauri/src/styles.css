@@ -1182,7 +1182,7 @@ button:disabled {
 }
 
 .sidebar-chevron {
-  margin-left: auto;
+  flex: 0 0 auto;
   color: #94a3b8;
   transition: transform 200ms ease;
 }

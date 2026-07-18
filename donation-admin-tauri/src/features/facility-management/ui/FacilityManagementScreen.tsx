@@ -25,9 +25,9 @@ import {
   DataTableHead,
   DataTableHeaderCell,
 } from "../../../shared/ui/DataTable";
+import { Drawer } from "../../../shared/ui/Drawer";
 import { EmptyState } from "../../../shared/ui/EmptyState";
 import { FormField } from "../../../shared/ui/FormField";
-import { FormSection } from "../../../shared/ui/FormSection";
 import { Input } from "../../../shared/ui/Input";
 import { Panel, PanelHeader } from "../../../shared/ui/Panel";
 import { Select } from "../../../shared/ui/Select";
@@ -231,72 +231,6 @@ export function FacilityManagementScreen({ token }: { token: string }) {
           }
         />
 
-        {formOpen && (
-          <FormSection>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <FormField label="코드 (slug)">
-                <Input
-                  value={form.code}
-                  disabled={editingId != null}
-                  placeholder="haetsal"
-                  onChange={(e) => setForm({ ...form, code: e.target.value })}
-                />
-              </FormField>
-              <FormField label="시설명">
-                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-              </FormField>
-              <FormField label="지역">
-                <Input value={form.region} onChange={(e) => setForm({ ...form, region: e.target.value })} />
-              </FormField>
-              <FormField label="유형">
-                <Select
-                  value={form.type}
-                  onChange={(e) => setForm({ ...form, type: e.target.value as FacilityType })}
-                >
-                  {Object.entries(FACILITY_TYPE_LABEL).map(([v, l]) => (
-                    <option key={v} value={v}>{l}</option>
-                  ))}
-                </Select>
-              </FormField>
-              <FormField label="상태">
-                <Select
-                  value={form.status}
-                  onChange={(e) => setForm({ ...form, status: e.target.value as FacilityStatus })}
-                >
-                  {Object.entries(FACILITY_STATUS_LABEL).map(([v, l]) => (
-                    <option key={v} value={v}>{l}</option>
-                  ))}
-                </Select>
-              </FormField>
-              <FormField label="카드 이니셜">
-                <Input maxLength={4} value={form.avatarInitial} onChange={(e) => setForm({ ...form, avatarInitial: e.target.value })} />
-              </FormField>
-              <FormField label="소개 (아동 개인정보 미포함)" className="md:col-span-2">
-                <Textarea
-                  rows={2}
-                  value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                />
-              </FormField>
-              <label className="flex items-center gap-2 text-[13px] text-zinc-700">
-                <Checkbox
-                  checked={form.verified}
-                  onChange={(e) => setForm({ ...form, verified: e.target.checked })}
-                />
-                자격확인 완료
-              </label>
-            </div>
-            <div className="mt-5 flex justify-end gap-2">
-              <Button size="sm" onClick={submit} disabled={saving || !form.name.trim() || (editingId == null && !form.code.trim())}>
-                {editingId == null ? "추가" : "저장"}
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => setFormOpen(false)}>
-                취소
-              </Button>
-            </div>
-          </FormSection>
-        )}
-
         {error && <p className="text-[13px] font-semibold text-red-600">{error}</p>}
         {loading ? (
           <p className="text-[13px] text-zinc-500">불러오는 중...</p>
@@ -341,6 +275,77 @@ export function FacilityManagementScreen({ token }: { token: string }) {
       </Panel>
 
       {selected && <DonationItemPanel token={token} facility={selected} />}
+
+      <Drawer
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        title={editingId == null ? "시설 추가" : "시설 수정"}
+        description={editingId == null ? "후원 대상 시설의 기본 정보를 등록합니다." : "선택한 시설의 운영 정보를 수정합니다."}
+        footer={
+          <>
+            <Button size="sm" variant="outline" onClick={() => setFormOpen(false)}>
+              취소
+            </Button>
+            <Button size="sm" onClick={submit} disabled={saving || !form.name.trim() || (editingId == null && !form.code.trim())}>
+              {editingId == null ? "추가" : "저장"}
+            </Button>
+          </>
+        }
+      >
+        <div className="grid gap-4">
+          <FormField label="코드 (slug)">
+            <Input
+              value={form.code}
+              disabled={editingId != null}
+              placeholder="haetsal"
+              onChange={(e) => setForm({ ...form, code: e.target.value })}
+            />
+          </FormField>
+          <FormField label="시설명">
+            <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+          </FormField>
+          <FormField label="지역">
+            <Input value={form.region} onChange={(e) => setForm({ ...form, region: e.target.value })} />
+          </FormField>
+          <FormField label="유형">
+            <Select
+              value={form.type}
+              onChange={(e) => setForm({ ...form, type: e.target.value as FacilityType })}
+            >
+              {Object.entries(FACILITY_TYPE_LABEL).map(([v, l]) => (
+                <option key={v} value={v}>{l}</option>
+              ))}
+            </Select>
+          </FormField>
+          <FormField label="상태">
+            <Select
+              value={form.status}
+              onChange={(e) => setForm({ ...form, status: e.target.value as FacilityStatus })}
+            >
+              {Object.entries(FACILITY_STATUS_LABEL).map(([v, l]) => (
+                <option key={v} value={v}>{l}</option>
+              ))}
+            </Select>
+          </FormField>
+          <FormField label="카드 이니셜">
+            <Input maxLength={4} value={form.avatarInitial} onChange={(e) => setForm({ ...form, avatarInitial: e.target.value })} />
+          </FormField>
+          <FormField label="소개 (아동 개인정보 미포함)">
+            <Textarea
+              rows={4}
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+            />
+          </FormField>
+          <label className="flex items-center gap-2 text-[13px] text-zinc-700">
+            <Checkbox
+              checked={form.verified}
+              onChange={(e) => setForm({ ...form, verified: e.target.checked })}
+            />
+            자격확인 완료
+          </label>
+        </div>
+      </Drawer>
     </main>
   );
 }
@@ -374,27 +379,27 @@ function SortableFacilityRow({ facility, selected, onSelect, onEdit, onRemove }:
       )}
       onClick={onSelect}
     >
-      <DataTableCell>
-        <div className="flex items-center gap-2 font-bold text-zinc-900">
+      <DataTableCell className="py-2.5 pl-3">
+        <div className="flex min-w-0 items-center gap-2.5 font-bold text-zinc-900">
           <button
             type="button"
             className={cn(
-              "-ml-1 grid h-7 w-5 shrink-0 cursor-grab place-items-center rounded-md text-zinc-300 transition-colors",
-              "hover:bg-zinc-100 hover:text-zinc-600 focus-visible:bg-zinc-100 focus-visible:text-zinc-700 focus-visible:outline-none",
-              isDragging && "cursor-grabbing bg-zinc-100 text-zinc-700",
+              "grid h-7 w-7 shrink-0 cursor-grab place-items-center rounded-md border border-zinc-200 bg-transparent text-zinc-400 transition-colors",
+              "hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-600 focus-visible:border-zinc-300 focus-visible:bg-zinc-50 focus-visible:text-zinc-600 focus-visible:outline-none",
+              isDragging && "cursor-grabbing border-zinc-400 bg-zinc-50 text-zinc-700 shadow-sm",
             )}
             aria-label={`${facility.name} 순서 변경`}
             onClick={(e) => e.stopPropagation()}
             {...attributes}
             {...listeners}
           >
-            <GripVertical size={14} />
+            <GripVertical size={14} strokeWidth={1.75} />
           </button>
-          <span className="grid h-7 w-7 place-items-center rounded-lg bg-emerald-50 text-emerald-700">
+          <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-emerald-50 text-emerald-700">
             {facility.avatarInitial || facility.name.charAt(0)}
           </span>
-          {facility.name}
-          {facility.verified && <CheckCircle2 size={14} className="text-sky-600" />}
+          <span className="min-w-0 truncate">{facility.name}</span>
+          {facility.verified && <CheckCircle2 size={14} className="shrink-0 text-sky-600" />}
         </div>
       </DataTableCell>
       <DataTableCell>

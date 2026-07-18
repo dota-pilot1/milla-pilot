@@ -23,6 +23,22 @@ spring:
         format_sql: true
     show-sql: true
 
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.connectiontimeout: 5000
+      mail.smtp.timeout: 5000
+      mail.smtp.writetimeout: 5000
+
+app:
+  front-url: ${APP_FRONT_URL:https://dxline-tallent.com}
+  mail-from: ${MAIL_FROM:${MAIL_USERNAME:}}
+
 jwt:
   secret: ${JWT_SECRET:donation-platform-dev-secret-key-must-be-at-least-32-bytes-long}
   access-token-expiration-ms: 1800000

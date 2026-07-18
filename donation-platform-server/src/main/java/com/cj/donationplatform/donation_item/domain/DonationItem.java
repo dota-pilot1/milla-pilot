@@ -108,4 +108,35 @@ public class DonationItem {
         this.deadline = deadline;
         this.displayOrder = displayOrder;
     }
+
+    /** 후원 참여 반영 — raisedAmount 는 Σ Contribution 으로 유지된다. */
+    public void addRaised(long amount) {
+        this.raisedAmount += amount;
+    }
+
+    /** 목표 달성 시 결제 잠금 (F-013). */
+    public void markLocked() {
+        this.status = ItemStatus.LOCKED;
+    }
+
+    /** 통합구매 실행 시 구매 진행 단계로. */
+    public void markBuying() {
+        this.status = ItemStatus.BUYING;
+    }
+
+    /** 송장 등록 시 배송중 단계로 (step6). */
+    public void markShipping() {
+        this.status = ItemStatus.SHIPPING;
+    }
+
+    /** 시설 수령확인(사람 1클릭) — 배송완료 ≠ 수령확인 (step6 §8). */
+    public void markReceived() {
+        this.status = ItemStatus.RECEIVED;
+    }
+
+    /** 진행 상태 초기화 (시더 리셋용). */
+    public void resetProgress() {
+        this.raisedAmount = 0L;
+        this.status = ItemStatus.RECRUITING;
+    }
 }

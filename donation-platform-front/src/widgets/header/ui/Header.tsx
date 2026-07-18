@@ -32,8 +32,17 @@ import { useAuth, authActions } from "@/entities/user/model/authStore";
 import { menuApi } from "@/entities/menu/api/menuApi";
 import type { MenuItem, MenuRecord } from "@/entities/menu/model/types";
 import { RoleBadge } from "@/features/user-management/RoleBadge";
+import { Button } from "@/shared/ui/Button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/shared/ui/Dialog";
 import { LanguageSelect } from "@/shared/ui/LanguageSelect";
 import { ThemeSwitcher } from "@/shared/ui/theme/ThemeSwitcher";
+import { cn } from "@/shared/lib/utils";
 
 function buildTree(flat: MenuRecord[], userRole: string | null): MenuItem[] {
   const visible = flat.filter(
@@ -156,9 +165,15 @@ function normalizeAdminSections(admin: MenuItem | undefined) {
   return sections;
 }
 
+function normalizePath(path: string) {
+  return path.length > 1 ? path.replace(/\/+$/, "") : path;
+}
+
 function isActivePath(pathname: string, href: string | null) {
   if (!href) return false;
-  return href === "/dashboard" ? pathname === href : pathname.startsWith(href);
+  const current = normalizePath(pathname);
+  const target = normalizePath(href);
+  return target === "/dashboard" ? current === target : current.startsWith(target);
 }
 
 function UserAvatar({ name }: { name: string }) {
@@ -365,6 +380,93 @@ function Sidebar({ tree }: { tree: MenuItem[] }) {
   );
 }
 
+function MobileNavLink({
+  item,
+  depth = 0,
+  onSelect,
+}: {
+  item: MenuItem;
+  depth?: number;
+  onSelect: () => void;
+}) {
+  const pathname = usePathname();
+  const Icon = menuIcons[item.code] ?? Menu;
+  const active = isActivePath(pathname, item.path);
+
+  if (!item.path) return null;
+
+  return (
+    <Link
+      href={item.path}
+      target={item.isExternal ? "_blank" : undefined}
+      rel={item.isExternal ? "noopener noreferrer" : undefined}
+      onClick={onSelect}
+      className={cn(
+        "flex h-10 items-center gap-2 rounded-md px-3 text-sm transition-colors",
+        active
+          ? "bg-primary text-primary-foreground"
+          : "text-muted-foreground hover:bg-accent hover:text-foreground",
+      )}
+      style={{ paddingLeft: depth > 0 ? 28 : undefined }}
+    >
+      <Icon className="size-4 shrink-0" />
+      <span className="truncate font-medium">{item.label}</span>
+    </Link>
+  );
+}
+
+function MobileNav({ tree }: { tree: MenuItem[] }) {
+  const [open, setOpen] = useState(false);
+  const dashboard = tree.find((item) => item.code === "DASHBOARD");
+  const admin = tree.find((item) => item.code === "ADMIN");
+  const webLinks = tree.filter(
+    (item) => item.code !== "DASHBOARD" && item.code !== "ADMIN" && item.path
+  );
+  const sections = normalizeAdminSections(admin);
+  const close = () => setOpen(false);
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="icon" className="shrink-0 lg:hidden" aria-label="메뉴 열기">
+          <Menu className="size-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="left-3 top-3 h-[calc(100vh-1.5rem)] max-h-none w-[calc(100vw-1.5rem)] max-w-sm translate-x-0 translate-y-0 p-0">
+        <DialogHeader className="border-b px-4 py-4">
+          <DialogTitle>메뉴</DialogTitle>
+        </DialogHeader>
+        <nav className="max-h-[calc(100vh-6.5rem)] space-y-5 overflow-y-auto px-3 py-4">
+          <div className="space-y-1">
+            {dashboard ? <MobileNavLink item={dashboard} onSelect={close} /> : null}
+            {webLinks.map((item) => (
+              <MobileNavLink key={item.id} item={item} onSelect={close} />
+            ))}
+          </div>
+          {sections.map((section) => {
+            const SectionIcon = section.icon;
+            return (
+              <section key={section.id} className="space-y-1">
+                <div className="flex h-8 items-center gap-2 px-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  <SectionIcon className="size-3.5" />
+                  {section.label}
+                </div>
+                <div className="space-y-1">
+                  {section.children
+                    .flatMap((child) => (child.children.length > 0 ? child.children : [child]))
+                    .map((child) => (
+                      <MobileNavLink key={child.id} item={child} depth={1} onSelect={close} />
+                    ))}
+                </div>
+              </section>
+            );
+          })}
+        </nav>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function getCurrentPageTitle(pathname: string, tree: MenuItem[]) {
   const leaves = flattenLeaves(tree);
   const current = leaves
@@ -394,8 +496,18 @@ function AppShell({
       <Sidebar tree={tree} />
       <div className="min-h-screen lg:pl-64">
         <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-background/90 px-4 backdrop-blur-sm">
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-foreground">{title}</p>
+          <div className="flex min-w-0 items-center gap-2.5">
+            <MobileNav tree={tree} />
+            <div className="min-w-0 lg:hidden">
+              <Link
+                href="/dashboard"
+                className="block truncate text-sm font-bold leading-tight tracking-tight text-foreground"
+              >
+                Milla
+              </Link>
+              <p className="truncate text-xs leading-tight text-muted-foreground">{title}</p>
+            </div>
+            <p className="hidden truncate text-sm font-semibold text-foreground lg:block">{title}</p>
           </div>
           <div className="flex items-center gap-2">
             <LanguageSelect />

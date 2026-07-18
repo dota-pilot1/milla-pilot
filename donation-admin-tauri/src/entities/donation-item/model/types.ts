@@ -1,5 +1,11 @@
 export type ItemCategory = "LEARNING" | "LIVING" | "HYGIENE";
-export type ItemStatus = "RECRUITING" | "LOCKED" | "BUYING" | "SHIPPING";
+export type ItemStatus =
+  | "RECRUITING"
+  | "LOCKED"
+  | "BUYING"
+  | "SHIPPING"
+  | "RECEIVED"
+  | "RECEIPTED";
 
 export type DonationItem = {
   id: number;
@@ -45,4 +51,6 @@ export const ITEM_STATUS_LABEL: Record<ItemStatus, string> = {
   LOCKED: "목표달성",
   BUYING: "통합 구매 진행",
   SHIPPING: "배송중",
+  RECEIVED: "수령확인",
+  RECEIPTED: "영수증 발급",
 };

@@ -14,58 +14,77 @@ export interface DonationItemCardProps {
   onDonate?: (item: DonationItem) => void;
 }
 
+/** 카드용 짧은 상태 라벨 — 배지 폭을 통일해 시선 정리. */
+const CARD_STATUS_LABEL: Partial<Record<DonationItem["status"], string>> = {
+  BUYING: "구매중",
+  SHIPPING: "배송중",
+  RECEIVED: "수령완료",
+  RECEIPTED: "영수증",
+};
+
+/** 우측 상단 단일 상태 배지 — 운영 상태(구매/배송…) 우선, 없으면 목표달성/모집중. */
+function statusBadge(item: DonationItem, full: boolean) {
+  const operational =
+    item.status !== "RECRUITING" && item.status !== "LOCKED";
+  if (operational) {
+    return {
+      label: CARD_STATUS_LABEL[item.status] ?? ITEM_STATUS_LABEL[item.status],
+      variant: ITEM_STATUS_VARIANT[item.status],
+    };
+  }
+  return full
+    ? { label: ITEM_STATUS_LABEL.LOCKED, variant: ITEM_STATUS_VARIANT.LOCKED }
+    : { label: ITEM_STATUS_LABEL.RECRUITING, variant: ITEM_STATUS_VARIANT.RECRUITING };
+}
+
 export function DonationItemCard({ item, onDonate }: DonationItemCardProps) {
   const pct = pctOf(item.raisedAmount, item.goalAmount);
   const full = item.raisedAmount >= item.goalAmount;
   const canDonate = item.status === "RECRUITING" && !full;
+  const badge = statusBadge(item, full);
 
   return (
-    <Card className="p-5">
-      <div className="grid gap-4 sm:grid-cols-[3rem_minmax(0,1fr)_auto] sm:grid-rows-[auto_auto] sm:items-center">
-        <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-muted text-2xl sm:row-span-2">
+    <Card
+      onClick={() => onDonate?.(item)}
+      className="flex h-full cursor-pointer flex-col p-5 transition-all hover:border-primary/40 hover:bg-muted/30 hover:shadow-md"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <span className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-3xl ring-1 ring-primary/10">
           {item.emoji || "📦"}
         </span>
+        <Badge variant={badge.variant}>{badge.label}</Badge>
+      </div>
 
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="font-semibold">{item.name}</h3>
-            {full ? <Badge variant="locked">목표달성</Badge> : null}
-            {/* 목표달성(LOCKED)은 full 배지로 이미 표시 — 구매/배송 등 운영 상태만 추가 */}
-            {item.status === "BUYING" || item.status === "SHIPPING" ? (
-              <Badge variant={ITEM_STATUS_VARIANT[item.status]}>
-                {ITEM_STATUS_LABEL[item.status]}
-              </Badge>
-            ) : null}
-          </div>
-          {item.note ? (
-            <p className="mt-0.5 text-xs text-muted-foreground">{item.note}</p>
-          ) : null}
+      <div className="mt-3">
+        <h3 className="font-semibold leading-tight">{item.name}</h3>
+        {item.note ? (
+          <p className="mt-1 text-xs text-muted-foreground">{item.note}</p>
+        ) : null}
+      </div>
+
+      <div className="mt-4">
+        <div className="mb-1.5 flex items-center justify-between text-sm">
+          <span className="text-muted-foreground">달성률</span>
+          <span className="font-bold text-primary">{pct}%</span>
         </div>
+        <Progress value={pct} complete={full} />
+        <p className="mt-2 text-sm text-muted-foreground">
+          <b className="text-foreground">{formatKRW(item.raisedAmount)}</b> /{" "}
+          {formatKRW(item.goalAmount)}
+        </p>
 
-        <span className="hidden text-right text-sm font-bold text-primary sm:block">
-          {pct}%
-        </span>
-
-        <div className="grid min-w-0 gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
-          <Progress value={pct} complete={full} />
-          <span className="text-sm text-muted-foreground sm:text-right">
-            <b className="text-foreground">{formatKRW(item.raisedAmount)}</b> /{" "}
-            {formatKRW(item.goalAmount)}
-          </span>
-        </div>
-
-        <div className="flex shrink-0 items-center justify-between gap-3 sm:justify-end">
-          <span className="text-sm font-bold text-primary sm:hidden">{pct}%</span>
-          {canDonate ? (
-            <Button size="sm" onClick={() => onDonate?.(item)}>
-              후원하기
-            </Button>
-          ) : (
-            <Button size="sm" variant="secondary" disabled>
-              {full ? "목표달성" : ITEM_STATUS_LABEL[item.status]}
-            </Button>
-          )}
-        </div>
+        {canDonate ? (
+          <Button
+            size="sm"
+            className="mt-4 w-full"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDonate?.(item);
+            }}
+          >
+            후원하기
+          </Button>
+        ) : null}
       </div>
     </Card>
   );
