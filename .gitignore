@@ -24,6 +24,9 @@ src-tauri/target/
 !.env.example.*
 env.local
 
+# Local deployment/signing secrets
+**/.local-secrets/
+
 # IDE
 .idea/
 .vscode/
