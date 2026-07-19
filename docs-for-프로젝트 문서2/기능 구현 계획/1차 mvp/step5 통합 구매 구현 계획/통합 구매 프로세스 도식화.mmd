@@ -1,0 +1,32 @@
+%% 통합 구매(Integrated Purchase) 프로세스 — 기획 §5·§8·§9 기준
+%% 핵심: 목표달성 후 "한 번만" 통합구매 → 시설 직배송. 중복구매 0건(§15).
+%% MVP: 실결제 없음(가상 리허설, §9 C-003) — 운영자가 구매를 "기록"한다.
+
+flowchart TD
+    A["물품 모집중<br/>RECRUITING"] -->|후원 공동충당| B{"목표 도달?"}
+    B -->|아니오| A
+    B -->|"예 · 자동 잠금(F-013)"| C["목표달성<br/>LOCKED · 추가결제 차단"]
+
+    C -->|"운영자(Tauri): 통합구매 실행"| D[/"판매처 · 실구매액 · 구매증빙(주문·송장) 입력"/]
+    D --> E{"이미 통합구매됨?"}
+    E -->|"예"| X["거부 · 중복구매 금지<br/>(DB UNIQUE, §15 중복구매 0건)"]
+    E -->|"아니오"| F["PurchaseOrder 1건 생성<br/>item.status → BUYING"]
+
+    F --> G["판매처 → 시설 직배송<br/>SHIPPING"]
+    G --> H["시설 수령확인<br/>RECEIVED"]
+    H --> I["영수증 발급<br/>RECEIPTED"]
+    I --> J["후원자 타임라인에 단계 반영"]
+
+    %% 가드 & 주의
+    C -. "LOCKED 아니면 실행 불가" .-> D
+    F -. "구매증빙 ≠ 세액공제 영수증(F-015)" .-> I
+    D -. "MVP: 실결제 없음 · 구매 기록만(§9 C-003)" .-> F
+
+    classDef stage fill:#ecfdf5,stroke:#a7f3d0,color:#065f46;
+    classDef lock fill:#fffbeb,stroke:#fde68a,color:#b45309;
+    classDef danger fill:#fff1f3,stroke:#fecdd3,color:#b42318;
+    classDef action fill:#eef2ff,stroke:#c7d2fe,color:#3730a3;
+    class A,G,H,I,J stage;
+    class C lock;
+    class X danger;
+    class D,F action;

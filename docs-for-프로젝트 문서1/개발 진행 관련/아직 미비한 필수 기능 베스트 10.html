@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>아직 미비한 필수 기능 · 베스트 10</title>
+    <style>
+      :root { color-scheme: light; --bg:#f6f8fb; --paper:#fff; --text:#111827; --muted:#667085; --line:#d8e0eb; --soft:#f1f5f9;
+        --green:#047857; --green-soft:#ecfdf5; --blue:#0369a1; --blue-soft:#e0f2fe; --amber:#b45309; --amber-soft:#fffbeb; --violet:#6d28d9; --violet-soft:#f5f3ff; --red:#b42318; --red-soft:#fff1f3; }
+      * { box-sizing:border-box; }
+      body { margin:0; color:var(--text); background:var(--bg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; line-height:1.65; }
+      main { max-width:1080px; margin:0 auto; padding:40px 24px 72px; }
+      header, section { border:1px solid var(--line); border-radius:18px; background:var(--paper); box-shadow:0 16px 42px rgba(15,23,42,.05); }
+      header { padding:30px; } section { margin-top:18px; padding:24px; }
+      h1,h2,h3,p { margin-top:0; } h1 { margin-bottom:10px; font-size:30px; letter-spacing:-.01em; }
+      h2 { margin-bottom:14px; font-size:21px; } h3 { margin:18px 0 8px; font-size:15px; } p { margin-bottom:12px; }
+      .lead { max-width:860px; margin-bottom:0; color:var(--muted); font-size:16px; }
+      .meta { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px; }
+      .pill { display:inline-flex; align-items:center; min-height:28px; padding:0 11px; border:1px solid var(--line); border-radius:999px; color:#344054; background:#fff; font-size:12px; font-weight:800; }
+      .pill.g { color:var(--green); background:var(--green-soft); border-color:#a7f3d0; }
+      .pill.b { color:var(--blue); background:var(--blue-soft); border-color:#bae6fd; }
+      .pill.r { color:var(--red); background:var(--red-soft); border-color:#fecdd3; }
+      code { padding:2px 6px; border-radius:6px; color:#0f172a; background:var(--soft); font-family:"SFMono-Regular",Consolas,monospace; font-size:.9em; }
+      table { width:100%; border-collapse:collapse; overflow:hidden; border:1px solid var(--line); border-radius:12px; font-size:13.5px; margin-top:6px; }
+      th,td { padding:10px 13px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; } th { color:#475467; background:#f8fafc; font-size:11.5px; font-weight:800; text-transform:uppercase; } tr:last-child td { border-bottom:0; } td code { font-size:12.5px; }
+      .tag { display:inline-block; font-size:10.5px; font-weight:800; padding:1px 8px; border-radius:6px; white-space:nowrap; }
+      .tag.core { color:var(--red); background:var(--red-soft); }
+      .tag.prod { color:var(--amber); background:var(--amber-soft); }
+      .tag.trust { color:var(--blue); background:var(--blue-soft); }
+      .tag.p0 { color:var(--red); background:var(--red-soft); } .tag.p1 { color:var(--amber); background:var(--amber-soft); } .tag.p2 { color:var(--blue); background:var(--blue-soft); }
+      .callout { margin-top:14px; padding:16px; border:1px solid #a7f3d0; border-radius:12px; color:#065f46; background:var(--green-soft); }
+      .note { margin-top:14px; padding:16px; border:1px solid #bae6fd; border-radius:12px; color:var(--blue); background:var(--blue-soft); }
+      .warning { margin-top:14px; padding:16px; border:1px solid #fde68a; border-radius:12px; color:var(--amber); background:var(--amber-soft); }
+      ul { margin:0; padding-left:20px; } li + li { margin-top:6px; }
+      .loop { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:4px 0 0; }
+      .step { display:inline-flex; align-items:center; gap:6px; padding:6px 11px; border:1px solid var(--line); border-radius:10px; background:#fff; font-size:12.5px; font-weight:700; }
+      .step.done { color:var(--green); background:var(--green-soft); border-color:#a7f3d0; }
+      .step.gap { color:var(--red); background:var(--red-soft); border-color:#fecdd3; }
+      .arrow { color:var(--muted); font-weight:800; }
+      .card { margin-top:16px; padding:20px; border:1px solid var(--line); border-radius:14px; background:#fdfdfe; }
+      .card:first-of-type { margin-top:6px; }
+      .card h3 { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:0 0 12px; font-size:17px; }
+      .rank { display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:8px; background:#111827; color:#fff; font-size:14px; font-weight:800; flex:0 0 auto; }
+      .kv { margin:0; } .kv dt { float:left; clear:left; width:78px; color:var(--muted); font-size:12.5px; font-weight:800; padding:3px 0; }
+      .kv dd { margin:0 0 2px 90px; font-size:13.5px; padding:3px 0; }
+      .kv dd + dt { }
+      .src { color:var(--muted); font-size:12px; }
+      b.hl { color:var(--red); }
+      .legend { display:flex; flex-wrap:wrap; gap:14px; margin-top:10px; font-size:12.5px; color:var(--muted); }
+      .legend span { display:inline-flex; align-items:center; gap:6px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="meta">
+          <span class="pill">Step 999</span>
+          <span class="pill g">이행 루프 본체 6/6</span>
+          <span class="pill r">미비한 필수 10</span>
+        </div>
+        <h1>아직 미비한 필수 기능 · 베스트 10</h1>
+        <p class="lead">
+          step5(통합구매) + 웹 물품 구매현황 + step6(배송 딥링크)까지 구현되어
+          <b>후원 이행 루프의 본체 6개는 동작</b>한다. 이 문서는 그 위에서 <b>실서비스 전 반드시 채워야 할 필수 기능</b>만
+          기획 문서 근거와 함께 우선순위로 정리한다. 커뮤니티·명예관·통계·i18n 같은 <b>순수 부가는 제외</b>한다.
+        </p>
+      </header>
+
+      <!-- 0. 현재 위치 -->
+      <section>
+        <h2>0. 지금 이행 루프는 어디까지 닫혔나</h2>
+        <p class="src">근거: <code>제품 핵심 기능 및 범위.html</code> §5·§7·§8 이행 루프</p>
+        <div class="loop">
+          <span class="step done">시설 준비물 목표</span><span class="arrow">→</span>
+          <span class="step done">공동충당</span><span class="arrow">→</span>
+          <span class="step done">목표달성 자동잠금</span><span class="arrow">→</span>
+          <span class="step done">통합구매 1회</span><span class="arrow">→</span>
+          <span class="step done">송장·배송조회</span><span class="arrow">→</span>
+          <span class="step done">수령확인</span><span class="arrow">→</span>
+          <span class="step gap">영수증 발급 ✗</span>
+        </div>
+        <div class="warning">
+          루프의 <b>마지막 칸(영수증 발급 · <code>RECEIPTED</code>)</b>이 비어 있다. 상태값은 enum에 있으나
+          <code>DonationItem.markReceipted()</code> 전환 메서드도, 발급/증빙 도메인도, 후원자 노출도 없다.
+          <b>본체를 진짜로 닫으려면 이 한 칸(아래 #1)이 먼저다.</b>
+        </div>
+        <div class="legend">
+          <span><span class="tag core">본체</span> 핵심 루프 완결에 필요</span>
+          <span><span class="tag prod">실서비스</span> 실운영 전 반드시(부가지만 필수)</span>
+          <span><span class="tag trust">신뢰·운영</span> 안정 운영을 위한 보강</span>
+        </div>
+      </section>
+
+      <!-- 1. 요약 표 -->
+      <section>
+        <h2>1. 베스트 10 요약</h2>
+        <table>
+          <thead>
+            <tr><th>#</th><th>기능</th><th>분류</th><th>우선</th><th>현재 상태(한 줄)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td><b>영수증 발급 단계(RECEIPTED)</b></td><td><span class="tag core">본체</span></td><td><span class="tag p0">P0</span></td><td>enum만 존재, 전환·발급·노출 전무 — 루프 미완결</td></tr>
+            <tr><td>2</td><td><b>실결제(PG) 연동</b></td><td><span class="tag prod">실서비스</span></td><td><span class="tag p0">P0</span></td><td>충당은 <code>RECORDED</code> 기록뿐, 실제 돈 이동 없음</td></tr>
+            <tr><td>3</td><td><b>후원 취소 · 환불 정합성</b></td><td><span class="tag prod">실서비스</span></td><td><span class="tag p0">P0</span></td><td>취소 상태값·롤백·환불 규칙 없음</td></tr>
+            <tr><td>4</td><td><b>증빙/영수증 파일 첨부 + 노출</b></td><td><span class="tag core">본체</span></td><td><span class="tag p1">P1</span></td><td>S3·필드 준비됨, 업로드 UI·화면 노출 미연결</td></tr>
+            <tr><td>5</td><td><b>관리자 권한 세분화(permission authz)</b></td><td><span class="tag prod">실서비스</span></td><td><span class="tag p1">P1</span></td><td>role 단위만, permission 도메인 미활용</td></tr>
+            <tr><td>6</td><td><b>상태 전환 감사 로그 · 이력</b></td><td><span class="tag trust">신뢰·운영</span></td><td><span class="tag p1">P1</span></td><td>누가·언제 전환했는지 이력 없음(<code>updatedAt</code>만)</td></tr>
+            <tr><td>7</td><td><b>후원자 알림(단계 이벤트 통지)</b></td><td><span class="tag trust">신뢰·운영</span></td><td><span class="tag p1">P1</span></td><td>후원자는 pull(재방문)만, push 통지 없음</td></tr>
+            <tr><td>8</td><td><b>마감일(deadline) 만료 · 미달 처리</b></td><td><span class="tag trust">신뢰·운영</span></td><td><span class="tag p2">P2</span></td><td>필드만 존재, 만료·목표미달 처리 로직 없음</td></tr>
+            <tr><td>9</td><td><b>실구매액↔목표액 차액 정산 규칙</b></td><td><span class="tag trust">신뢰·운영</span></td><td><span class="tag p2">P2</span></td><td>잉여/부족 처리 정책·표시 미정</td></tr>
+            <tr><td>10</td><td><b>인증·인가 견고화</b></td><td><span class="tag trust">신뢰·운영</span></td><td><span class="tag p2">P2</span></td><td>거부 시 403 대신 401 등 미세 결함</td></tr>
+          </tbody>
+        </table>
+        <div class="note">
+          <b>P0(본체·실서비스 핵심)</b>: #1 루프 완결 → #2·#3 실돈 흐름. <b>P1</b>: 운영 신뢰의 뼈대. <b>P2</b>: 있으면 좋은 견고화.
+          <b>전문가 검토 관문(§5·F-016)</b>: 실결제·환불(#2·#3)은 코드 이전에 회계/법률 검토가 선행 조건.
+        </div>
+      </section>
+
+      <!-- 2. 상세 -->
+      <section>
+        <h2>2. 상세 — 근거 · 현재 · 필요 이유 · 제안</h2>
+
+        <div class="card">
+          <h3><span class="rank">1</span> 영수증 발급 단계(RECEIPTED) 완성 <span class="tag core">본체</span> <span class="tag p0">P0</span></h3>
+          <dl class="kv">
+            <dt>기획 근거</dt><dd>이행 루프 마지막 칸 "영수증 발급자료 → 후원자 화면 단계 반영"(§5·§8). 정책 "영수증·구매 이행 추적은 단계적 확장".</dd>
+            <dt>현재</dt><dd><code>ItemStatus.RECEIPTED</code> enum·메뉴(<code>ADMIN_RECEIPTS</code>)는 있으나 <b>전환 메서드/도메인/후원자 노출 전무</b>. <code>RECEIVED</code>에서 멈춘다.</dd>
+            <dt>왜 필수</dt><dd>이 칸이 비면 <b>본체 루프가 열린 채</b>다. 후원자가 "내 후원이 실제 물품으로 전달·정산됐다"를 확인하는 종착점.</dd>
+            <dt>제안</dt><dd><code>markReceipted()</code> + 수령확인 후 <b>증빙 묶음(구매영수증·배송완료·수령확인)</b>을 발급자료로 정리 → 웹 구매현황/후원내역 타임라인에 "영수증" 노출. <b>세액공제용 아님</b> 문구 유지(F-015).</dd>
+          </dl>
+        </div>
+
+        <div class="card">
+          <h3><span class="rank">2</span> 실결제(PG) 연동 <span class="tag prod">실서비스</span> <span class="tag p0">P0</span></h3>
+          <dl class="kv">
+            <dt>기획 근거</dt><dd>정책 "결제 기능은 <b>전문가 검토 후 별도 단계</b>에서 도입". <code>ContributionStatus</code> 주석: "차기 <code>PAID</code> 실결제 — 관문 통과 후".</dd>
+            <dt>현재</dt><dd>공동충당은 <code>RECORDED</code>(가상 리허설) — <b>실제 돈 이동 없음</b>. 목표달성도 "기록상" 달성.</dd>
+            <dt>왜 필수</dt><dd>돈이 실제로 모이지 않으면 통합구매 재원이 없다. <b>실서비스의 전제</b>.</dd>
+            <dt>제안</dt><dd>PG 선정(정기결제 불필요, 단건) → <code>PAID</code> 상태 + 결제키/승인번호 저장. 후원금은 <b>시설 전용계좌 직접 귀속</b> 구조(정책) 반영. <b>관문(F-016) 선행</b>.</dd>
+          </dl>
+        </div>
+
+        <div class="card">
+          <h3><span class="rank">3</span> 후원 취소 · 환불 정합성 <span class="tag prod">실서비스</span> <span class="tag p0">P0</span></h3>
+          <dl class="kv">
+            <dt>기획 근거</dt><dd><code>ContributionStatus</code> 주석: "차기 <code>REFUNDED</code> 환불". §5 정합성(초과·동시성)의 역방향 짝.</dd>
+            <dt>현재</dt><dd><b>취소/환불 경로 없음.</b> 상태값은 <code>RECORDED</code> 하나뿐, <code>raisedAmount</code> 롤백·목표달성 후 환불 규칙 미정.</dd>
+            <dt>왜 필수</dt><dd>실결제(#2)가 붙는 순간 환불 요청은 반드시 발생. 잠금(LOCKED) 이후 환불 시 <b>목표 재개방/구매 취소</b> 규칙이 없으면 정합성이 깨진다.</dd>
+            <dt>제안</dt><dd>취소는 <b>구매 실행(BUYING) 전까지만</b> 허용을 기본선으로. 취소 시 비관락으로 <code>raisedAmount</code> 차감 + 목표 미달 시 <code>RECRUITING</code> 복귀. 구매 후 환불은 별도 정책.</dd>
+          </dl>
+        </div>
+
+        <div class="card">
+          <h3><span class="rank">4</span> 증빙/영수증 파일 첨부 + 화면 노출 <span class="tag core">본체</span> <span class="tag p1">P1</span></h3>
+          <dl class="kv">
+            <dt>기획 근거</dt><dd>핵심기능표 "물품 구매 현황 = 구매 진행·완료, <b>영수증·송장 표시</b>". 상태 전환의 신뢰 자료.</dd>
+            <dt>현재</dt><dd><code>evidenceFileUrl</code> 필드 + <code>UploadController</code>/S3 인프라 <b>준비됨</b>. 그러나 통합구매 드로워에 <b>업로드 UI 미연결</b>, 구매현황 카드에 파일 노출 없음.</dd>
+            <dt>왜 필수</dt><dd>주문번호 텍스트만으론 신뢰가 약하다. 실제 <b>영수증 이미지/PDF</b>가 후원자에게 보여야 루프가 "증빙"으로 닫힌다.</dd>
+            <dt>제안</dt><dd>통합구매/송장 드로워에 파일 첨부(기존 <code>shared/api/upload</code> 재사용) → 구매현황 <code>PurchaseStatusCard</code>에 증빙 파일 링크 추가.</dd>
+          </dl>
+        </div>
+
+        <div class="card">
+          <h3><span class="rank">5</span> 관리자 권한 세분화(permission 기반 authz) <span class="tag prod">실서비스</span> <span class="tag p1">P1</span></h3>
+          <dl class="kv">
+            <dt>기획 근거</dt><dd>범위 문서 "관리자 authz 세분화 = 프로덕션 필수 부가". permission·role-permission 도메인이 이미 설계됨.</dd>
+            <dt>현재</dt><dd><code>SecurityConfig</code>는 <code>hasAnyRole("PLATFORM_ADMIN","ADMIN")</code> <b>역할 단위</b>만(10곳). <code>Permission</code>/역할-권한 매핑 도메인은 있으나 <b>authz에 미활용</b>, <code>@PreAuthorize</code> 0건.</dd>
+            <dt>왜 필수</dt><dd>운영자가 늘면 "시설 등록만", "구매 실행만" 같은 <b>세분 권한</b>이 필요. 지금은 all-or-nothing.</dd>
+            <dt>제안</dt><dd>권한 코드(예 <code>PURCHASE_EXECUTE</code>, <code>FACILITY_WRITE</code>) 정의 → <code>@PreAuthorize("hasAuthority(...)")</code>로 전환. 기존 role-permission 매핑 화면 재활용.</dd>
+          </dl>
+        </div>
+
+        <div class="card">
+          <h3><span class="rank">6</span> 상태 전환 감사 로그 · 이력 <span class="tag trust">신뢰·운영</span> <span class="tag p1">P1</span></h3>
+          <dl class="kv">
+            <dt>기획 근거</dt><dd>범위 문서 "감사메시지 = 프로덕션 필수 부가". 정책 "신뢰·운영 가능성 우선".</dd>
+            <dt>현재</dt><dd>물품 상태 전환(LOCKED→BUYING→SHIPPING→RECEIVED)에 <b>누가·언제·왜</b> 이력이 없다. <code>updatedAt</code> 한 칸뿐.</dd>
+            <dt>왜 필수</dt><dd>돈·물품이 오가는 이행 루프에서 <b>추적 불가능한 상태 변경</b>은 분쟁 시 치명적. 오작동·오조작 역추적 근거.</dd>
+            <dt>제안</dt><dd><code>StatusHistory</code>(대상·이전→이후·actor·사유·시각) 도메인 추가. 전환 메서드에서 append. Tauri에 타임라인 조회.</dd>
+          </dl>
+        </div>
+
+        <div class="card">
+          <h3><span class="rank">7</span> 후원자 알림(단계 이벤트 통지) <span class="tag trust">신뢰·운영</span> <span class="tag p1">P1</span></h3>
+          <dl class="kv">
+            <dt>기획 근거</dt><dd>루프 종단 "후원자 화면에 <b>단계 반영</b>"(§8). 현재는 반영 방식이 재방문(pull)뿐.</dd>
+            <dt>현재</dt><dd>목표달성·구매·배송·수령 시 <b>후원자에게 알리는 채널 없음</b>. 후원자가 직접 들어와 확인해야 함.</dd>
+            <dt>왜 필수</dt><dd>내 후원이 어떻게 됐는지 모르면 재후원·신뢰가 안 쌓인다. 이행 루프의 "닫힘"을 후원자가 체감하는 장치.</dd>
+            <dt>제안</dt><dd>MVP는 <b>인앱 알림함</b>(이벤트 저장 + 뱃지)부터. 이메일/푸시는 이후. 단계 전환 훅에서 후원자별 알림 생성.</dd>
+          </dl>
+        </div>
+
+        <div class="card">
+          <h3><span class="rank">8</span> 마감일(deadline) 만료 · 목표미달 처리 <span class="tag trust">신뢰·운영</span> <span class="tag p2">P2</span></h3>
+          <dl class="kv">
+            <dt>기획 근거</dt><dd>물품 정책 "물품명…목표금액, <b>마감일</b>을 관리한다".</dd>
+            <dt>현재</dt><dd><code>DonationItem.deadline</code> 필드만 존재. <b>만료 시 자동 처리·목표 미달 마감 규칙 없음</b>. 지난 물품도 계속 모집중.</dd>
+            <dt>왜 필수</dt><dd>마감이 지나도 계속 후원받으면 후원자 기대와 어긋난다. 미달 마감분의 환불(#3)과도 연동.</dd>
+            <dt>제안</dt><dd>마감 경과 스케줄러 or 조회 시 파생 상태 → 미달이면 <code>EXPIRED</code>(모집종료) 처리 + 후원분 환불 정책 연결.</dd>
+          </dl>
+        </div>
+
+        <div class="card">
+          <h3><span class="rank">9</span> 실구매액 ↔ 목표액 차액 정산 규칙 <span class="tag trust">신뢰·운영</span> <span class="tag p2">P2</span></h3>
+          <dl class="kv">
+            <dt>기획 근거</dt><dd>물품 정책 "목표금액은 <b>실제 구매 총액 기준</b>으로 표시".</dd>
+            <dt>현재</dt><dd>통합구매는 <code>purchasedAmount</code>(실구매액)를 목표액과 <b>다르게</b> 기록 가능하나, <b>잉여/부족 차액 처리 규칙·표시가 미정</b>.</dd>
+            <dt>왜 필수</dt><dd>모인 돈 &gt; 실구매액이면 잔액 귀속, 반대면 부족분 처리 — <b>회계 투명성</b>의 핵심. 실결제(#2) 붙으면 즉시 이슈화.</dd>
+            <dt>제안</dt><dd>차액 정책 정의(잔액=시설 후원금 귀속 등) + 구매현황에 "목표 vs 실구매" 비교·잔액 표기.</dd>
+          </dl>
+        </div>
+
+        <div class="card">
+          <h3><span class="rank">10</span> 인증 · 인가 견고화 <span class="tag trust">신뢰·운영</span> <span class="tag p2">P2</span></h3>
+          <dl class="kv">
+            <dt>기획 근거</dt><dd>범위 문서 "관리자 authz 세분화·감사 = 실서비스 필수". #5의 하부 위생.</dd>
+            <dt>현재</dt><dd>권한 거부 시 <b>403이 아닌 401로 응답</b>되는 등 상태코드 미세 결함(기능 차단은 정상). 토큰 리프레시는 있으나 실패·만료 UX·계정 잠금 등은 얕음.</dd>
+            <dt>왜 필수</dt><dd>실서비스에서 인증 실패 응답이 부정확하면 클라이언트 오류 처리·모니터링이 꼬인다.</dd>
+            <dt>제안</dt><dd>인증 실패=401 / 권한 부족=403 정합화, 리프레시 실패 흐름·연속 실패 잠금 정비.</dd>
+          </dl>
+        </div>
+      </section>
+
+      <!-- 3. 범위 밖 -->
+      <section>
+        <h2>3. 이 문서에서 <u>제외</u>한 것 (순수 부가)</h2>
+        <p class="src">근거: <code>제품 핵심 기능 및 범위.html</code> §3 범위 3분류 — "없어도 본체 작동, 파일럿 이후".</p>
+        <ul>
+          <li>커뮤니티 · 명예홍보관 · 협력교실</li>
+          <li>통계 대시보드 · i18n(다국어) · 펀딩 캠페인</li>
+          <li>실시간 택배 추적(집계 API 자동화 = step6 Phase 2) — MVP는 송장 딥링크까지</li>
+          <li>물품/시설 대표 이미지 파이프라인 — 정책상 검수 기준 수립 후 차기</li>
+        </ul>
+        <div class="callout">
+          <b>정리:</b> 본체 6/6은 동작한다. <b>#1(영수증)로 루프를 완전히 닫고</b>, 전문가 관문을 지나 <b>#2·#3(실결제·환불)</b>을 얹으면
+          "실제 돈으로 도는" 최소 실서비스가 된다. #4~#10은 그 위의 신뢰·운영 뼈대다.
+        </div>
+        <h3>참고 문서</h3>
+        <ul>
+          <li>범위/본체: <code>docs-for-프로젝트 문서2/제품 핵심 기능 및 범위.html</code></li>
+          <li>정책: <code>docs-for-프로젝트 문서1/기획 문서/후원 관련 정책 요약/핵심 정책 요약.md</code>, <code>.../후원 관련 정책 정리/후원 정책.md</code></li>
+          <li>선행 계획: <code>기능 구현 계획/1차 mvp/step5 통합 구매 구현 계획</code>, <code>.../step6 배송 추적 구현 계획</code></li>
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>

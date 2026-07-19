@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Milla 배포 사이트 정보</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --card: #ffffff;
+      --text: #171717;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --soft: #f3f4f6;
+      --dark: #111111;
+      --ok: #0f766e;
+      --warn: #b45309;
+      --danger: #b91c1c;
+      --blue: #1d4ed8;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+    }
+
+    main {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 40px 0 64px;
+    }
+
+    header {
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 32px;
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 21px;
+      letter-spacing: -0.01em;
+    }
+
+    h3 {
+      margin: 18px 0 8px;
+      font-size: 16px;
+    }
+
+    p {
+      margin: 0;
+    }
+
+    a {
+      color: var(--blue);
+      text-decoration: none;
+      font-weight: 650;
+      word-break: break-all;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    code {
+      display: inline-block;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--soft);
+      padding: 1px 6px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.92em;
+    }
+
+    .lead {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--card);
+      padding: 22px;
+      box-shadow: 0 12px 30px rgba(17, 17, 17, 0.04);
+    }
+
+    .wide {
+      grid-column: 1 / -1;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin: 22px 0;
+    }
+
+    .summary-item {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--card);
+      padding: 14px;
+    }
+
+    .summary-item strong {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .summary-item span {
+      display: block;
+      margin-top: 4px;
+      font-weight: 750;
+    }
+
+    .list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 180px minmax(0, 1fr);
+      gap: 12px;
+      border-top: 1px solid var(--border);
+      padding-top: 10px;
+    }
+
+    .row:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .key {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      height: 24px;
+      border-radius: 999px;
+      padding: 0 9px;
+      font-size: 12px;
+      font-weight: 750;
+      vertical-align: middle;
+    }
+
+    .ok { background: #dff7f2; color: var(--ok); }
+    .warn { background: #fff3d8; color: var(--warn); }
+    .dark { background: var(--dark); color: #fff; }
+
+    .note {
+      border-left: 4px solid var(--dark);
+      border-radius: 10px;
+      background: #fff;
+      padding: 14px 16px;
+      color: var(--muted);
+    }
+
+    .danger-note {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 14px;
+    }
+
+    th, td {
+      border-bottom: 1px solid var(--border);
+      padding: 11px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--soft);
+      color: #374151;
+      font-size: 13px;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    @media (max-width: 760px) {
+      main { width: min(100% - 20px, 1120px); padding-top: 24px; }
+      h1 { font-size: 26px; }
+      .grid, .summary { grid-template-columns: 1fr; }
+      .row { grid-template-columns: 1fr; gap: 2px; }
+      .card { padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Milla 배포 사이트 정보</h1>
+    <p class="lead">
+      운영 접속 주소, 데스크탑 앱 릴리즈, GitHub 저장소, CI/CD 배포 기준을 한 페이지에 정리한다.
+      마지막 확인: <code>2026-07-19 00:07 KST</code>
+    </p>
+  </header>
+
+  <section class="summary" aria-label="요약">
+    <div class="summary-item">
+      <strong>운영 웹</strong>
+      <span><a href="https://dxline-tallent.com">dxline-tallent.com</a></span>
+    </div>
+    <div class="summary-item">
+      <strong>최신 앱 릴리즈</strong>
+      <span><a href="https://github.com/dota-pilot1/donation-admin-tauri/releases/tag/v0.1.1">v0.1.1</a></span>
+    </div>
+    <div class="summary-item">
+      <strong>메인 저장소</strong>
+      <span><a href="https://github.com/dota-pilot1/milla-pilot">dota-pilot1/milla-pilot</a></span>
+    </div>
+    <div class="summary-item">
+      <strong>최근 자동 배포</strong>
+      <span><span class="badge ok">성공</span> <code>6c759dd</code></span>
+    </div>
+  </section>
+
+  <section class="grid">
+    <article class="card">
+      <h2>1. 웹 서비스</h2>
+      <ul class="list">
+        <li class="row">
+          <span class="key">운영 도메인</span>
+          <span><a href="https://dxline-tallent.com">https://dxline-tallent.com</a></span>
+        </li>
+        <li class="row">
+          <span class="key">로그인</span>
+          <span><a href="https://dxline-tallent.com/login">https://dxline-tallent.com/login</a></span>
+        </li>
+        <li class="row">
+          <span class="key">후원하기</span>
+          <span><a href="https://dxline-tallent.com/donate">https://dxline-tallent.com/donate</a></span>
+        </li>
+        <li class="row">
+          <span class="key">내 후원 내역</span>
+          <span><a href="https://dxline-tallent.com/my-donations">https://dxline-tallent.com/my-donations</a></span>
+        </li>
+        <li class="row">
+          <span class="key">API smoke check</span>
+          <span><a href="https://dxline-tallent.com/api/site-settings">/api/site-settings</a> <span class="badge ok">200 확인</span></span>
+        </li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <h2>2. 데스크탑 앱</h2>
+      <ul class="list">
+        <li class="row">
+          <span class="key">앱 이름</span>
+          <span>Donation Admin</span>
+        </li>
+        <li class="row">
+          <span class="key">최신 릴리즈</span>
+          <span><a href="https://github.com/dota-pilot1/donation-admin-tauri/releases/tag/v0.1.1">Donation Admin v0.1.1</a> <span class="badge warn">Pre-release</span></span>
+        </li>
+        <li class="row">
+          <span class="key">Windows 설치 파일</span>
+          <span><a href="https://github.com/dota-pilot1/donation-admin-tauri/releases/download/v0.1.1/Donation.Admin_0.1.1_x64-setup.exe">Donation.Admin_0.1.1_x64-setup.exe</a></span>
+        </li>
+        <li class="row">
+          <span class="key">업데이트 메타</span>
+          <span><a href="https://github.com/dota-pilot1/donation-admin-tauri/releases/download/v0.1.1/latest.json">latest.json</a></span>
+        </li>
+        <li class="row">
+          <span class="key">게시 시각</span>
+          <span><code>2026-07-18 20:53 KST</code></span>
+        </li>
+      </ul>
+    </article>
+
+    <article class="card wide">
+      <h2>3. GitHub 정보</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>구분</th>
+            <th>주소 / 값</th>
+            <th>비고</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>메인 저장소</td>
+            <td><a href="https://github.com/dota-pilot1/milla-pilot">https://github.com/dota-pilot1/milla-pilot</a></td>
+            <td><span class="badge dark">PRIVATE</span> 기본 브랜치 <code>main</code></td>
+          </tr>
+          <tr>
+            <td>데스크탑 앱 릴리즈 저장소</td>
+            <td><a href="https://github.com/dota-pilot1/donation-admin-tauri">https://github.com/dota-pilot1/donation-admin-tauri</a></td>
+            <td>Tauri 앱 설치 파일/업데이트 메타 배포</td>
+          </tr>
+          <tr>
+            <td>최근 커밋</td>
+            <td><code>6c759dd613c2be1abdce5f3aa29023cec6f21b2d</code></td>
+            <td><code>ci: deploy after successful main ci</code></td>
+          </tr>
+          <tr>
+            <td>최근 CI</td>
+            <td><a href="https://github.com/dota-pilot1/milla-pilot/actions/runs/29649242037">CI run 29649242037</a></td>
+            <td><span class="badge ok">성공</span> backend/web/admin 검증</td>
+          </tr>
+          <tr>
+            <td>최근 Deploy</td>
+            <td><a href="https://github.com/dota-pilot1/milla-pilot/actions/runs/29649284332">Deploy run 29649284332</a></td>
+            <td><span class="badge ok">성공</span> workflow_run 자동 배포</td>
+          </tr>
+        </tbody>
+      </table>
+    </article>
+
+    <article class="card">
+      <h2>4. 프로젝트 기본 정보</h2>
+      <ul class="list">
+        <li class="row">
+          <span class="key">서비스명</span>
+          <span>Milla / DonationPlatform</span>
+        </li>
+        <li class="row">
+          <span class="key">목적</span>
+          <span>시설별 후원 물품 목표를 등록하고, 후원자가 목표에 참여한 뒤 구매/배송/증빙 흐름을 확인하는 MVP.</span>
+        </li>
+        <li class="row">
+          <span class="key">프론트</span>
+          <span>Next.js 16 정적 export, S3 + CloudFront 배포</span>
+        </li>
+        <li class="row">
+          <span class="key">백엔드</span>
+          <span>Spring Boot, Java 21, EC2 systemd 서비스 <code>milla-server</code></span>
+        </li>
+        <li class="row">
+          <span class="key">관리 앱</span>
+          <span>Tauri 데스크탑 앱 <code>donation-admin-tauri</code></span>
+        </li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <h2>5. 운영 배포 구성</h2>
+      <ul class="list">
+        <li class="row">
+          <span class="key">프론트 배포</span>
+          <span>S3 버킷 <code>beauty-book-hair-front</code> → CloudFront <code>E11NF3HMOB52NI</code></span>
+        </li>
+        <li class="row">
+          <span class="key">백엔드 배포</span>
+          <span>GitHub Actions에서 JAR 빌드 후 EC2 <code>/home/ubuntu/milla/app.jar</code> 업로드, <code>milla-server</code> 재시작</span>
+        </li>
+        <li class="row">
+          <span class="key">운영 API URL</span>
+          <span><code>https://dxline-tallent.com</code></span>
+        </li>
+        <li class="row">
+          <span class="key">CI 자동 실행</span>
+          <span><code>push main</code>, <code>pull_request</code>, <code>workflow_dispatch</code></span>
+        </li>
+        <li class="row">
+          <span class="key">Deploy 자동 실행</span>
+          <span>CI 성공 후 <code>workflow_run</code>으로 자동 실행. 수동 실행도 가능.</span>
+        </li>
+      </ul>
+    </article>
+
+    <article class="card wide">
+      <h2>6. 운영 확인 절차</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>확인 항목</th>
+            <th>명령 / 주소</th>
+            <th>정상 기준</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>프론트</td>
+            <td><code>curl -I https://dxline-tallent.com/login</code></td>
+            <td><code>HTTP/2 200</code>, S3/CloudFront 응답</td>
+          </tr>
+          <tr>
+            <td>백엔드 API</td>
+            <td><code>curl -i https://dxline-tallent.com/api/site-settings</code></td>
+            <td><code>HTTP/2 200</code>, JSON 응답</td>
+          </tr>
+          <tr>
+            <td>GitHub CI</td>
+            <td><a href="https://github.com/dota-pilot1/milla-pilot/actions/workflows/ci.yml">CI workflow</a></td>
+            <td>backend/web/admin job 성공</td>
+          </tr>
+          <tr>
+            <td>GitHub Deploy</td>
+            <td><a href="https://github.com/dota-pilot1/milla-pilot/actions/workflows/deploy.yml">Deploy workflow</a></td>
+            <td>backend/frontend deploy job 성공</td>
+          </tr>
+        </tbody>
+      </table>
+    </article>
+
+    <article class="card wide">
+      <h2>7. 주의 사항</h2>
+      <div class="note danger-note">
+        이 문서에는 AWS Access Key, SSH private key, DB 비밀번호, 메일 비밀번호, JWT secret 같은 비밀값을 절대 저장하지 않는다.
+        GitHub Actions Secret 이름과 운영 접속 주소만 문서화한다.
+      </div>
+      <h3>현재 배포 기준</h3>
+      <p>
+        <code>main</code>에 push되면 CI가 자동 실행되고, CI가 성공하면 Deploy가 자동 실행된다.
+        같은 브랜치에서 새 배포가 시작되면 이전 배포는 취소된다.
+      </p>
+    </article>
+  </section>
+</main>
+</body>
+</html>

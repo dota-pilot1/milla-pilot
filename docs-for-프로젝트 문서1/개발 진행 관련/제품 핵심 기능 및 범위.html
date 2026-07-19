@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>제품 핵심 기능 및 범위</title>
+    <style>
+      :root { color-scheme: light; --bg:#f6f8fb; --paper:#fff; --text:#111827; --muted:#667085; --line:#d8e0eb; --soft:#f1f5f9;
+        --green:#047857; --green-soft:#ecfdf5; --blue:#0369a1; --blue-soft:#e0f2fe; --amber:#b45309; --amber-soft:#fffbeb; --violet:#6d28d9; --violet-soft:#f5f3ff; --red:#b42318; --red-soft:#fff1f3; }
+      * { box-sizing:border-box; }
+      body { margin:0; color:var(--text); background:var(--bg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; line-height:1.65; }
+      main { max-width:1080px; margin:0 auto; padding:40px 24px 72px; }
+      header, section { border:1px solid var(--line); border-radius:18px; background:var(--paper); box-shadow:0 16px 42px rgba(15,23,42,.05); }
+      header { padding:30px; } section { margin-top:18px; padding:24px; }
+      h1,h2,h3,p { margin-top:0; } h1 { margin-bottom:10px; font-size:30px; letter-spacing:-.01em; }
+      h2 { margin-bottom:14px; font-size:21px; } h3 { margin:18px 0 8px; font-size:15px; } p { margin-bottom:12px; }
+      .lead { max-width:860px; margin-bottom:0; color:var(--muted); font-size:16px; }
+      .meta { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px; }
+      .pill { display:inline-flex; align-items:center; min-height:28px; padding:0 11px; border:1px solid var(--line); border-radius:999px; color:#344054; background:#fff; font-size:12px; font-weight:800; }
+      .pill.g { color:var(--green); background:var(--green-soft); border-color:#a7f3d0; } .pill.b { color:var(--blue); background:var(--blue-soft); border-color:#bae6fd; }
+      code { padding:2px 6px; border-radius:6px; color:#0f172a; background:var(--soft); font-family:"SFMono-Regular",Consolas,monospace; font-size:.9em; }
+      pre { overflow-x:auto; margin:10px 0 0; padding:16px; border:1px solid var(--line); border-radius:12px; color:#1f2937; background:#f8fafc; font-size:12.5px; line-height:1.75; font-family:"SFMono-Regular",Consolas,monospace; }
+      table { width:100%; border-collapse:collapse; overflow:hidden; border:1px solid var(--line); border-radius:12px; font-size:13.5px; margin-top:6px; }
+      th,td { padding:10px 13px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; } th { color:#475467; background:#f8fafc; font-size:11.5px; font-weight:800; text-transform:uppercase; } tr:last-child td { border-bottom:0; } td code { font-size:12.5px; }
+      .tag { display:inline-block; font-size:10.5px; font-weight:800; padding:1px 8px; border-radius:6px; }
+      .tag.done { color:var(--green); background:var(--green-soft); } .tag.wip { color:var(--amber); background:var(--amber-soft); } .tag.plan { color:var(--blue); background:var(--blue-soft); }
+      .callout { margin-top:14px; padding:16px; border:1px solid #a7f3d0; border-radius:12px; color:#065f46; background:var(--green-soft); }
+      .note { margin-top:14px; padding:16px; border:1px solid #bae6fd; border-radius:12px; color:var(--blue); background:var(--blue-soft); }
+      .warning { margin-top:14px; padding:16px; border:1px solid #fde68a; border-radius:12px; color:var(--amber); background:var(--amber-soft); }
+      ul { margin:0; padding-left:20px; } li + li { margin-top:6px; }
+      .cols { display:grid; grid-template-columns:1fr 1fr; gap:14px; } @media(max-width:760px){ .cols{grid-template-columns:1fr;} }
+      .cardbox { border:1px solid var(--line); border-radius:14px; padding:16px; background:#fff; }
+      .cardbox h3 { margin-top:0; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="meta">
+          <span class="pill g">핵심 비즈니스 로직</span>
+          <span class="pill b">1차 MVP · 폐쇄형 이행관리</span>
+        </div>
+        <h1>제품 핵심 기능 및 범위</h1>
+        <p class="lead">
+          이 제품의 <b>본체</b>는 "시설 준비물 목표 → 후원자 공동충당 → 목표달성 → 통합구매 → 수령·증빙·영수증 → 후원자 상태 확인"의
+          <b>후원 이행 루프</b>(기획 §5·§7)다. 웹 3 + 타우리 3, 총 6개 기능이 이 루프를 양쪽에서 구현한다.
+        </p>
+      </header>
+
+      <!-- 1 -->
+      <section>
+        <h2>1. 핵심 비즈니스 로직 (이행 루프)</h2>
+        <pre>[시설] 준비물 목표 등록·검수
+   → [후원자] 공동충당 (품목별 금액 참여)
+   → 목표달성 시 자동 잠금 (추가결제 차단, 중복구매 0)
+   → [운영자] 통합구매 1회 (판매처·실구매액·증빙 기록)
+   → 판매처 → 시설 직배송 → 시설 수령확인
+   → 영수증 발급자료 → 후원자 화면에 단계 반영</pre>
+        <div class="callout">이 루프가 닫히면 = <b>핵심 비즈니스 로직 완성.</b> 남은 건 이 루프에 안전장치·확장을 붙이는 것(부가).</div>
+      </section>
+
+      <!-- 2 -->
+      <section>
+        <h2>2. 핵심 기능 6개 (웹 3 · 타우리 3)</h2>
+        <div class="cols">
+          <div class="cardbox">
+            <h3>웹 — 후원자 대면</h3>
+            <table>
+              <tbody>
+                <tr><td><b>후원하기</b><br/><span style="color:var(--muted);font-size:12px">시설·물품 탐색, 공동충당 참여</span></td><td><span class="tag done">완료</span></td></tr>
+                <tr><td><b>후원 내역 보기</b><br/><span style="color:var(--muted);font-size:12px">내 기여·진행 단계(타임라인), 물품별 합산</span></td><td><span class="tag done">완료</span></td></tr>
+                <tr><td><b>물품 구매 현황</b><br/><span style="color:var(--muted);font-size:12px">구매 진행·완료, 영수증·송장 표시 + <b>배송 추적(송장→드로워)</b></span></td><td><span class="tag wip">예정 · 구매(step5 후속) + 배송(step6)</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="cardbox">
+            <h3>타우리 — 관리자</h3>
+            <table>
+              <tbody>
+                <tr><td><b>시설 관리</b><br/><span style="color:var(--muted);font-size:12px">시설·준비물 목표 CRUD, 단계 전환</span></td><td><span class="tag done">완료</span></td></tr>
+                <tr><td><b>후원 내역(기부 원장)</b><br/><span style="color:var(--muted);font-size:12px">물품별·전체 후원자 기록 조회</span></td><td><span class="tag done">완료</span></td></tr>
+                <tr><td><b>통합 구매</b><br/><span style="color:var(--muted);font-size:12px">구매 실행→완료 상태변경, 영수증·송장 첨부</span></td><td><span class="tag plan">계획 완료·구현 예정(step5)</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="note"><b>본체 완성 기준:</b> step5(통합구매) + 웹 물품 구매 현황 → 6/6. 현재 <b>4/6 완료.</b></div>
+      </section>
+
+      <!-- 3 -->
+      <section>
+        <h2>3. 범위 3분류</h2>
+        <table>
+          <thead><tr><th>분류</th><th>예</th><th>성격</th></tr></thead>
+          <tbody>
+            <tr><td><b>본체 (핵심)</b></td><td>위 6개 기능 (이행 루프)</td><td>지금 완성 중. 이게 제품의 이유</td></tr>
+            <tr><td><b>프로덕션 필수 부가</b></td><td>실결제(PG)·취소/환불 정합성·관리자 authz 세분화·감사메시지</td><td>본체 기능은 아니지만 <b>실서비스엔 필수</b>. 전문가 검토 관문 뒤(§5·F-016)</td></tr>
+            <tr><td><b>순수 부가 · 차기</b></td><td>커뮤니티·명예홍보관·협력교실·통계 대시보드·i18n·펀딩캠페인·실시간 택배추적</td><td>없어도 본체 작동. 파일럿 이후(§7·§10·§20)</td></tr>
+          </tbody>
+        </table>
+        <div class="warning"><b>주의:</b> "본체 이후는 다 부가"는 맞지만, <b>실결제·환불·authz</b>는 순수 부가와 달리 실서비스 전 반드시 필요. 그리고 <b>실시간 택배추적</b>(택배사 API)은 파일럿 이후 — MVP 구매현황은 <b>기록된 상태 + 송장번호</b>까지.</td>
+      </section>
+
+      <!-- 4 -->
+      <section>
+        <h2>4. 지금 위치 & 다음</h2>
+        <ul>
+          <li>완료: 웹 후원하기·후원내역 / 타우리 시설관리·기부원장 + 정합성(초과·동시성)·단계관리·authz 기초</li>
+          <li><b>다음(본체 마무리):</b> ① step5 통합구매(타우리) → ② 웹 물품 구매 현황(구매·증빙) → ③ <b>step6 배송 추적</b>(송장 1회 입력 + 자동 조회, 관리자 수동 X)</li>
+          <li>그다음: 프로덕션 필수 부가(실결제·환불·authz) → 순수 부가(선택)</li>
+        </ul>
+        <p style="margin-top:10px;color:var(--muted)">참고: <code>기능 구현 계획/1차 mvp/step1~5</code> · 정책 <code>공통 관리/후원 관련 정책 정리/후원 정책.md</code></p>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Step5 — 통합 구매 구현 계획</title>
+    <style>
+      :root { color-scheme: light; --bg:#f6f8fb; --paper:#fff; --text:#111827; --muted:#667085; --line:#d8e0eb; --soft:#f1f5f9;
+        --green:#047857; --green-soft:#ecfdf5; --blue:#0369a1; --blue-soft:#e0f2fe; --amber:#b45309; --amber-soft:#fffbeb; --violet:#6d28d9; --violet-soft:#f5f3ff; --red:#b42318; --red-soft:#fff1f3; }
+      * { box-sizing:border-box; }
+      body { margin:0; color:var(--text); background:var(--bg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; line-height:1.65; }
+      main { max-width:1080px; margin:0 auto; padding:40px 24px 72px; }
+      header, section { border:1px solid var(--line); border-radius:18px; background:var(--paper); box-shadow:0 16px 42px rgba(15,23,42,.05); }
+      header { padding:30px; } section { margin-top:18px; padding:24px; }
+      h1,h2,h3,p { margin-top:0; } h1 { margin-bottom:10px; font-size:30px; letter-spacing:-.01em; }
+      h2 { margin-bottom:14px; font-size:21px; } h3 { margin:18px 0 8px; font-size:15px; } p { margin-bottom:12px; }
+      .lead { max-width:840px; margin-bottom:0; color:var(--muted); font-size:16px; }
+      .meta { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px; }
+      .pill { display:inline-flex; align-items:center; min-height:28px; padding:0 11px; border:1px solid var(--line); border-radius:999px; color:#344054; background:#fff; font-size:12px; font-weight:800; }
+      .pill.g { color:var(--green); background:var(--green-soft); border-color:#a7f3d0; } .pill.b { color:var(--blue); background:var(--blue-soft); border-color:#bae6fd; }
+      code { padding:2px 6px; border-radius:6px; color:#0f172a; background:var(--soft); font-family:"SFMono-Regular",Consolas,monospace; font-size:.9em; }
+      pre { overflow-x:auto; margin:10px 0 0; padding:16px; border:1px solid var(--line); border-radius:12px; color:#1f2937; background:#f8fafc; font-size:12.5px; line-height:1.7; font-family:"SFMono-Regular",Consolas,monospace; }
+      table { width:100%; border-collapse:collapse; overflow:hidden; border:1px solid var(--line); border-radius:12px; font-size:13.5px; margin-top:6px; }
+      th,td { padding:10px 13px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; } th { color:#475467; background:#f8fafc; font-size:11.5px; font-weight:800; text-transform:uppercase; } tr:last-child td { border-bottom:0; } td code { font-size:12.5px; }
+      .tag { display:inline-block; font-size:10.5px; font-weight:800; padding:1px 8px; border-radius:6px; }
+      .tag.new { color:var(--green); background:var(--green-soft); } .tag.reuse { color:var(--blue); background:var(--blue-soft); } .tag.todo { color:var(--amber); background:var(--amber-soft); }
+      .callout { margin-top:14px; padding:16px; border:1px solid #a7f3d0; border-radius:12px; color:#065f46; background:var(--green-soft); }
+      .note { margin-top:14px; padding:16px; border:1px solid #bae6fd; border-radius:12px; color:var(--blue); background:var(--blue-soft); }
+      .warning { margin-top:14px; padding:16px; border:1px solid #fde68a; border-radius:12px; color:var(--amber); background:var(--amber-soft); }
+      ul { margin:0; padding-left:20px; } li + li { margin-top:6px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="meta">
+          <span class="pill">Step 5</span>
+          <span class="pill g">통합 구매</span>
+          <span class="pill b">관리자(Tauri)</span>
+        </div>
+        <h1>통합 구매 구현 계획</h1>
+        <p class="lead">
+          목표달성(잠금)된 물품을 <b>한 번만 통합구매</b>하고, 판매처·실구매액·증빙을 기록해 배송·수령·영수증으로 잇는다.
+          도식: <code>통합 구매 프로세스 도식화.mmd</code>.
+        </p>
+      </header>
+
+      <!-- 1 -->
+      <section>
+        <h2>1. 기획 근거 (있음 — 핵심)</h2>
+        <ul>
+          <li><b>§5 한 문장</b>: "다 모이면 플랫폼이 추가 결제를 막고, 시설(또는 적법 위임 구매자)이 <b>한 번만</b> 사서 시설로 보낸다"</li>
+          <li><b>§8 이행 흐름</b>: 목표달성 잠금 → <b>위임받은 구매자가 한 번만 통합구매</b> → 판매처에서 시설로 직배송</li>
+          <li><b>§9 조건부</b> C-002(통합구매 주체·구매위임 R-003), C-003(<b>실제 결제 없이 가상 리허설</b>)</li>
+          <li><b>F-013</b> 공동충당·목표잠금·한 번의 통합구매 · <b>F-015</b> 구매증빙 ≠ 세액공제 영수증</li>
+          <li><b>§15 지표</b>: <b>"목표잠금 후 중복구매 0건"</b>, 영수증 발급자료 완전성 100%</li>
+        </ul>
+        <div class="callout">즉 통합구매는 "물품당 <b>딱 한 번</b>, 운영자가 실행·기록"하는 절차. 실결제는 MVP 범위 밖(관문 뒤) — <b>구매를 "기록"</b>한다(가상 리허설).</div>
+      </section>
+
+      <!-- 2 -->
+      <section>
+        <h2>2. 무엇을 구현하나 — <code>PurchaseOrder</code> (통합구매 기록)</h2>
+        <p>물품당 1건의 구매 기록. <b>DB UNIQUE(donation_item_id)</b>로 중복구매를 원천 차단(§15 0건).</p>
+        <table>
+          <thead><tr><th>컬럼</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td><code>id</code></td><td>PK</td></tr>
+            <tr><td><code>donation_item_id</code></td><td>FK · <b>UNIQUE</b> (물품당 1건 = 중복구매 방지)</td></tr>
+            <tr><td><code>vendor</code></td><td>판매처</td></tr>
+            <tr><td><code>purchased_amount</code></td><td>실제 구매액(목표액과 다를 수 있음 — 가격변동 D-002는 차기)</td></tr>
+            <tr><td><code>evidence_no</code></td><td>구매증빙(주문번호·영수증 등). <b>세액공제 영수증 아님(F-015)</b>. <b>송장·배송추적은 step6</b>로 분리</td></tr>
+            <tr><td><code>note</code></td><td>메모</td></tr>
+            <tr><td><code>ordered_at</code> / <code>created_at</code></td><td>구매·기록 일시</td></tr>
+          </tbody>
+        </table>
+        <div class="note">이행 단계(배송·수령·영수증)는 이미 있는 <code>item.status</code>(6단계)로 추적한다. PurchaseOrder는 <b>구매 상세(판매처·금액·증빙)</b>를 담고, 단계는 item.status가 단일 출처. 이중 관리 안 함.</div>
+      </section>
+
+      <!-- 3 -->
+      <section>
+        <h2>3. 상태 관계</h2>
+        <pre>모집중(RECRUITING)
+  └ 후원 공동충당 → 목표 도달 → 자동 잠금
+목표달성(LOCKED)                 ← 통합구매 실행 가능
+  └ [통합구매 실행: 판매처·금액·증빙]
+     → PurchaseOrder 생성(1건) + item.status = BUYING
+배송중(SHIPPING) → 수령확인(RECEIVED) → 영수증(RECEIPTED)
+     (단계 전환은 step4 advancer / 상태 관리로)</pre>
+        <p>가드: <b>LOCKED 상태에서만</b> 통합구매 실행 가능. RECRUITING(미달성)·이미 PO 있는 물품은 거부.</p>
+      </section>
+
+      <!-- 4 -->
+      <section>
+        <h2>4. 백엔드 파일</h2>
+        <table>
+          <thead><tr><th>대상</th><th>내용</th><th>구분</th></tr></thead>
+          <tbody>
+            <tr><td><code>purchase_order/</code> 도메인</td><td>Entity · Repository · Service · Controller · DTO</td><td><span class="tag new">신규</span></td></tr>
+            <tr><td>실행 엔드포인트</td><td><code>POST /api/donation-items/{id}/purchase-order</code> (판매처·금액·증빙) → PO 생성 + item BUYING</td><td><span class="tag new">신규</span></td></tr>
+            <tr><td>조회</td><td><code>GET /api/donation-items/{id}/purchase-order</code>, 옵션 <code>GET /api/purchase-orders</code>(전체)</td><td><span class="tag new">신규</span></td></tr>
+            <tr><td>가드</td><td>LOCKED 아니면 거부 · UNIQUE 위반 시 "이미 통합구매됨"</td><td><span class="tag new">신규</span></td></tr>
+            <tr><td>SecurityConfig</td><td>통합구매 API <b>관리자 전용</b>(<code>hasAnyRole PLATFORM_ADMIN, ADMIN</code>)</td><td><span class="tag reuse">기존 패턴</span></td></tr>
+            <tr><td>ErrorCode</td><td><code>PURCHASE_NOT_ALLOWED</code>(잠금 아님) · <code>PURCHASE_ALREADY_DONE</code></td><td><span class="tag new">신규</span></td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- 5 -->
+      <section>
+        <h2>5. Tauri 화면 — "통합 구매" 메뉴</h2>
+        <p><code>ADMIN_PURCHASE_ORDERS</code>(<code>/purchase-orders</code>) 화면. 운영자의 작업 큐.</p>
+        <ul>
+          <li><b>목표달성(LOCKED) 물품 목록</b> = "구매 대기" 큐 (시설·물품·목표액·모인액)</li>
+          <li>행 <b>[통합구매 실행]</b> → Drawer: 판매처·실구매액·증빙 입력 → 확인(ConfirmDialog) → PO 생성 · item BUYING</li>
+          <li>이미 구매된 물품은 <b>구매 완료</b> 표시(판매처·금액·증빙) — 재실행 불가</li>
+          <li>primitive 재사용: <code>Panel · DataTable · Drawer · FormField · Input · ConfirmDialog · StatusBadge · EmptyState</code></li>
+        </ul>
+        <div class="warning"><b>F-015 안내 상시:</b> 화면·증빙에 "구매증빙(주문·송장)은 배송 확인 자료일 뿐, 세액공제 기부금영수증이 아닙니다" 문구.</div>
+      </section>
+
+      <!-- 6 -->
+      <section>
+        <h2>6. 정합성 · 제약</h2>
+        <ul>
+          <li><b>중복구매 0건(§15)</b> — <code>donation_item_id</code> UNIQUE + 서비스 가드. 동시 실행도 DB 유니크로 방지.</li>
+          <li><b>실결제 없음(MVP)</b> — 구매를 "기록"만. 실제 결제·정산은 전문가 검토 관문 뒤(§9 C-003).</li>
+          <li><b>구매증빙 ≠ 영수증(F-015)</b> — 문구 상시.</li>
+          <li>가격변동·환불(D-002) — <b>차기</b>. 이번엔 실구매액 기록까지만.</li>
+        </ul>
+      </section>
+
+      <!-- 7 -->
+      <section>
+        <h2>7. 범위 안 / 밖</h2>
+        <table>
+          <thead><tr><th>✅ 이번(Step5)</th><th>⛔ 밖</th></tr></thead>
+          <tbody>
+            <tr><td>목표달성 물품 통합구매 실행·기록(1건)</td><td>실제 결제·정산(관문 뒤)</td></tr>
+            <tr><td>판매처·실구매액·증빙 기록 + item BUYING</td><td>가격변동·환불 처리(D-002 차기)</td></tr>
+            <tr><td>중복구매 0 · 관리자 전용</td><td>판매처 API 연동·자동 발주(파일럿 이후)</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- 8 -->
+      <section>
+        <h2>8. 참고</h2>
+        <ul>
+          <li>도식: <code>통합 구매 프로세스 도식화.mmd</code></li>
+          <li>정책: <code>공통 관리/후원 관련 정책 정리/후원 정책.md</code></li>
+          <li>선행: step3(정합성·동시성), step4(후원 내역·단계 관리)</li>
+          <li><b>후속: step6 배송 추적</b> — 송장 입력·배송상태 자동조회(딥링크/집계 API)는 별도 스텝으로 분리</li>
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>

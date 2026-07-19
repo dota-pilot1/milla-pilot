@@ -1,0 +1,55 @@
+%% Step5 통합 구매 — 테이블 설계 ERD
+%% 신규: PURCHASE_ORDER (물품당 최대 1건, DB UNIQUE = 중복구매 0건 §15)
+%% 기존: FACILITY, DONATION_ITEM, CONTRIBUTION (참고용, 관계만 표시)
+
+erDiagram
+    FACILITY      ||--o{ DONATION_ITEM  : "has (1:N)"
+    DONATION_ITEM ||--o{ CONTRIBUTION   : "후원 참여 (1:N · 기부 원장)"
+    DONATION_ITEM ||--o| PURCHASE_ORDER : "통합구매 (1 : 0..1 · 물품당 1건)"
+
+    FACILITY {
+        bigint    id           PK
+        varchar   code         UK
+        varchar   name
+        varchar   region
+        varchar   type
+        varchar   status
+        boolean   verified
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    DONATION_ITEM {
+        bigint    id            PK
+        bigint    facility_id   FK
+        varchar   name
+        varchar   category
+        bigint    goal_amount
+        bigint    raised_amount "Σ CONTRIBUTION"
+        varchar   status        "RECRUITING|LOCKED|BUYING|SHIPPING|RECEIVED|RECEIPTED"
+        date      deadline
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    CONTRIBUTION {
+        bigint    id               PK
+        bigint    donation_item_id FK
+        bigint    donor_id         FK "→ USERS"
+        bigint    amount
+        varchar   status           "RECORDED"
+        timestamp created_at
+    }
+
+    %% ───── 신규 (Step5) ─────
+    PURCHASE_ORDER {
+        bigint    id               PK "IDENTITY"
+        bigint    donation_item_id FK "UK · 물품당 1건(중복구매 0)"
+        varchar   vendor           "판매처"
+        bigint    purchased_amount "실구매액(목표액과 다를 수 있음)"
+        varchar   evidence_no      "구매증빙(주문·송장) — 세액공제 영수증 아님 F-015"
+        varchar   note
+        timestamp ordered_at       "구매·기록 일시"
+        timestamp created_at
+        timestamp updated_at
+    }

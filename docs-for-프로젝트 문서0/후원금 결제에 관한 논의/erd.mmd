@@ -1,0 +1,186 @@
+erDiagram
+  USER {
+    bigint id PK
+    string email UK
+    string name
+    string role_code
+    datetime created_at
+  }
+
+  FACILITY {
+    bigint id PK
+    string name
+    string region
+    string type
+    string status
+    datetime created_at
+  }
+
+  WALLET {
+    bigint id PK
+    bigint user_id FK
+    decimal available_balance
+    decimal reserved_balance
+    decimal refundable_balance
+    int version
+    datetime created_at
+    datetime updated_at
+  }
+
+  WALLET_TRANSACTION {
+    bigint id PK
+    bigint wallet_id FK
+    string tx_type
+    string tx_status
+    decimal amount
+    string reference_type
+    bigint reference_id
+    string idempotency_key UK
+    string pg_transaction_id UK
+    string reason
+    datetime created_at
+  }
+
+  PAYMENT {
+    bigint id PK
+    bigint user_id FK
+    bigint wallet_transaction_id FK
+    string provider
+    string provider_payment_key UK
+    decimal amount
+    string status
+    datetime approved_at
+    datetime created_at
+  }
+
+  REFUND_REQUEST {
+    bigint id PK
+    bigint user_id FK
+    bigint wallet_transaction_id FK
+    string provider_refund_key UK
+    decimal amount
+    string status
+    string reason
+    datetime requested_at
+    datetime completed_at
+  }
+
+  FACILITY_FUND {
+    bigint id PK
+    bigint facility_id FK
+    decimal available_amount
+    decimal reserved_amount
+    decimal used_amount
+    int version
+    datetime created_at
+    datetime updated_at
+  }
+
+  FACILITY_FUND_TRANSACTION {
+    bigint id PK
+    bigint facility_fund_id FK
+    bigint wallet_transaction_id FK
+    string tx_type
+    string tx_status
+    decimal amount
+    string reason
+    datetime created_at
+  }
+
+  DISCLOSED_ITEM {
+    bigint id PK
+    bigint facility_id FK
+    string name
+    string category
+    int expected_quantity
+    decimal expected_amount
+    string status
+    string disclosure_note
+    datetime disclosed_at
+    datetime created_at
+  }
+
+  PURCHASE_ORDER {
+    bigint id PK
+    bigint facility_id FK
+    string status
+    string vendor_name
+    decimal planned_amount
+    decimal actual_amount
+    decimal shipping_fee
+    string receipt_url
+    string operator_note
+    datetime ordered_at
+    datetime purchased_at
+    datetime delivered_at
+    datetime created_at
+  }
+
+  PURCHASE_ITEM {
+    bigint id PK
+    bigint purchase_order_id FK
+    bigint disclosed_item_id FK
+    string item_name
+    int quantity
+    decimal unit_price
+    decimal total_amount
+    string status
+  }
+
+  PURCHASE_FUND_USAGE {
+    bigint id PK
+    bigint purchase_order_id FK
+    bigint facility_fund_transaction_id FK
+    bigint user_id FK
+    decimal amount
+    string usage_status
+    datetime created_at
+  }
+
+  DONATION_USAGE_REPORT {
+    bigint id PK
+    bigint user_id FK
+    bigint facility_id FK
+    bigint purchase_order_id FK
+    decimal used_amount
+    string report_status
+    string proof_url
+    datetime published_at
+  }
+
+  AUDIT_LOG {
+    bigint id PK
+    bigint actor_user_id FK
+    string action
+    string target_type
+    bigint target_id
+    string before_json
+    string after_json
+    string reason
+    datetime created_at
+  }
+
+  USER ||--|| WALLET : owns
+  USER ||--o{ PAYMENT : pays
+  USER ||--o{ REFUND_REQUEST : requests
+  USER ||--o{ PURCHASE_FUND_USAGE : contributes
+  USER ||--o{ DONATION_USAGE_REPORT : receives
+  USER ||--o{ AUDIT_LOG : acts
+
+  WALLET ||--o{ WALLET_TRANSACTION : records
+  WALLET_TRANSACTION ||--o| PAYMENT : charges
+  WALLET_TRANSACTION ||--o| REFUND_REQUEST : refunds
+  WALLET_TRANSACTION ||--o{ FACILITY_FUND_TRANSACTION : allocates
+
+  FACILITY ||--|| FACILITY_FUND : has
+  FACILITY ||--o{ DISCLOSED_ITEM : discloses
+  FACILITY ||--o{ PURCHASE_ORDER : purchases
+  FACILITY ||--o{ DONATION_USAGE_REPORT : reports
+
+  FACILITY_FUND ||--o{ FACILITY_FUND_TRANSACTION : records
+  PURCHASE_ORDER ||--o{ PURCHASE_ITEM : contains
+  PURCHASE_ORDER ||--o{ PURCHASE_FUND_USAGE : funded_by
+  PURCHASE_ORDER ||--o{ DONATION_USAGE_REPORT : proves
+  DISCLOSED_ITEM ||--o{ PURCHASE_ITEM : fulfilled_by
+  FACILITY_FUND_TRANSACTION ||--o{ PURCHASE_FUND_USAGE : used_by
+

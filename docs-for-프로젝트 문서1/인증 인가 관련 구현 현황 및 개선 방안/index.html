@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>인증·인가 구현 현황 및 개선 방안</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f8fb;
+        --paper: #ffffff;
+        --text: #111827;
+        --muted: #667085;
+        --line: #d8e0eb;
+        --soft: #f1f5f9;
+        --green: #047857;
+        --green-soft: #ecfdf5;
+        --blue: #1d4ed8;
+        --blue-soft: #eff6ff;
+        --amber: #b45309;
+        --amber-soft: #fffbeb;
+        --red: #b42318;
+        --red-soft: #fef3f2;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        color: var(--text);
+        background: var(--bg);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.65;
+      }
+
+      main {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 40px 24px 72px;
+      }
+
+      header, section {
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: var(--paper);
+        box-shadow: 0 16px 42px rgba(15, 23, 42, 0.05);
+      }
+
+      header { padding: 30px; }
+      section { margin-top: 18px; padding: 24px; }
+
+      h1, h2, h3, p { margin-top: 0; }
+      h1 { margin-bottom: 10px; font-size: 32px; line-height: 1.25; letter-spacing: 0; }
+      h2 { margin-bottom: 12px; font-size: 22px; letter-spacing: 0; }
+      h3 { margin-bottom: 8px; font-size: 16px; }
+      p { margin-bottom: 12px; }
+
+      code {
+        padding: 2px 5px;
+        border-radius: 6px;
+        color: #0f172a;
+        background: var(--soft);
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 0.92em;
+      }
+
+      ul, ol { margin: 0; padding-left: 22px; }
+      li + li { margin-top: 8px; }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        font-size: 14px;
+      }
+
+      th, td {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        color: #475467;
+        background: #f8fafc;
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      tr:last-child td { border-bottom: 0; }
+
+      .lead {
+        max-width: 900px;
+        margin-bottom: 0;
+        color: var(--muted);
+        font-size: 16px;
+      }
+
+      .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 18px;
+      }
+
+      .pill, .status {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 0 10px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: #fff;
+        font-size: 12px;
+        font-weight: 800;
+        white-space: nowrap;
+      }
+
+      .pill { color: #344054; }
+      .ok { border-color: #bbf7d0; color: var(--green); background: var(--green-soft); }
+      .partial { border-color: #fed7aa; color: var(--amber); background: var(--amber-soft); }
+      .risk { border-color: #fecdca; color: var(--red); background: var(--red-soft); }
+      .info { border-color: #bfdbfe; color: var(--blue); background: var(--blue-soft); }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .card {
+        min-height: 132px;
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #fff;
+      }
+
+      .card strong { display: block; margin-bottom: 8px; }
+      .card span { display: block; color: var(--muted); font-size: 14px; }
+
+      .callout, .warning, .danger, .note {
+        margin-top: 14px;
+        padding: 14px 16px;
+        border-radius: 12px;
+        font-size: 14px;
+      }
+
+      .callout { border: 1px solid #bbf7d0; color: #065f46; background: var(--green-soft); }
+      .warning { border: 1px solid #fed7aa; color: #92400e; background: var(--amber-soft); }
+      .danger { border: 1px solid #fecdca; color: var(--red); background: var(--red-soft); }
+      .note { border: 1px solid #bfdbfe; color: var(--blue); background: var(--blue-soft); }
+
+      .flow {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      .step {
+        min-height: 108px;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #f8fafc;
+      }
+
+      .step b { display: block; margin-bottom: 6px; }
+      .step small { display: block; color: var(--muted); line-height: 1.55; }
+
+      .source-list {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px 14px;
+      }
+
+      .source-list li {
+        margin-top: 0;
+        overflow-wrap: anywhere;
+      }
+
+      @media (max-width: 920px) {
+        main { padding: 24px 14px 52px; }
+        header, section { border-radius: 14px; }
+        .grid, .flow, .source-list { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="meta">
+          <span class="pill">Auth/RBAC</span>
+          <span class="pill">Spring Security</span>
+          <span class="pill">JWT</span>
+          <span class="pill">Tauri Admin</span>
+          <span class="pill">Next.js Web</span>
+        </div>
+        <h1>인증·인가 구현 현황 및 개선 방안</h1>
+        <p class="lead">
+          DonationPlatform의 인증·인가 체계는 JWT 기반 stateless 인증과 Role 기반 API 보호를 중심으로 구현되어 있다.
+          Refresh Token 저장·회전, 메뉴 표시 권한, Permission 데이터 모델도 존재한다. 다만 현재 API 접근 제어는 아직
+          Permission 중심까지 완전히 내려오지 않았고, 운영 보안 관점에서는 토큰 저장 방식·감사 로그·시설 관리자 범위 제한을 보강해야 한다.
+        </p>
+      </header>
+
+      <section>
+        <h2>요약 판단</h2>
+        <div class="grid">
+          <div class="card">
+            <strong>현재 MVP 적합성</strong>
+            <span>플랫폼 관리자 중심의 내부 운영 MVP라면 현 구조로 동작 가능하다. 로그인, 토큰 발급, refresh, role 기반 보호가 갖춰져 있다.</span>
+          </div>
+          <div class="card">
+            <strong>가장 큰 미비점</strong>
+            <span>Permission은 모델과 시더가 있지만, 실제 주요 API 보호는 대부분 <code>ROLE_PLATFORM_ADMIN</code> 중심이다.</span>
+          </div>
+          <div class="card">
+            <strong>우선 개선 방향</strong>
+            <span>Refresh 재발급 안정화, 권한 매핑의 실제 적용, 시설 관리자 scope 제한, 인증 실패 UX 통일 순서가 합리적이다.</span>
+          </div>
+        </div>
+        <div class="callout">
+          최근 관리자 앱은 access token 만료 시 <code>/api/auth/refresh</code>로 재발급 후 원 요청을 1회 재시도하도록 보강되었다.
+          refresh token도 만료되었거나 서버 저장 토큰과 불일치하면 세션을 정리하고 로그인 화면으로 돌리는 구조다.
+        </div>
+      </section>
+
+      <section>
+        <h2>구현 현황 매트릭스</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>영역</th>
+              <th>상태</th>
+              <th>현재 구현</th>
+              <th>판단</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>회원가입/로그인</td>
+              <td><span class="status ok">구현됨</span></td>
+              <td><code>/api/auth/signup</code>, <code>/api/auth/login</code>. 첫 가입자는 플랫폼 관리자, 이후 기본 후원자 역할 부여.</td>
+              <td>MVP에는 충분하다. 운영 전에는 관리자 최초 계정 생성 절차를 별도 통제하는 편이 좋다.</td>
+            </tr>
+            <tr>
+              <td>Access Token</td>
+              <td><span class="status ok">구현됨</span></td>
+              <td>JWT claim에 user id, email, username, role, permissions, type 포함. 기본 만료는 설정값 기준 30분.</td>
+              <td>stateless API 인증에 적합하다. 단, 권한 변경 즉시 반영은 refresh/재로그인 이후가 기준이다.</td>
+            </tr>
+            <tr>
+              <td>Refresh Token</td>
+              <td><span class="status ok">구현됨</span></td>
+              <td>DB 저장형 refresh token. 재발급 시 새 refresh token으로 회전하고 기존 값을 대체한다.</td>
+              <td>단일 세션 기준으로 안전한 편이다. 다중 기기 세션을 지원하려면 userId 단일 저장 구조를 확장해야 한다.</td>
+            </tr>
+            <tr>
+              <td>JWT 필터</td>
+              <td><span class="status ok">구현됨</span></td>
+              <td><code>Authorization: Bearer</code> 토큰을 파싱하고 access token일 때만 SecurityContext를 구성한다.</td>
+              <td>refresh token으로 API 접근이 되지 않도록 type을 구분하는 점은 적절하다.</td>
+            </tr>
+            <tr>
+              <td>API 인가</td>
+              <td><span class="status partial">부분 구현</span></td>
+              <td><code>SecurityConfig</code>와 일부 컨트롤러에서 <code>hasAnyRole('PLATFORM_ADMIN', 'ADMIN')</code> 중심으로 보호한다.</td>
+              <td>관리자 MVP는 가능하지만, 세부 권한 관리 화면과 실제 API 권한 적용 사이에 간극이 있다.</td>
+            </tr>
+            <tr>
+              <td>Role/Permission 모델</td>
+              <td><span class="status partial">부분 구현</span></td>
+              <td><code>roles</code>, <code>permissions</code>, <code>role_permissions</code> 모델과 관리 API가 있다.</td>
+              <td>데이터 모델은 준비되어 있으나 실제 보호 규칙을 <code>hasAuthority</code>로 전환하는 작업이 남아 있다.</td>
+            </tr>
+            <tr>
+              <td>메뉴 권한</td>
+              <td><span class="status partial">부분 구현</span></td>
+              <td><code>menus.requiredRole</code>, <code>requiredPermission</code> 필드가 있고 앱에서 메뉴 접근 가능 여부를 계산한다.</td>
+              <td>UI 노출 제어에는 유용하지만, 보안 경계는 반드시 서버 API 인가가 담당해야 한다.</td>
+            </tr>
+            <tr>
+              <td>웹 클라이언트 refresh</td>
+              <td><span class="status ok">구현됨</span></td>
+              <td>Axios interceptor가 401 발생 시 refresh 후 원 요청을 재시도한다. 동시 refresh는 queue로 묶는다.</td>
+              <td>교과서적인 방식이다. refresh 실패 시 전역 logout 이벤트를 발생시키는 점도 적절하다.</td>
+            </tr>
+            <tr>
+              <td>Tauri 관리자 refresh</td>
+              <td><span class="status ok">보강됨</span></td>
+              <td><code>apiRequest</code>에서 401 발생 시 refresh token으로 재발급하고 원 요청을 1회 재시도한다.</td>
+              <td>최근 발생한 “유효하지 않은 토큰” 화면 문제의 핵심 원인을 해소하는 방향이다.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>현재 인증 흐름</h2>
+        <div class="flow">
+          <div class="step">
+            <b>1. 로그인</b>
+            <small>클라이언트가 이메일/비밀번호를 <code>/api/auth/login</code>으로 전송한다.</small>
+          </div>
+          <div class="step">
+            <b>2. 토큰 발급</b>
+            <small>서버가 access token과 refresh token을 발급하고 refresh token을 DB에 저장한다.</small>
+          </div>
+          <div class="step">
+            <b>3. API 호출</b>
+            <small>보호 API는 <code>Authorization: Bearer</code> access token으로 호출한다.</small>
+          </div>
+          <div class="step">
+            <b>4. 만료 감지</b>
+            <small>access token 만료로 401이 발생하면 클라이언트가 refresh API를 호출한다.</small>
+          </div>
+          <div class="step">
+            <b>5. 재시도/로그아웃</b>
+            <small>재발급 성공 시 원 요청을 재시도하고, 실패 시 로컬 세션을 정리한다.</small>
+          </div>
+        </div>
+        <div class="note">
+          서버는 refresh token을 단순 검증만 하지 않고 DB에 저장된 값과 비교한다. 따라서 로그아웃, 토큰 회전, 서버측 세션 무효화가 가능하다.
+        </div>
+      </section>
+
+      <section>
+        <h2>인가 구조</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>구분</th>
+              <th>현재 방식</th>
+              <th>장점</th>
+              <th>한계</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Role 기반 보호</td>
+              <td><code>hasAnyRole('PLATFORM_ADMIN', 'ADMIN')</code></td>
+              <td>단순하고 명확하다. 현재 관리자 콘솔 중심 구조에 잘 맞는다.</td>
+              <td>유저 관리, 롤 관리, 시설 관리처럼 세부 권한 분리가 필요한 순간 유연성이 떨어진다.</td>
+            </tr>
+            <tr>
+              <td>Permission 모델</td>
+              <td><code>USER_VIEW</code>, <code>ROLE_EDIT</code> 등 권한 코드와 카테고리 시더</td>
+              <td>권한 관리 UI와 역할-권한 매핑의 기반이 있다.</td>
+              <td>실제 API annotation/URL rule에는 아직 제한적으로만 반영되어 있다.</td>
+            </tr>
+            <tr>
+              <td>메뉴 권한</td>
+              <td>메뉴별 requiredRole/requiredPermission</td>
+              <td>관리자 사이드바와 웹 메뉴 노출을 서버 데이터로 제어할 수 있다.</td>
+              <td>메뉴 숨김은 UX 제어일 뿐이다. 직접 URL/API 호출은 서버 인가가 막아야 한다.</td>
+            </tr>
+            <tr>
+              <td>시설 관리자 범위</td>
+              <td><code>ROLE_FACILITY_ADMIN</code> 역할은 존재하나 API scope 제한은 미완성</td>
+              <td>도메인 역할은 이미 정의되어 있다.</td>
+              <td>시설별 담당자-시설 매핑과 row-level authorization이 필요하다.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>주요 리스크</h2>
+        <div class="grid">
+          <div class="card">
+            <strong>Permission과 실제 보호 규칙의 불일치</strong>
+            <span>관리 화면에서 권한을 조정해도 주요 API가 role rule만 보면 운영자가 기대한 권한 분리가 적용되지 않을 수 있다.</span>
+          </div>
+          <div class="card">
+            <strong>Refresh token 저장 위치</strong>
+            <span>현재 웹과 Tauri 모두 localStorage 계열 저장을 사용한다. MVP 개발 편의성은 좋지만 XSS·로컬 접근 리스크가 있다.</span>
+          </div>
+          <div class="card">
+            <strong>시설 단위 접근 제어 부재</strong>
+            <span>시설 관리자가 도입되면 “내 시설의 물품/배송/증빙만 접근” 같은 row-level rule이 필수다.</span>
+          </div>
+        </div>
+        <div class="warning">
+          권한 관리 UI가 존재하는 상태에서는 “권한을 설정했는데 실제 API가 왜 열려 있나?”라는 혼란이 생기기 쉽다.
+          단기적으로는 화면에 “현재 플랫폼 관리자 전용”임을 명확히 하고, 중기적으로는 Permission 기반 보호로 맞춰야 한다.
+        </div>
+      </section>
+
+      <section>
+        <h2>개선 우선순위</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>우선순위</th>
+              <th>작업</th>
+              <th>구체 방안</th>
+              <th>기대 효과</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="status risk">P0</span></td>
+              <td>토큰 만료 UX 안정화</td>
+              <td>모든 클라이언트 API 래퍼에서 401 refresh 재시도, 실패 시 세션 정리와 로그인 화면 이동을 일관 처리한다.</td>
+              <td>장시간 미사용 후 “유효하지 않은 토큰” 오류 화면에 멈추는 문제를 줄인다.</td>
+            </tr>
+            <tr>
+              <td><span class="status risk">P0</span></td>
+              <td>관리 API 보호 범위 재점검</td>
+              <td>신규/기존 관리자 API가 <code>authenticated()</code>만 타지 않는지 확인하고 role/permission rule을 명시한다.</td>
+              <td>실수로 열린 운영 API를 방지한다.</td>
+            </tr>
+            <tr>
+              <td><span class="status partial">P1</span></td>
+              <td>Permission 기반 전환</td>
+              <td><code>USER_VIEW</code>, <code>FACILITY_EDIT</code>, <code>CONTRIBUTION_VIEW</code> 같은 도메인 권한을 정리하고 <code>hasAuthority</code>를 적용한다.</td>
+              <td>역할 이름이 아니라 실제 업무 권한 단위로 접근을 제어할 수 있다.</td>
+            </tr>
+            <tr>
+              <td><span class="status partial">P1</span></td>
+              <td>시설 관리자 scope 설계</td>
+              <td>사용자-시설 매핑 테이블을 만들고 facility id 기준으로 조회/수정 범위를 제한한다.</td>
+              <td>시설 담당자에게 필요한 기능만 열 수 있다.</td>
+            </tr>
+            <tr>
+              <td><span class="status info">P2</span></td>
+              <td>감사 로그</td>
+              <td>로그인 실패, refresh 실패, 권한 변경, 관리자 데이터 수정 이벤트를 별도 감사 로그로 남긴다.</td>
+              <td>운영 사고 분석과 권한 오남용 추적이 쉬워진다.</td>
+            </tr>
+            <tr>
+              <td><span class="status info">P2</span></td>
+              <td>토큰 저장 정책 강화</td>
+              <td>웹은 httpOnly secure cookie 전환 가능성을 검토하고, Tauri는 OS secure storage 도입을 검토한다.</td>
+              <td>토큰 탈취 표면을 줄인다.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>권장 목표 구조</h2>
+        <ol>
+          <li>로그인 성공 시 서버는 access token과 refresh token을 발급하고, refresh token은 서버 DB에 저장된 최신 값만 인정한다.</li>
+          <li>클라이언트는 access token 만료 시 refresh를 한 번 시도하고, 성공하면 원 요청을 한 번만 재시도한다.</li>
+          <li>서버 API는 URL rule과 method security 중 하나를 기준으로 권한 정책을 명확히 문서화한다.</li>
+          <li>관리 기능은 <code>ROLE_PLATFORM_ADMIN</code> 같은 큰 역할보다 <code>FACILITY_EDIT</code>, <code>CONTRIBUTION_VIEW</code> 같은 업무 권한으로 점진 전환한다.</li>
+          <li>시설 관리자 기능이 열릴 때는 role만 보지 말고 facility ownership/scope를 반드시 함께 검사한다.</li>
+        </ol>
+      </section>
+
+      <section>
+        <h2>점검한 주요 파일</h2>
+        <ul class="source-list">
+          <li><code>donation-platform-server/src/main/java/com/cj/donationplatform/config/SecurityConfig.java</code></li>
+          <li><code>donation-platform-server/src/main/java/com/cj/donationplatform/user/application/AuthService.java</code></li>
+          <li><code>donation-platform-server/src/main/java/com/cj/donationplatform/user/presentation/AuthController.java</code></li>
+          <li><code>donation-platform-server/src/main/java/com/cj/donationplatform/auth/jwt/JwtTokenProvider.java</code></li>
+          <li><code>donation-platform-server/src/main/java/com/cj/donationplatform/auth/security/JwtAuthenticationFilter.java</code></li>
+          <li><code>donation-platform-server/src/main/java/com/cj/donationplatform/role/domain/Role.java</code></li>
+          <li><code>donation-platform-server/src/main/java/com/cj/donationplatform/permission/domain/Permission.java</code></li>
+          <li><code>donation-platform-server/src/main/java/com/cj/donationplatform/config/RoleSeeder.java</code></li>
+          <li><code>donation-platform-server/src/main/java/com/cj/donationplatform/config/PermissionSeeder.java</code></li>
+          <li><code>donation-platform-server/src/main/java/com/cj/donationplatform/config/MenuSeeder.java</code></li>
+          <li><code>donation-platform-front/src/shared/api/axios.ts</code></li>
+          <li><code>donation-admin-tauri/src/shared/api/client.ts</code></li>
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>

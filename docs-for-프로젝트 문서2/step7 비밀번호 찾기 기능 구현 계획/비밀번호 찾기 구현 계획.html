@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Step7 — 비밀번호 찾기 구현 계획</title>
+    <style>
+      :root { color-scheme: light; --bg:#f6f8fb; --paper:#fff; --text:#111827; --muted:#667085; --line:#d8e0eb; --soft:#f1f5f9;
+        --green:#047857; --green-soft:#ecfdf5; --blue:#0369a1; --blue-soft:#e0f2fe; --amber:#b45309; --amber-soft:#fffbeb; --violet:#6d28d9; --violet-soft:#f5f3ff; --red:#b42318; --red-soft:#fff1f3; }
+      * { box-sizing:border-box; }
+      body { margin:0; color:var(--text); background:var(--bg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; line-height:1.65; }
+      main { max-width:1060px; margin:0 auto; padding:40px 24px 72px; }
+      header, section { border:1px solid var(--line); border-radius:18px; background:var(--paper); box-shadow:0 16px 42px rgba(15,23,42,.05); }
+      header { padding:30px; } section { margin-top:18px; padding:24px; }
+      h1,h2,h3,p { margin-top:0; } h1 { margin-bottom:10px; font-size:28px; letter-spacing:-.01em; }
+      h2 { margin-bottom:14px; font-size:20px; } h3 { margin:18px 0 8px; font-size:14px; } p { margin-bottom:12px; }
+      .lead { max-width:860px; margin-bottom:0; color:var(--muted); font-size:15.5px; }
+      .meta { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+      .pill { display:inline-flex; align-items:center; min-height:28px; padding:0 11px; border:1px solid var(--line); border-radius:999px; color:#344054; background:#fff; font-size:12px; font-weight:800; }
+      .pill.g { color:var(--green); background:var(--green-soft); border-color:#a7f3d0; }
+      .pill.b { color:var(--blue); background:var(--blue-soft); border-color:#bae6fd; }
+      code { padding:2px 6px; border-radius:6px; color:#0f172a; background:var(--soft); font-family:"SFMono-Regular",Consolas,monospace; font-size:.85em; }
+      pre { overflow-x:auto; margin:10px 0 0; padding:14px; border:1px solid var(--line); border-radius:12px; color:#1f2937; background:#f8fafc; font-size:12.5px; line-height:1.7; font-family:"SFMono-Regular",Consolas,monospace; }
+      table { width:100%; border-collapse:collapse; overflow:hidden; border:1px solid var(--line); border-radius:12px; font-size:13.5px; margin-top:6px; }
+      th,td { padding:9px 12px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; } th { color:#475467; background:#f8fafc; font-size:11.5px; font-weight:800; text-transform:uppercase; } tr:last-child td { border-bottom:0; } td code { font-size:12px; }
+      .ok { color:var(--green); font-weight:800; } .new { color:var(--violet); font-weight:800; }
+      .callout { margin-top:14px; padding:15px; border:1px solid #a7f3d0; border-radius:12px; color:#065f46; background:var(--green-soft); }
+      .note { margin-top:14px; padding:15px; border:1px solid #bae6fd; border-radius:12px; color:var(--blue); background:var(--blue-soft); }
+      .warning { margin-top:14px; padding:15px; border:1px solid #fde68a; border-radius:12px; color:var(--amber); background:var(--amber-soft); }
+      ul { margin:0; padding-left:20px; } li + li { margin-top:5px; }
+      .src { color:var(--muted); font-size:12px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="meta">
+          <span class="pill">Step 7</span>
+          <span class="pill g">구현 가능 ✓</span>
+          <span class="pill b">참고: beauty-book-hair</span>
+        </div>
+        <h1>비밀번호 찾기 구현 계획</h1>
+        <p class="lead">
+          로그인 폼에 <b>이메일로 비밀번호 재설정</b>을 추가한다. beauty-book-hair(<code>com.cj.beautybook</code>)가
+          milla(<code>com.cj.donationplatform</code>)와 <b>동일 구조</b>라 백엔드는 거의 드롭인 참고가 되고,
+          milla에 <b>없는 건 이메일 전송 인프라(SMTP) 하나뿐</b>이다.
+        </p>
+      </header>
+
+      <!-- 1 -->
+      <section>
+        <h2>1. 결론 — 가능한가?</h2>
+        <div class="callout"><b>가능하다.</b> beauty-book에 <code>PasswordResetToken</code>·<code>PasswordResetService</code>·<code>AuthController</code> 엔드포인트·<code>EmailNotificationService</code>가 완비돼 있고, 패키지·엔티티·시큐리티 구조가 milla와 같다. 코드 이식 + <b>SMTP 설정</b>만 추가하면 된다.</div>
+        <p class="src" style="margin-top:12px">참고 원본: <code>beauty-book-hair/beauty-book-server/.../user/application/PasswordResetService.java</code>, <code>notification/application/EmailNotificationService.java</code>, <code>auth/domain/PasswordResetToken.java</code></p>
+      </section>
+
+      <!-- 2 -->
+      <section>
+        <h2>2. milla 현재 상태 vs 필요한 것</h2>
+        <table>
+          <thead><tr><th>항목</th><th>milla 현재</th><th>필요</th></tr></thead>
+          <tbody>
+            <tr><td>Auth 엔드포인트</td><td>signup·login·refresh·logout·me·check-email</td><td class="new">+ password-reset 요청/확인</td></tr>
+            <tr><td>이메일 전송</td><td>❌ 없음 (starter-mail·JavaMailSender·spring.mail 전무)</td><td class="new">+ <b>SMTP 인프라 신규</b></td></tr>
+            <tr><td>User 도메인</td><td><code>email</code>·<code>passwordHash</code> 있음, <code>changePassword</code> 없음</td><td class="new">+ <code>changePassword()</code></td></tr>
+            <tr><td>재설정 토큰</td><td>❌ 없음</td><td class="new">+ <code>PasswordResetToken</code> 엔티티·repo</td></tr>
+            <tr><td>프론트</td><td>LoginForm·SignupForm (정적 export SPA)</td><td class="new">+ 찾기 링크·페이지 2개</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- 3 -->
+      <section>
+        <h2>3. 방식 선택 — 토큰 링크 (권장)</h2>
+        <p>beauty-book엔 두 방식이 다 있다. milla 웹(정적 SPA)엔 <b>토큰 링크 방식</b>이 표준·간단.</p>
+        <table>
+          <thead><tr><th>방식</th><th>흐름</th><th>비고</th></tr></thead>
+          <tbody>
+            <tr><td><b>토큰 링크</b> (권장)</td><td>이메일로 <code>/reset-password?token=…</code> 링크 발송 → 클릭 → 새 비번 입력</td><td>웹 표준. 정적 페이지가 쿼리 토큰 읽어 처리(§6)</td></tr>
+            <tr><td>인증 코드</td><td>이메일로 6자리 코드 발송 → 코드 입력 → 새 비번</td><td>앱/모바일 친화. 지금은 불필요</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- 4 -->
+      <section>
+        <h2>4. 흐름</h2>
+        <pre>[로그인 폼] "비밀번호를 잊으셨나요?" 링크
+      ↓
+[찾기 페이지] 이메일 입력 → POST /api/auth/password-reset/request { email }
+      ↓  (서버) PasswordResetToken 생성(단일사용·만료) → 재설정 링크 메일 발송
+[이메일] "비밀번호 재설정 안내" → https://dxline-tallent.com/reset-password?token=XXXX
+      ↓
+[재설정 페이지] 새 비번 입력 → POST /api/auth/password-reset/confirm { token, newPassword }
+      ↓  (서버) 토큰 검증(만료/사용) → user.changePassword() → 토큰 markUsed
+[완료] 로그인 페이지로</pre>
+      </section>
+
+      <!-- 5 -->
+      <section>
+        <h2>5. 백엔드 구현 항목</h2>
+        <table>
+          <thead><tr><th>파일/변경</th><th>내용</th></tr></thead>
+          <tbody>
+            <tr><td class="new">domain <code>PasswordResetToken</code></td><td>user, token(UUID), expiresAt, used. <code>create(user)</code>·<code>isExpired()</code>·<code>markUsed()</code></td></tr>
+            <tr><td class="new">infra <code>PasswordResetTokenRepository</code></td><td><code>findByTokenAndUsedFalse</code>, <code>deleteByUserId</code></td></tr>
+            <tr><td class="new">app <code>PasswordResetService</code></td><td><code>requestReset(email)</code> / <code>confirmReset(token, newPassword)</code> (beauty-book 이식)</td></tr>
+            <tr><td class="new">presentation <code>AuthController</code></td><td>+ POST <code>/api/auth/password-reset/request</code>, <code>/confirm</code> (permitAll)</td></tr>
+            <tr><td class="new">DTO</td><td><code>PasswordResetRequestDto(email)</code>, <code>PasswordResetConfirmDto(token, newPassword)</code></td></tr>
+            <tr><td class="new"><code>User.changePassword()</code></td><td>비번 해시 교체 메서드 추가</td></tr>
+            <tr><td class="new"><code>ErrorCode</code></td><td><code>USER_NOT_FOUND</code>, <code>INVALID_PASSWORD_RESET_TOKEN</code></td></tr>
+            <tr><td class="new">notification <code>EmailNotificationService</code></td><td><code>JavaMailSender</code>로 HTML 메일 — 재설정 안내/변경 완료</td></tr>
+            <tr><td>SecurityConfig</td><td>password-reset 경로 permitAll 추가</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- 6 -->
+      <section>
+        <h2>6. 이메일 인프라 (유일한 신규 인프라)</h2>
+        <p>milla엔 메일 전송이 없다. <code>spring-boot-starter-mail</code> 추가 + SMTP 설정 필요.</p>
+        <table>
+          <thead><tr><th>옵션</th><th>내용</th><th>추천</th></tr></thead>
+          <tbody>
+            <tr><td>Gmail SMTP</td><td>앱 비밀번호 발급 → <code>smtp.gmail.com:587</code>. 설정 간단</td><td>MVP·쇼케이스</td></tr>
+            <tr><td>AWS SES</td><td>같은 계정(ap-northeast-2), 도메인 검증 필요. 발송량·신뢰성↑</td><td>프로덕션</td></tr>
+          </tbody>
+        </table>
+        <pre>build.gradle:  implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+application.yaml:
+  spring.mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}          # Gmail 앱 비밀번호
+    properties.mail.smtp: { auth: true, starttls.enable: true }
+  app:
+    front-url: ${APP_FRONT_URL:https://dxline-tallent.com}</pre>
+        <div class="warning"><b>배포 반영:</b> EC2 <code>/home/ubuntu/milla/.env</code>에 <code>MAIL_USERNAME</code>·<code>MAIL_PASSWORD</code>·<code>APP_FRONT_URL</code> 추가 후 <code>milla-server</code> 재시작. (비밀값은 <code>.env</code>에만)</div>
+      </section>
+
+      <!-- 7 -->
+      <section>
+        <h2>7. 프론트 구현 (정적 export 호환)</h2>
+        <ul>
+          <li><b>로그인 폼</b>(<code>features/auth/login/LoginForm.tsx</code>): "비밀번호를 잊으셨나요?" 링크 → <code>/forgot-password</code></li>
+          <li><b>찾기 페이지</b> <code>/app/forgot-password/page.tsx</code>: 이메일 입력 → request 호출 → "메일을 확인하세요" 안내</li>
+          <li><b>재설정 페이지</b> <code>/app/reset-password/page.tsx</code>: <code>useSearchParams().get("token")</code>로 토큰 읽어 새 비번 → confirm 호출 (step 프론트 정적화와 동일 패턴)</li>
+        </ul>
+        <div class="note">정적 export라 <code>reset-password?token=</code>는 <b>쿼리스트링</b>으로 받는다(경로 파라미터 X) — <code>/donate/facility?id=</code> 전환과 같은 방식. <code>useSearchParams</code>는 <code>&lt;Suspense&gt;</code>로 감싼다.</div>
+      </section>
+
+      <!-- 8 -->
+      <section>
+        <h2>8. 보안 고려</h2>
+        <ul>
+          <li><b>토큰</b>: UUID·단일사용(<code>used</code>)·만료(예 30분). 사용/만료 시 거부.</li>
+          <li><b>유저 열거 방지</b>: 이메일이 없어도 <b>항상 200</b> 반환 권장(가입 여부 노출 금지). beauty-book은 <code>USER_NOT_FOUND</code>를 던지므로 milla에선 "성공 응답 고정"으로 개선.</li>
+          <li><b>레이트 리밋</b>: 동일 이메일 재요청 시 기존 토큰 무효화(<code>deleteByUserId</code>) + 짧은 재발송 간격.</li>
+          <li><b>메일 실패 격리</b>: 발송 실패해도 요청 트랜잭션은 성공 처리(로그만).</li>
+        </ul>
+      </section>
+
+      <!-- 9 -->
+      <section>
+        <h2>9. 범위 / 체크리스트</h2>
+        <h3>이번(Step7)</h3>
+        <ul>
+          <li>토큰 링크 방식 비밀번호 재설정(요청→메일→확인)</li>
+          <li>SMTP 메일 인프라 + 재설정/변경완료 HTML 메일</li>
+          <li>로그인 폼 링크 + 찾기/재설정 페이지 2개</li>
+        </ul>
+        <h3>범위 밖(차기)</h3>
+        <ul>
+          <li>인증 코드 방식·SMS·소셜 로그인 복구</li>
+          <li>비밀번호 정책 강화(재사용 금지 등)</li>
+        </ul>
+        <h3>구현 순서</h3>
+        <pre>1) build.gradle starter-mail + application.yaml spring.mail/app.front-url
+2) PasswordResetToken 엔티티·repo
+3) EmailNotificationService (JavaMailSender)
+4) PasswordResetService + User.changePassword + ErrorCode
+5) AuthController 2 엔드포인트 + SecurityConfig permitAll
+6) 프론트 forgot-password / reset-password 페이지 + 로그인 링크
+7) EC2 .env(MAIL_*·APP_FRONT_URL) + 재배포 + 실제 메일 수신 검증</pre>
+      </section>
+
+      <section>
+        <h2>참고</h2>
+        <ul>
+          <li>백엔드 원본: <code>beauty-book-hair/beauty-book-server/src/main/java/com/cj/beautybook/</code> — <code>user/application/PasswordResetService.java</code>, <code>user/presentation/AuthController.java</code>, <code>auth/domain/PasswordResetToken.java</code>, <code>notification/application/EmailNotificationService.java</code></li>
+          <li>배포 반영: <code>docs-for-프로젝트 문서1/배포 관련/배포 사이트 정보.html</code> (EC2 <code>.env</code>·재시작)</li>
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>

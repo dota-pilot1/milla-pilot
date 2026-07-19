@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Step6 — 배송 추적 구현 계획</title>
+    <style>
+      :root { color-scheme: light; --bg:#f6f8fb; --paper:#fff; --text:#111827; --muted:#667085; --line:#d8e0eb; --soft:#f1f5f9;
+        --green:#047857; --green-soft:#ecfdf5; --blue:#0369a1; --blue-soft:#e0f2fe; --amber:#b45309; --amber-soft:#fffbeb; --violet:#6d28d9; --violet-soft:#f5f3ff; --red:#b42318; --red-soft:#fff1f3; }
+      * { box-sizing:border-box; }
+      body { margin:0; color:var(--text); background:var(--bg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; line-height:1.65; }
+      main { max-width:1080px; margin:0 auto; padding:40px 24px 72px; }
+      header, section { border:1px solid var(--line); border-radius:18px; background:var(--paper); box-shadow:0 16px 42px rgba(15,23,42,.05); }
+      header { padding:30px; } section { margin-top:18px; padding:24px; }
+      h1,h2,h3,p { margin-top:0; } h1 { margin-bottom:10px; font-size:30px; letter-spacing:-.01em; }
+      h2 { margin-bottom:14px; font-size:21px; } h3 { margin:18px 0 8px; font-size:15px; } p { margin-bottom:12px; }
+      .lead { max-width:840px; margin-bottom:0; color:var(--muted); font-size:16px; }
+      .meta { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px; }
+      .pill { display:inline-flex; align-items:center; min-height:28px; padding:0 11px; border:1px solid var(--line); border-radius:999px; color:#344054; background:#fff; font-size:12px; font-weight:800; }
+      .pill.g { color:var(--green); background:var(--green-soft); border-color:#a7f3d0; } .pill.b { color:var(--blue); background:var(--blue-soft); border-color:#bae6fd; }
+      code { padding:2px 6px; border-radius:6px; color:#0f172a; background:var(--soft); font-family:"SFMono-Regular",Consolas,monospace; font-size:.9em; }
+      pre { overflow-x:auto; margin:10px 0 0; padding:16px; border:1px solid var(--line); border-radius:12px; color:#1f2937; background:#f8fafc; font-size:12.5px; line-height:1.7; font-family:"SFMono-Regular",Consolas,monospace; }
+      table { width:100%; border-collapse:collapse; overflow:hidden; border:1px solid var(--line); border-radius:12px; font-size:13.5px; margin-top:6px; }
+      th,td { padding:10px 13px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; } th { color:#475467; background:#f8fafc; font-size:11.5px; font-weight:800; text-transform:uppercase; } tr:last-child td { border-bottom:0; } td code { font-size:12.5px; }
+      .tag { display:inline-block; font-size:10.5px; font-weight:800; padding:1px 8px; border-radius:6px; }
+      .tag.p1 { color:var(--green); background:var(--green-soft); } .tag.p2 { color:var(--blue); background:var(--blue-soft); } .tag.later { color:var(--amber); background:var(--amber-soft); }
+      .callout { margin-top:14px; padding:16px; border:1px solid #a7f3d0; border-radius:12px; color:#065f46; background:var(--green-soft); }
+      .note { margin-top:14px; padding:16px; border:1px solid #bae6fd; border-radius:12px; color:var(--blue); background:var(--blue-soft); }
+      .warning { margin-top:14px; padding:16px; border:1px solid #fde68a; border-radius:12px; color:var(--amber); background:var(--amber-soft); }
+      ul { margin:0; padding-left:20px; } li + li { margin-top:6px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="meta">
+          <span class="pill">Step 6</span>
+          <span class="pill g">배송 추적</span>
+          <span class="pill b">별도 구현 · 자동화 우선</span>
+        </div>
+        <h1>배송 추적 구현 계획</h1>
+        <p class="lead">
+          통합구매(step5) 이후 <b>판매처 → 시설 직배송</b>을 추적한다. <b>원칙: 관리자 수동 상태변경 금지</b> —
+          사람이 넣는 건 <b>송장번호 1회</b>뿐, 배송 단계는 딥링크/집계 API로 자동.
+        </p>
+      </header>
+
+      <!-- 1 -->
+      <section>
+        <h2>1. 원칙 · 기획 근거</h2>
+        <ul>
+          <li><b>§8 이행 흐름</b>: 판매처에서 시설로 직배송 → 시설 수령확인</li>
+          <li><b>§7</b> 1차 파일럿: 배송·수령 <b>관리(tracking)</b> 포함</li>
+          <li>실제 택배사 연동은 원래 "파일럿 이후"(파트너 R-002·R-003)지만, <b>무료 집계 API/딥링크로 지금도 저비용 구현 가능</b></li>
+        </ul>
+        <div class="callout"><b>핵심 원칙:</b> 관리자가 배송중→완료를 손으로 클릭하는 방식 <b>금지</b>(비효율). 송장번호만 1회 입력하면 상태는 자동으로 따라온다.</div>
+      </section>
+
+      <!-- 2 -->
+      <section>
+        <h2>2. 데이터</h2>
+        <p>step5 <code>PURCHASE_ORDER</code>에 <b>배송 필드 추가</b>(별도 테이블도 대안). 구매증빙(주문번호)과 <b>송장(운송장번호)은 구분</b>.</p>
+        <table>
+          <thead><tr><th>컬럼</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td><code>courier</code></td><td>택배사 코드(CJ대한통운·우체국·한진 등) — 관리자 1회 입력</td></tr>
+            <tr><td><code>tracking_no</code></td><td>운송장번호 — 관리자 1회 입력</td></tr>
+            <tr><td><code>delivery_status</code></td><td>배송 단계 캐시(READY·IN_TRANSIT·OUT_FOR_DELIVERY·DELIVERED) — API 동기화 값</td></tr>
+            <tr><td><code>last_synced_at</code></td><td>마지막 배송상태 조회 시각</td></tr>
+          </tbody>
+        </table>
+        <div class="note">배송 이벤트 이력(집화→간선→…)까지 저장하려면 <code>Shipment</code> + <code>ShipmentEvent</code> 테이블로 분리 가능. MVP는 위 캐시 필드로 충분.</div>
+      </section>
+
+      <!-- 3 -->
+      <section>
+        <h2>3. 2단계 구현</h2>
+        <table>
+          <thead><tr><th>단계</th><th>방식</th><th>비용</th><th>자동화</th></tr></thead>
+          <tbody>
+            <tr><td><span class="tag p1">Phase 1 · MVP</span></td><td>택배사+송장번호 저장 → <b>조회 페이지 딥링크</b>. 웹 "송장" 클릭 → 택배사/통합조회 페이지 열림(드로워 or 새 탭)</td><td>0</td><td>사용자 클릭 조회</td></tr>
+            <tr><td><span class="tag p2">Phase 2</span></td><td><b>택배 집계 API 연동</b> → 서버가 배송상태 pull → 드로워에 단계 표시. 폴링/온디맨드 동기화</td><td>무료~소액</td><td><b>완전 자동</b></td></tr>
+          </tbody>
+        </table>
+        <h3>API 후보 (집계형 — 개별 택배사 X)</h3>
+        <ul>
+          <li><b>delivery-tracker</b> (오픈소스 · <code>tracker.delivery</code> · GraphQL) — <b>무료</b>, 파일럿에 얹기 쉬움 → <b>MVP 추천</b></li>
+          <li><b>스윗트래커 / 스마트택배 API</b> — 국내 표준, 안정적, 무료 티어 → 프로덕션 선호</li>
+        </ul>
+        <div class="warning"><b>개별 택배사 API를 여러 개 붙이지 말 것.</b> 한국은 택배사가 많아 <b>집계 API 하나</b>로 전 택배사 커버한다.</div>
+      </section>
+
+      <!-- 4 -->
+      <section>
+        <h2>4. 수령확인은 사람 (신뢰 장치)</h2>
+        <p>자동 추적으로 <b>배송완료(DELIVERED)</b>가 떠도, <b>시설 수령확인(RECEIVED)</b>은 시설/관리자가 확인하는 별도 스텝(§8). 배송완료 ≠ 실물 수령확인.</p>
+        <ul>
+          <li><b>배송중 상태 = 자동</b> (딥링크/API)</li>
+          <li><b>수령확인 = 사람 1클릭</b> → <code>item.status = RECEIVED</code> (기존 단계 관리 재사용)</li>
+        </ul>
+      </section>
+
+      <!-- 5 -->
+      <section>
+        <h2>5. 화면</h2>
+        <ul>
+          <li><b>웹 · 물품 구매 현황</b>: 구매완료 물품에 송장 표시 → <b>클릭 시 드로워</b>(배송단계·최근 이벤트). Phase1은 조회 링크, Phase2는 in-app 단계.</li>
+          <li><b>Tauri · 통합구매/배송</b>: 구매 후 <b>택배사·송장번호 입력</b>(1회). 수령확인 버튼.</li>
+        </ul>
+      </section>
+
+      <!-- 6 -->
+      <section>
+        <h2>6. 범위 안 / 밖</h2>
+        <table>
+          <thead><tr><th>✅ 이번(Step6)</th><th>⛔ 밖</th></tr></thead>
+          <tbody>
+            <tr><td>송장 1회 입력 + 배송 조회(딥링크)</td><td>택배사 계약·실시간 웹훅</td></tr>
+            <tr><td>집계 API 자동 상태(Phase2, 무료)</td><td>반품·교환 물류(D-002 차기)</td></tr>
+            <tr><td>수령확인(사람) 연결</td><td>다중 배송지·분할배송</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- 7 -->
+      <section>
+        <h2>7. 참고</h2>
+        <ul>
+          <li>선행: step5(통합구매 — 판매처·실구매액·주문증빙까지). 송장/배송은 이 문서(step6).</li>
+          <li>정책: <code>공통 관리/후원 관련 정책 정리/후원 정책.md</code> · 범위: <code>제품 핵심 기능 및 범위.html</code></li>
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>

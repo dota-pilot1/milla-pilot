@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>후원금 결제에 관한 논의</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f8fb;
+        --paper: #ffffff;
+        --text: #111827;
+        --muted: #667085;
+        --line: #d8e0eb;
+        --soft: #f1f5f9;
+        --green: #047857;
+        --green-soft: #ecfdf5;
+        --blue: #1d4ed8;
+        --blue-soft: #eff6ff;
+        --amber: #b45309;
+        --amber-soft: #fffbeb;
+        --red: #b42318;
+        --red-soft: #fef3f2;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        color: var(--text);
+        background: var(--bg);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+        line-height: 1.65;
+      }
+
+      main {
+        max-width: 1160px;
+        margin: 0 auto;
+        padding: 40px 24px 72px;
+      }
+
+      header, section {
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: var(--paper);
+        box-shadow: 0 16px 42px rgba(15, 23, 42, 0.05);
+      }
+
+      header { padding: 30px; }
+      section { margin-top: 18px; padding: 24px; }
+
+      h1, h2, h3, p { margin-top: 0; }
+      h1 { margin-bottom: 10px; font-size: 32px; line-height: 1.25; letter-spacing: 0; }
+      h2 { margin-bottom: 12px; font-size: 22px; letter-spacing: 0; }
+      h3 { margin-bottom: 8px; font-size: 16px; }
+      p { margin-bottom: 12px; }
+
+      code {
+        padding: 2px 5px;
+        border-radius: 6px;
+        color: #0f172a;
+        background: var(--soft);
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 0.92em;
+      }
+
+      ul, ol { margin: 0; padding-left: 22px; }
+      li + li { margin-top: 8px; }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        font-size: 14px;
+      }
+
+      th, td {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        color: #475467;
+        background: #f8fafc;
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      tr:last-child td { border-bottom: 0; }
+
+      .lead {
+        max-width: 900px;
+        margin-bottom: 0;
+        color: var(--muted);
+        font-size: 16px;
+      }
+
+      .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 18px;
+      }
+
+      .pill, .status {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 0 10px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: #fff;
+        font-size: 12px;
+        font-weight: 800;
+        white-space: nowrap;
+      }
+
+      .pill { color: #344054; }
+      .ok { border-color: #bbf7d0; color: var(--green); background: var(--green-soft); }
+      .partial { border-color: #fed7aa; color: var(--amber); background: var(--amber-soft); }
+      .risk { border-color: #fecdca; color: var(--red); background: var(--red-soft); }
+      .info { border-color: #bfdbfe; color: var(--blue); background: var(--blue-soft); }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+      .card {
+        min-height: 132px;
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #fff;
+      }
+
+      .card strong { display: block; margin-bottom: 8px; }
+      .card span { display: block; color: var(--muted); font-size: 14px; }
+
+      .callout, .warning, .danger, .note {
+        margin-top: 14px;
+        padding: 14px 16px;
+        border-radius: 12px;
+        font-size: 14px;
+      }
+
+      .callout { border: 1px solid #bbf7d0; color: #065f46; background: var(--green-soft); }
+      .warning { border: 1px solid #fed7aa; color: #92400e; background: var(--amber-soft); }
+      .danger { border: 1px solid #fecdca; color: var(--red); background: var(--red-soft); }
+      .note { border: 1px solid #bfdbfe; color: var(--blue); background: var(--blue-soft); }
+
+      .flow {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      .step {
+        min-height: 108px;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #f8fafc;
+      }
+
+      .step b { display: block; margin-bottom: 6px; }
+      .step small { display: block; color: var(--muted); line-height: 1.55; }
+
+      .mono-block {
+        overflow-x: auto;
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #0f172a;
+        color: #e5e7eb;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      @media (max-width: 900px) {
+        .grid, .grid.two, .flow { grid-template-columns: 1fr; }
+        main { padding: 24px 14px 48px; }
+        header, section { padding: 20px; }
+        h1 { font-size: 28px; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="meta">
+          <span class="pill ok">단계별 MVP 전략</span>
+          <span class="pill info">시설별 후원금 풀</span>
+          <span class="pill info">자체 물류센터</span>
+          <span class="pill partial">법무 검토 필요</span>
+          <span class="pill">작성일 2026-07-19</span>
+        </div>
+        <h1>후원금 결제와 포인트 기반 후원 설계 논의</h1>
+        <p class="lead">
+          초기에는 후원자가 외부 쇼핑몰에서 직접 구매한 물품을 자체 물류센터로 모으고,
+          플랫폼이 입고, 검수, 시설 전달, 증빙 공유를 맡는다. 이후 공동 현금 후원, 포인트 결제,
+          자체 쇼핑몰, 물류 자동화로 확장한다.
+        </p>
+      </header>
+
+      <section>
+        <h2>결론</h2>
+        <div class="callout">
+          현실적인 순서는 물류 검증을 먼저 하고, 결제/포인트/쇼핑몰 기능은 뒤로 미루는 것이다.
+          MVP 1차는 자체 물류센터를 활용한 직접 구매 후원으로 시작하고,
+          MVP 2차부터 공동 현금 후원과 플랫폼 구매를 단계적으로 붙인다.
+        </div>
+        <div class="grid">
+          <div class="card">
+            <strong>MVP 1차</strong>
+            <span>후원자가 직접 구매하고 영수증/송장을 첨부한다. 플랫폼은 물류센터 입고부터 시설 전달까지 관리한다.</span>
+          </div>
+          <div class="card">
+            <strong>MVP 2~4차</strong>
+            <span>비싼 물품은 단체 현금 후원으로 공동 구매하고, 이후 자체 쇼핑몰 구매까지 확장한다.</span>
+          </div>
+          <div class="card">
+            <strong>MVP 5차</strong>
+            <span>자체 쇼핑몰과 공동 구매에 물류센터 자동화, 입고 검수, 배송 추적 시스템을 결합한다.</span>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>현실적인 단계별 MVP 전략</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>단계</th>
+              <th>핵심 모델</th>
+              <th>후원자 역할</th>
+              <th>플랫폼 역할</th>
+              <th>검증 목표</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>MVP 1</strong></td>
+              <td>자체 물류센터 활용</td>
+              <td>외부 쇼핑몰에서 물품을 직접 구매하고 영수증, 송장, 주문 내역을 첨부한다.</td>
+              <td>물류센터 주소 제공, 입고 확인, 검수, 분류, 시설 전달, 웹 공유를 맡는다.</td>
+              <td>시설 물품 공시, 후원자 직접 구매 의향, 입고/검수/전달 운영 가능성을 검증한다.</td>
+            </tr>
+            <tr>
+              <td><strong>MVP 2</strong></td>
+              <td>고가 물품 공동 현금 후원</td>
+              <td>노트북, 대형 가전, 계절 물품처럼 단가가 높은 물품에 금액으로 공동 후원한다.</td>
+              <td>공동 모금, 구매 집행, 영수증/송장 첨부, 시설 전달, 후원자 공지를 담당한다.</td>
+              <td>후원금 풀, 공동 구매, 차액 처리, 환불 정책, 구매 증빙 흐름을 검증한다.</td>
+            </tr>
+            <tr>
+              <td><strong>MVP 3</strong></td>
+              <td>자체 쇼핑몰 전환</td>
+              <td>플랫폼 안에서 시설별 필요 물품을 선택해 구매 또는 후원한다.</td>
+              <td>상품 등록, 주문, 구매, 배송, 시설 전달, 증빙 공개를 일괄 관리한다.</td>
+              <td>후원 UX를 단순화하고 외부 쇼핑몰/송장 첨부 부담을 줄인다.</td>
+            </tr>
+            <tr>
+              <td><strong>MVP 4</strong></td>
+              <td>하이브리드</td>
+              <td>자체 쇼핑몰에서 바로 구매하거나, 고가 물품은 공동 후원에 참여한다.</td>
+              <td>자체 쇼핑몰 주문과 MVP 2의 공동 구매를 함께 지원한다.</td>
+              <td>소액/단품 후원과 고가/공동 후원을 하나의 서비스 안에서 운영한다.</td>
+            </tr>
+            <tr>
+              <td><strong>MVP 5</strong></td>
+              <td>물류센터 자동화와 배송 추적 확장</td>
+              <td>입고, 검수, 배송, 전달 상태를 웹에서 추적한다.</td>
+              <td>입고 스캔, 송장 자동 매칭, CCTV/사진 증빙, 시설별 출고, 배송 추적을 고도화한다.</td>
+              <td>운영 비용을 낮추고 물류 신뢰성과 추적 가능성을 높인다.</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="note">
+          이 순서는 금융 시스템을 먼저 크게 만들지 않고, 물품 후원 수요와 시설 전달 운영을 먼저 검증한다.
+          이후 결제와 자체 쇼핑몰을 붙이면 이미 검증된 물류/증빙 흐름 위에서 확장할 수 있다.
+        </div>
+      </section>
+
+      <section>
+        <h2>단계별 책임 경계</h2>
+        <div class="grid">
+          <div class="card">
+            <strong>MVP 1의 책임 경계</strong>
+            <span>
+              후원자는 외부 구매와 영수증/송장 첨부까지 담당한다. 플랫폼은 물류센터 입고 이후의 검수,
+              보관, 시설 전달, 전달 증빙 공개를 책임진다.
+            </span>
+          </div>
+          <div class="card">
+            <strong>MVP 2의 책임 경계</strong>
+            <span>
+              후원자는 금액 후원까지만 담당한다. 플랫폼 관리자가 공동 구매, 영수증, 송장, 전달 증빙,
+              후원자 메시지 발송을 처리한다.
+            </span>
+          </div>
+          <div class="card">
+            <strong>MVP 3 이후 책임 경계</strong>
+            <span>
+              후원자는 플랫폼 안에서 구매/후원을 완료한다. 플랫폼은 쇼핑몰, 결제, 구매, 물류, 증빙을
+              하나의 운영 시스템으로 관리한다.
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>모델 비교</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>모델</th>
+              <th>설명</th>
+              <th>장점</th>
+              <th>부담</th>
+              <th>판단</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>물품별 직접 후원</td>
+              <td>후원금이 특정 물품 목표금액에 바로 귀속된다.</td>
+              <td>투명성이 가장 높고 메시지가 직관적이다.</td>
+              <td>가격 변동, 품절, 대체 구매, 차액 반환, 목표 미달 처리가 복잡하다.</td>
+              <td><span class="status risk">MVP 부담 큼</span></td>
+            </tr>
+            <tr>
+              <td>전체 포인트</td>
+              <td>후원자가 포인트를 충전하고 여러 시설/목표에 사용한다.</td>
+              <td>UX가 좋고 반복 후원 마찰이 낮다.</td>
+              <td>미사용 잔액, 환불, 별도관리, 선불성 규제 검토가 필요하다.</td>
+              <td><span class="status partial">확장 기능</span></td>
+            </tr>
+            <tr>
+              <td>시설별 후원금 풀</td>
+              <td>후원금은 시설에 귀속되고, 공시된 물품 구매에 사용된다.</td>
+              <td>운영 복잡도를 줄이면서 투명성을 확보할 수 있다.</td>
+              <td>사후 매칭과 증빙 관리가 필요하다.</td>
+              <td><span class="status ok">MVP 권장</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>MVP 권장 흐름</h2>
+        <div class="flow">
+          <div class="step">
+            <b>1. 포인트 충전</b>
+            <small>후원자는 카드/간편결제로 후원 포인트를 충전한다.</small>
+          </div>
+          <div class="step">
+            <b>2. 시설 선택</b>
+            <small>사전에 공시된 필요 물품 목록을 보고 시설에 후원한다.</small>
+          </div>
+          <div class="step">
+            <b>3. 시설 후원금 풀</b>
+            <small>후원금은 시설별 사용 가능 잔액으로 이동한다.</small>
+          </div>
+          <div class="step">
+            <b>4. 구매 실행</b>
+            <small>관리자가 공시 물품을 중심으로 실제 구매를 진행한다.</small>
+          </div>
+          <div class="step">
+            <b>5. 사용 매칭</b>
+            <small>구매금액에 어떤 후원자의 금액이 쓰였는지 연결한다.</small>
+          </div>
+          <div class="step">
+            <b>6. 증빙 공개</b>
+            <small>후원자에게 구매 내역, 영수증, 전달 증빙을 보여준다.</small>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>후원자에게 보여줄 표현</h2>
+        <div class="grid two">
+          <div class="card">
+            <strong>권장 문구</strong>
+            <span>
+              이 시설은 현재 겨울 내복, 학습 문제집, 위생용품 구매를 준비하고 있습니다.
+              후원금은 공개된 필요 물품 구매에 사용되며, 구매 완료 후 사용 내역과 증빙을 확인할 수 있습니다.
+            </span>
+          </div>
+          <div class="card">
+            <strong>피해야 할 문구</strong>
+            <span>
+              이 물품을 직접 구매합니다. 이 노트북에 10,000원을 후원합니다.
+              목표 달성 시 반드시 이 상품을 구매합니다.
+            </span>
+          </div>
+        </div>
+        <div class="note">
+          물품은 후원 대상이 아니라 구매 예정 항목으로 표현한다. 후원 대상은 시설이며, 물품은 사전 공시와 사후 증빙의 기준이다.
+        </div>
+      </section>
+
+      <section>
+        <h2>상태 모델</h2>
+        <h3>포인트/지갑 상태</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>상태</th>
+              <th>의미</th>
+              <th>주요 전이</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><code>CHARGED</code></td><td>결제 승인으로 포인트가 충전됨</td><td><code>AVAILABLE</code></td></tr>
+            <tr><td><code>AVAILABLE</code></td><td>후원자가 사용할 수 있는 잔액</td><td><code>ALLOCATED_TO_FACILITY</code>, <code>REFUNDED</code></td></tr>
+            <tr><td><code>ALLOCATED_TO_FACILITY</code></td><td>특정 시설 후원금 풀로 배정됨</td><td><code>RESERVED_FOR_PURCHASE</code></td></tr>
+            <tr><td><code>RESERVED_FOR_PURCHASE</code></td><td>구매 건에 사용 예정으로 잠김</td><td><code>USED</code>, <code>RELEASED</code></td></tr>
+            <tr><td><code>USED</code></td><td>실제 구매에 사용 완료</td><td>종결 또는 사용 리포트 발행</td></tr>
+            <tr><td><code>RELEASED</code></td><td>구매 실패/취소로 시설 풀 또는 지갑으로 반환</td><td><code>AVAILABLE</code> 또는 시설 풀 잔액</td></tr>
+            <tr><td><code>REFUNDED</code></td><td>현금 환불 완료</td><td>종결</td></tr>
+          </tbody>
+        </table>
+
+        <h3>구매 상태</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>상태</th>
+              <th>의미</th>
+              <th>관리자 작업</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><code>DISCLOSED</code></td><td>시설 필요 물품이 공시됨</td><td>물품명, 예상 수량, 예상 금액 등록</td></tr>
+            <tr><td><code>PURCHASE_READY</code></td><td>구매 가능한 후원금이 확보됨</td><td>구매안 작성</td></tr>
+            <tr><td><code>PURCHASE_DRAFT</code></td><td>판매처/수량/예상금액 검토 중</td><td>구매 항목 수정</td></tr>
+            <tr><td><code>PURCHASE_ORDERED</code></td><td>주문 완료</td><td>주문번호, 판매처, 배송정보 등록</td></tr>
+            <tr><td><code>PARTIAL_PURCHASED</code></td><td>일부만 구매됨</td><td>부족분, 대체 구매, 차액 처리</td></tr>
+            <tr><td><code>PURCHASED</code></td><td>구매 완료</td><td>영수증 등록, 후원금 사용 매칭</td></tr>
+            <tr><td><code>DELIVERED</code></td><td>시설 전달 완료</td><td>전달 증빙 등록</td></tr>
+            <tr><td><code>CLOSED</code></td><td>증빙 공개와 후원자 리포트 완료</td><td>마감</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>테이블 설계 원칙</h2>
+        <ul>
+          <li>잔액은 직접 덮어쓰지 않고 거래 원장을 append-only로 기록한다.</li>
+          <li>PG 결제/환불 콜백은 <code>idempotency_key</code>와 provider transaction key로 중복 반영을 막는다.</li>
+          <li>같은 포인트가 두 구매에 동시에 쓰이지 않도록 DB 트랜잭션과 version 기반 낙관적 락을 사용한다.</li>
+          <li>구매 한 건에 어떤 후원자의 후원금이 얼마씩 쓰였는지 <code>PURCHASE_FUND_USAGE</code>로 남긴다.</li>
+          <li>관리자 수동 조정은 <code>AUDIT_LOG</code>에 사유, 전후 값, 수행자를 기록한다.</li>
+          <li>물품 가격 변동과 차액은 후원자별 즉시 환불보다 시설 후원금 풀 내 잔액 조정으로 우선 처리한다.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>권장 ERD</h2>
+        <p>
+          상세 Mermaid ERD는 같은 폴더의 <code>erd.mmd</code>에 둔다.
+          핵심은 지갑 원장, 시설 후원금 원장, 구매 주문, 구매별 후원금 사용 매칭을 분리하는 것이다.
+        </p>
+        <div class="mono-block">USER
+  -> WALLET
+  -> WALLET_TRANSACTION
+  -> FACILITY_FUND_TRANSACTION
+  -> PURCHASE_FUND_USAGE
+  -> PURCHASE_ORDER
+  -> DONATION_USAGE_REPORT</div>
+      </section>
+
+      <section>
+        <h2>법무/정책 검토 포인트</h2>
+        <div class="warning">
+          이 문서는 제품/기술 설계 초안이며 법률 자문이 아니다. 포인트 충전, 미사용 잔액 환불, 선불충전금 별도관리,
+          전자금융거래법상 선불전자지급수단 해당 여부는 별도 법무 검토가 필요하다.
+        </div>
+        <ul>
+          <li>충전 포인트가 선불전자지급수단에 해당하는지</li>
+          <li>미사용 포인트 환불 가능 기준과 환불 수수료 정책</li>
+          <li>시설 후원금 풀로 배정된 금액의 취소/환불 가능 시점</li>
+          <li>구매 완료 후 환불 제한 근거와 고지 방식</li>
+          <li>목표 물품 변경, 품절, 대체 구매 시 후원자 동의가 필요한 범위</li>
+          <li>별도 계좌 관리 또는 선불충전금 별도관리 의무 적용 가능성</li>
+          <li>후원금과 물품 구매대행, 기부금, 포인트 결제의 회계 처리 기준</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>다음 구현 순서</h2>
+        <ol>
+          <li>유저 관리, 역할 관리, 권한 관리, 역할-권한 매핑을 먼저 CRUD로 완성한다.</li>
+          <li>시설별 공시 물품 상태와 관리자 구매 워크플로우를 정리한다.</li>
+          <li>지갑/포인트 원장 테이블을 설계하고 결제 없이 내부 테스트 데이터를 만든다.</li>
+          <li>PG 단건 충전을 연결하고 멱등성, 중복 콜백, 환불 테스트를 작성한다.</li>
+          <li>시설 후원금 풀 배정과 구매 사용 매칭을 구현한다.</li>
+          <li>후원자 사용 리포트와 증빙 화면을 만든다.</li>
+        </ol>
+      </section>
+    </main>
+  </body>
+</html>

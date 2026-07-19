@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>배포 사이트 정보 (MVP 쇼케이스)</title>
+    <style>
+      :root { color-scheme: light; --bg:#f6f8fb; --paper:#fff; --text:#111827; --muted:#667085; --line:#d8e0eb; --soft:#f1f5f9;
+        --green:#047857; --green-soft:#ecfdf5; --blue:#0369a1; --blue-soft:#e0f2fe; --amber:#b45309; --amber-soft:#fffbeb; --red:#b42318; --red-soft:#fff1f3; }
+      * { box-sizing:border-box; }
+      body { margin:0; color:var(--text); background:var(--bg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; line-height:1.65; }
+      main { max-width:1040px; margin:0 auto; padding:40px 24px 72px; }
+      header, section { border:1px solid var(--line); border-radius:18px; background:var(--paper); box-shadow:0 16px 42px rgba(15,23,42,.05); }
+      header { padding:30px; } section { margin-top:18px; padding:24px; }
+      h1,h2,h3,p { margin-top:0; } h1 { margin-bottom:10px; font-size:28px; letter-spacing:-.01em; }
+      h2 { margin-bottom:14px; font-size:20px; } h3 { margin:18px 0 8px; font-size:14px; } p { margin-bottom:12px; }
+      .lead { max-width:840px; margin-bottom:0; color:var(--muted); font-size:15.5px; }
+      .meta { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+      .pill { display:inline-flex; align-items:center; min-height:28px; padding:0 11px; border:1px solid var(--line); border-radius:999px; color:#344054; background:#fff; font-size:12px; font-weight:800; }
+      .pill.g { color:var(--green); background:var(--green-soft); border-color:#a7f3d0; }
+      .pill.a { color:var(--amber); background:var(--amber-soft); border-color:#fde68a; }
+      a.live { color:var(--blue); font-weight:800; }
+      code { padding:2px 6px; border-radius:6px; color:#0f172a; background:var(--soft); font-family:"SFMono-Regular",Consolas,monospace; font-size:.86em; }
+      pre { overflow-x:auto; margin:10px 0 0; padding:14px; border:1px solid var(--line); border-radius:12px; color:#1f2937; background:#f8fafc; font-size:12.5px; line-height:1.7; font-family:"SFMono-Regular",Consolas,monospace; }
+      table { width:100%; border-collapse:collapse; overflow:hidden; border:1px solid var(--line); border-radius:12px; font-size:13.5px; margin-top:6px; }
+      th,td { padding:9px 12px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; } th { color:#475467; background:#f8fafc; font-size:11.5px; font-weight:800; text-transform:uppercase; } tr:last-child td { border-bottom:0; } td code { font-size:12px; }
+      .ok { color:var(--green); font-weight:800; } .warn { color:var(--amber); font-weight:800; }
+      .note { margin-top:14px; padding:15px; border:1px solid #bae6fd; border-radius:12px; color:var(--blue); background:var(--blue-soft); }
+      .warning { margin-top:14px; padding:15px; border:1px solid #fde68a; border-radius:12px; color:var(--amber); background:var(--amber-soft); }
+      ul { margin:0; padding-left:20px; } li + li { margin-top:5px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="meta">
+          <span class="pill">배포 현황</span>
+          <span class="pill g">LIVE</span>
+          <span class="pill a">MVP 쇼케이스 · english-agent-hub 슬롯 인계</span>
+        </div>
+        <h1>배포 사이트 정보</h1>
+        <p class="lead">
+          milla 후원 플랫폼(서버+프론트)이 english-agent-hub의 EC2/도메인/CloudFront/S3 슬롯을 <b>인계</b>받아 배포됨.
+          공개 주소: <a class="live" href="https://dxline-tallent.com" target="_blank">https://dxline-tallent.com</a>
+          <br />⚠️ 비밀값(JWT/AWS/DB 비번)은 이 문서에 기재하지 않음 — 서버 <code>.env</code>에만 존재.
+        </p>
+      </header>
+
+      <!-- 현황 -->
+      <section>
+        <h2>1. 현재 상태</h2>
+        <table>
+          <thead><tr><th>레이어</th><th>상태</th><th>실측</th></tr></thead>
+          <tbody>
+            <tr><td>프론트</td><td class="ok">✅ LIVE</td><td>CloudFront → S3 <code>beauty-book-hair-front</code> (milla 정적 export) · <code>/</code> HTTP 200</td></tr>
+            <tr><td>백엔드</td><td class="ok">✅ LIVE</td><td>EC2 <code>:4301</code> Nginx 경유 · <code>/api/site-settings</code> HTTP 200</td></tr>
+            <tr><td>DB</td><td class="ok">✅</td><td><code>donation_platform</code> (시더 데이터 적재)</td></tr>
+            <tr><td>이미지 업로드(presign)</td><td class="ok">✅ 활성</td><td>S3 <code>milla-donation-images</code> (공개읽기+CORS) · towercrane 계정 키 재사용 · milla <code>.env</code>에 주입</td></tr>
+            <tr><td>이메일 · 비밀번호 찾기</td><td class="ok">✅ 활성</td><td>Gmail SMTP(beauty-book 앱 비밀번호 재사용) · <code>password_reset_tokens</code> 테이블 · 실제 발송 검증됨</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- 인계 인프라 -->
+      <section>
+        <h2>2. 인프라 (english-agent-hub에서 인계 — 그대로)</h2>
+        <table>
+          <tbody>
+            <tr><td>도메인</td><td><code>dxline-tallent.com</code> (Route 53)</td></tr>
+            <tr><td>CloudFront</td><td>배포 ID <code>E11NF3HMOB52NI</code> · <code>/api/*</code>→EC2, <code>*</code>→S3</td></tr>
+            <tr><td>ACM 인증서</td><td>BeautyBook 발급분 그대로 (us-east-1)</td></tr>
+            <tr><td>EC2</td><td><code>13.209.195.64</code> (i-067f79b2891658b5d · t3.small 2GB · ap-northeast-2)</td></tr>
+            <tr><td>Nginx</td><td><code>:80</code> → <code>proxy_pass http://localhost:4301</code> (CloudFront origin)</td></tr>
+            <tr><td>프론트 S3 버킷</td><td><code>beauty-book-hair-front</code> (내용물만 milla로 교체)</td></tr>
+            <tr><td>SSH 키</td><td><code>english-agent-hub-container/배포 가이드/hibot-d-server-key.pem</code></td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- milla 신규/설정 -->
+      <section>
+        <h2>3. milla 배포 리소스 (EC2 내부 신규)</h2>
+        <table>
+          <tbody>
+            <tr><td>systemd 서비스</td><td><code>milla-server.service</code> (<code>-Xmx512m -Xms256m</code>)</td></tr>
+            <tr><td>백엔드 포트</td><td><code>4301</code> (english-agent-hub와 동일 슬롯 → Nginx 무변경)</td></tr>
+            <tr><td>JAR / env</td><td><code>/home/ubuntu/milla/app.jar</code> · <code>/home/ubuntu/milla/.env</code> (600)</td></tr>
+            <tr><td>DB</td><td><code>donation_platform</code> — 기존 <code>english-agent-hub-postgres</code> 컨테이너(<code>:5436</code>, postgres/postgres)에 DB만 추가</td></tr>
+            <tr><td>CORS</td><td><code>SecurityConfig.java</code>에 <code>https://dxline-tallent.com</code> 추가(재빌드 반영)</td></tr>
+            <tr><td>프론트 API</td><td>빌드 시 <code>NEXT_PUBLIC_API_URL=https://dxline-tallent.com</code></td></tr>
+            <tr><td><code>.env</code> 항목</td><td><code>JWT_SECRET</code> · <code>AWS_*</code>(이미지) · <code>MAIL_USERNAME</code>/<code>MAIL_PASSWORD</code>(Gmail 앱비번, beauty-book <code>/home/ubuntu/.env</code>에서 재사용) — 값은 서버에만</td></tr>
+            <tr><td>동적 라우트</td><td>정적 export 호환 위해 <code>/donate/facility?id=</code>·<code>/donate/item?id=</code> 쿼리스트링으로 전환</td></tr>
+          </tbody>
+        </table>
+        <div class="note"><b>인계로 중단된 것:</b> <code>englishagenthub.service</code> <code>stop</code>+<code>disable</code> (app.jar·DB 보존) · S3 프론트만 milla로 교체. 되돌리면 복구 가능(§6).</div>
+      </section>
+
+      <!-- 트래픽 -->
+      <section>
+        <h2>4. 트래픽 경로</h2>
+        <pre>사용자 → https://dxline-tallent.com (Route 53)
+      → CloudFront (E11NF3HMOB52NI)
+          ├ /api/*  → EC2 :80 Nginx → 127.0.0.1:4301 (milla Spring Boot) → Postgres :5436/donation_platform
+          └ *       → S3 beauty-book-hair-front (milla Next 정적)</pre>
+      </section>
+
+      <!-- 재배포 -->
+      <section>
+        <h2>5. 재배포 명령</h2>
+        <h3>백엔드</h3>
+        <pre>cd donation-platform-server && ./gradlew build -x test
+scp -i "&lt;pem&gt;" build/libs/donation-platform-server-0.0.1-SNAPSHOT.jar ubuntu@13.209.195.64:/home/ubuntu/milla/app.jar
+ssh -i "&lt;pem&gt;" ubuntu@13.209.195.64 "sudo systemctl restart milla-server && sleep 3 && systemctl is-active milla-server"</pre>
+        <h3>프론트</h3>
+        <pre>cd donation-platform-front
+NEXT_PUBLIC_API_URL=https://dxline-tallent.com npm run build     # → out/
+aws s3 sync out/ s3://beauty-book-hair-front --delete --region ap-northeast-2
+aws cloudfront create-invalidation --distribution-id E11NF3HMOB52NI --paths "/*"</pre>
+        <h3>상태 확인</h3>
+        <pre>curl -s -o /dev/null -w "%{http_code}\n" https://dxline-tallent.com/api/site-settings   # 200
+ssh -i "&lt;pem&gt;" ubuntu@13.209.195.64 "systemctl status milla-server --no-pager; free -h"</pre>
+      </section>
+
+      <!-- 롤백 -->
+      <section>
+        <h2>6. 롤백 (english-agent-hub 복구)</h2>
+        <pre># 백엔드 원복
+ssh -i "&lt;pem&gt;" ubuntu@13.209.195.64 "
+  sudo systemctl stop milla-server &amp;&amp; sudo systemctl disable milla-server
+  sudo systemctl enable englishagenthub &amp;&amp; sudo systemctl start englishagenthub"
+# 프론트 원복: english-agent-hub-front 를 다시 빌드해 같은 버킷에 sync + 무효화</pre>
+        <div class="warning"><b>주의:</b> 프론트 S3는 milla로 <code>--delete</code> 동기화돼 english-agent-hub 파일이 지워졌으므로, 원복하려면 english-agent-hub 프론트를 <b>재빌드해 다시 sync</b>해야 한다(DB·컨테이너는 보존됨).</div>
+      </section>
+
+      <!-- 정식 배포 -->
+      <section>
+        <h2>7. "정식 배포" 시 분리할 것 (지금은 쇼케이스)</h2>
+        <ul>
+          <li>milla 전용 <b>도메인</b> (지금은 dxline-tallent.com 인계) + 전용 CloudFront/ACM</li>
+          <li>milla 전용 <b>EC2/인스턴스</b> (지금은 beauty-book·english-agent-hub와 2GB 공유 — 메모리 빠듯)</li>
+          <li>milla 전용 <b>DB 컨테이너</b> (지금은 english-agent-hub-postgres에 DB만 추가)</li>
+          <li><b>이미지 업로드</b>: 전용 S3 버킷 + IAM 키 (§ 별도) · CORS <code>dxline-tallent.com</code> PUT 허용</li>
+          <li><b>CORS 환경변수화</b> (현재 코드 하드코딩)</li>
+          <li>프론트: SEO 필요 시 정적→SSR(Vercel/컨테이너) 검토 — <code>프론트를 ec2로 별도 배포하는게 이상적인가.md</code> 참고</li>
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>

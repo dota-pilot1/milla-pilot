@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>① 구현 완료 (기획 대비)</title>
+    <style>
+      :root { color-scheme: light; --bg:#f6f8fb; --paper:#fff; --text:#111827; --muted:#667085; --line:#d8e0eb; --soft:#f1f5f9;
+        --green:#047857; --green-soft:#ecfdf5; --blue:#0369a1; --blue-soft:#e0f2fe; --amber:#b45309; --amber-soft:#fffbeb; --violet:#6d28d9; --violet-soft:#f5f3ff; --red:#b42318; --red-soft:#fff1f3; }
+      * { box-sizing:border-box; }
+      body { margin:0; color:var(--text); background:var(--bg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; line-height:1.65; }
+      main { max-width:1080px; margin:0 auto; padding:40px 24px 72px; }
+      header, section { border:1px solid var(--line); border-radius:18px; background:var(--paper); box-shadow:0 16px 42px rgba(15,23,42,.05); }
+      header { padding:30px; } section { margin-top:18px; padding:24px; }
+      h1,h2,h3,p { margin-top:0; } h1 { margin-bottom:10px; font-size:30px; letter-spacing:-.01em; }
+      h2 { margin-bottom:14px; font-size:21px; } h3 { margin:18px 0 8px; font-size:15px; } p { margin-bottom:12px; }
+      .lead { max-width:880px; margin-bottom:0; color:var(--muted); font-size:16px; }
+      .meta { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px; }
+      .pill { display:inline-flex; align-items:center; min-height:28px; padding:0 11px; border:1px solid var(--line); border-radius:999px; color:#344054; background:#fff; font-size:12px; font-weight:800; }
+      .pill.g { color:var(--green); background:var(--green-soft); border-color:#a7f3d0; }
+      .pill.b { color:var(--blue); background:var(--blue-soft); border-color:#bae6fd; }
+      code { padding:2px 6px; border-radius:6px; color:#0f172a; background:var(--soft); font-family:"SFMono-Regular",Consolas,monospace; font-size:.86em; }
+      table { width:100%; border-collapse:collapse; overflow:hidden; border:1px solid var(--line); border-radius:12px; font-size:13.5px; margin-top:6px; }
+      th,td { padding:10px 13px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; } th { color:#475467; background:#f8fafc; font-size:11.5px; font-weight:800; text-transform:uppercase; } tr:last-child td { border-bottom:0; } td code { font-size:12px; }
+      .done { color:var(--green); font-weight:800; white-space:nowrap; }
+      .tag { display:inline-block; font-size:10.5px; font-weight:800; padding:1px 8px; border-radius:6px; white-space:nowrap; }
+      .tag.web { color:var(--blue); background:var(--blue-soft); } .tag.app { color:var(--violet); background:var(--violet-soft); } .tag.be { color:#334155; background:var(--soft); }
+      .callout { margin-top:14px; padding:16px; border:1px solid #a7f3d0; border-radius:12px; color:#065f46; background:var(--green-soft); }
+      .note { margin-top:14px; padding:16px; border:1px solid #bae6fd; border-radius:12px; color:var(--blue); background:var(--blue-soft); }
+      ul { margin:0; padding-left:20px; } li + li { margin-top:6px; }
+      .src { color:var(--muted); font-size:12px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="meta">
+          <span class="pill">Step 999 · 현황</span>
+          <span class="pill g">① 구현 완료</span>
+          <span class="pill b">기획 대비 대조</span>
+        </div>
+        <h1>구현 완료 (기획 대비)</h1>
+        <p class="lead">
+          <b>기획 문서에서 요구한 것 중 지금 코드로 동작하는 것</b>만 근거(파일·엔드포인트)와 함께 정리한다.
+          이행 루프 본체 6개 + 정합성 안전장치 + 구매·배송·수령 확장 + 정책 필드 + 공통 기반까지 완료.
+          아직 안 된 것은 별도 문서 <code>② 미구현 · 구현 예정 (기획 대비).html</code> 참고.
+        </p>
+      </header>
+
+      <!-- 1 -->
+      <section>
+        <h2>1. 이행 루프 본체 6개 (웹 3 · 타우리 3)</h2>
+        <p class="src">근거: <code>제품 핵심 기능 및 범위.html</code> §5·§8 — "본체 완성 기준: 6/6"</p>
+        <table>
+          <thead><tr><th>기능</th><th>면</th><th>상태</th><th>구현 근거</th></tr></thead>
+          <tbody>
+            <tr><td><b>후원하기</b> — 시설·물품 탐색, 공동충당 참여</td><td><span class="tag web">웹</span></td><td class="done">✅ 완료</td><td><code>/donate</code>, <code>/donate/facilities/[id]</code>, <code>/donate/items/[id]</code> · <code>features/donate</code> · POST <code>/api/contributions</code></td></tr>
+            <tr><td><b>후원 내역</b> — 내 기여·진행단계, 물품별 합산</td><td><span class="tag web">웹</span></td><td class="done">✅ 완료</td><td><code>/my-donations</code> · <code>features/my-donations</code> · GET <code>/api/contributions/me</code></td></tr>
+            <tr><td><b>물품 구매 현황</b> — 구매·증빙·송장 딥링크</td><td><span class="tag web">웹</span></td><td class="done">✅ 완료</td><td><code>PurchaseStatusCard</code> · GET <code>/api/donation-items/{id}/purchase-order</code> (공개)</td></tr>
+            <tr><td><b>시설 관리</b> — 시설·준비물 CRUD, 단계 전환</td><td><span class="tag app">타우리</span></td><td class="done">✅ 완료</td><td><code>features/facility-management</code> · <code>FacilityController</code> · <code>DonationItemController</code></td></tr>
+            <tr><td><b>후원 내역(기부 원장)</b> — 물품별·전체 조회</td><td><span class="tag app">타우리</span></td><td class="done">✅ 완료</td><td><code>features/contribution-ledger</code> · GET <code>/api/contributions</code>, <code>/by-item/{id}</code></td></tr>
+            <tr><td><b>통합 구매</b> — 실행→완료, 증빙·송장 기록</td><td><span class="tag app">타우리</span></td><td class="done">✅ 완료</td><td><code>features/purchase-management</code> · <code>PurchaseOrderController</code></td></tr>
+          </tbody>
+        </table>
+        <div class="callout"><b>본체 6/6 완료.</b> 시설 준비물 목표 → 공동충당 → 목표달성 잠금 → 통합구매 → 배송조회 → 수령확인까지 양쪽(웹·타우리)에서 닫힌다. (마지막 "영수증 발급"만 미완 — 문서②)</div>
+      </section>
+
+      <!-- 2 -->
+      <section>
+        <h2>2. 정합성 · 잠금 (핵심 안전장치)</h2>
+        <p class="src">근거: <code>step3 후원 목표 금액 초과시 정합성 동시성 문제 처리</code> · §15 KPI "중복구매 0"</p>
+        <table>
+          <thead><tr><th>항목</th><th>상태</th><th>구현 근거</th></tr></thead>
+          <tbody>
+            <tr><td>목표달성 시 자동 잠금(<code>LOCKED</code>) — 추가결제 차단</td><td class="done">✅</td><td><code>ContributionService</code> · <code>item.addRaised()</code> 후 도달 시 <code>markLocked()</code></td></tr>
+            <tr><td>초과 충당 방지 + 동시성(비관적 락)</td><td class="done">✅</td><td><code>findByIdForUpdate</code> (<code>@Lock PESSIMISTIC_WRITE</code>) — 20건 동시요청 검증 완료</td></tr>
+            <tr><td>중복구매 0 — 물품당 통합구매 1건</td><td class="done">✅</td><td><code>purchase_orders.donation_item_id</code> <b>UNIQUE</b> 제약</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- 3 -->
+      <section>
+        <h2>3. 구매 → 배송 → 수령 확장 (step5 · step6 Phase1)</h2>
+        <table>
+          <thead><tr><th>항목</th><th>상태</th><th>내용 · 근거</th></tr></thead>
+          <tbody>
+            <tr><td><b>통합구매 기록</b></td><td class="done">✅</td><td>판매처, 판매처 URL, 구매일, 구매액, 구매수량, 주문/영수증번호, <b>영수증 이미지 첨부</b>, 메모 — <code>PurchaseOrder</code> + S3 presign</td></tr>
+            <tr><td><b>송장(딥링크)</b></td><td class="done">✅</td><td>택배사·송장번호·송장이미지·배송예정일 · <code>tracker.delivery</code> 통합조회 딥링크 · 송장번호 채우면 <b>자동 배송중(SHIPPING)</b></td></tr>
+            <tr><td><b>수령확인</b></td><td class="done">✅</td><td>사람 1클릭 → <code>RECEIVED</code> · POST <code>/api/donation-items/{id}/receive</code> (배송완료 ≠ 수령확인)</td></tr>
+            <tr><td>두 입력 경로 유지</td><td class="done">✅</td><td>구매 폼에서 송장 함께 or 완료목록 <b>별도 '송장 등록'</b> 단계 — 팀 논의 여지</td></tr>
+          </tbody>
+        </table>
+        <div class="note">배송 <b>단계 자동화(집계 API pull)</b>는 step6 Phase2로 남김(문서②). 지금은 송장 1회 입력 + 딥링크 조회까지.</div>
+      </section>
+
+      <!-- 4 -->
+      <section>
+        <h2>4. 정책 필드 매핑 (핵심 정책 요약 대비)</h2>
+        <p class="src">근거: <code>후원 관련 정책 요약/핵심 정책 요약.md</code></p>
+        <table>
+          <thead><tr><th>정책</th><th>상태</th><th>구현 근거</th></tr></thead>
+          <tbody>
+            <tr><td>시설: 시설명·지역·유형·자격확인·표시상태·<code>avatar_initial</code>, 이미지 미사용</td><td class="done">✅</td><td><code>Facility</code> 도메인 + 시설 카드(이니셜)</td></tr>
+            <tr><td>시설 삭제 시 소속 물품 함께 정리</td><td class="done">✅</td><td><code>FacilityService.delete</code> → <code>donationItemRepository.deleteByFacility_Id</code></td></tr>
+            <tr><td>물품: 물품명·카테고리·수량메모·필요이유·목표금액·모인금액·상태·마감일·<code>emoji</code></td><td class="done">✅</td><td><code>DonationItem</code>: name·category·note·reason·goalAmount·raisedAmount·status·deadline·emoji·targetQuantity</td></tr>
+            <tr><td>모인금액 = <b>후원 참여 합계</b>로 대체 (정책상 "차기")</td><td class="done">✅ 선반영</td><td><code>item.addRaised(amount)</code> — 후원 시 실시간 합산</td></tr>
+            <tr><td>상태 배지: 모집중·목표달성·통합구매진행·배송중</td><td class="done">✅</td><td>배지 단일 출처(<code>Badge</code> / <code>ITEM_STATUS_*</code>)</td></tr>
+            <tr><td>"100% 전달" 등 미검증 보장문구 미사용</td><td class="done">✅</td><td>구매증빙=<b>세액공제 영수증 아님</b>(F-015) 명시</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- 5 -->
+      <section>
+        <h2>5. 공통 기반 · 인프라</h2>
+        <table>
+          <thead><tr><th>영역</th><th>상태</th><th>근거</th></tr></thead>
+          <tbody>
+            <tr><td>인증 — 회원가입·로그인·refresh·logout·me</td><td class="done">✅</td><td><code>AuthController</code> · JWT</td></tr>
+            <tr><td>인가(authz) <b>기초</b> — 역할 단위</td><td class="done">✅</td><td><code>SecurityConfig</code> <code>hasAnyRole</code> (세분화는 문서②)</td></tr>
+            <tr><td>DB-driven 메뉴 + 유저·롤·권한·역할-권한 관리</td><td class="done">✅</td><td><code>menu·role·permission·permission_category</code> · <code>UserManagementController</code></td></tr>
+            <tr><td>S3 업로드(presign)</td><td class="done">✅</td><td><code>UploadController</code> POST <code>/api/upload/presign</code> — 영수증·송장 이미지 사용</td></tr>
+            <tr><td>시더(idempotent)</td><td class="done">✅</td><td>시설·물품·후원자(donor01~10)·후원 데모</td></tr>
+            <tr><td>공통 UI 컴포넌트</td><td class="done">✅</td><td><code>Select</code>, <b><code>DatePicker</code>(신규)</b>, <code>Drawer</code>, <code>DataTable</code>, <code>FormField</code> 등</td></tr>
+            <tr><td>후원하기 카드 UI — 2열 세로 카드</td><td class="done">✅</td><td><code>DonationItemCard</code> 리팩토링(상태 배지 우상단·진행률 묶음)</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- 6 -->
+      <section>
+        <h2>6. API 인벤토리 (구현된 엔드포인트)</h2>
+        <table>
+          <thead><tr><th>도메인</th><th>엔드포인트</th></tr></thead>
+          <tbody>
+            <tr><td>인증/유저</td><td><code>/api/auth/*</code> (signup·login·refresh·logout·me·check-email), <code>/api/users/**</code> (role·active·삭제)</td></tr>
+            <tr><td>시설/물품</td><td><code>/api/facilities/**</code>, <code>/api/facilities/{id}/items</code>, <code>/api/donation-items/**</code></td></tr>
+            <tr><td>후원(원장)</td><td>POST <code>/api/contributions</code>, GET <code>/me</code>·<code>/by-item/{id}</code>·전체</td></tr>
+            <tr><td>통합구매/배송</td><td>POST <code>/donation-items/{id}/purchase-order</code>, GET <code>/purchase-orders</code>·<code>/pending</code>·물품별, PATCH <code>/purchase-orders/{id}</code>·<code>/{id}/shipment</code>, POST <code>/donation-items/{id}/receive</code></td></tr>
+            <tr><td>업로드/설정/메뉴</td><td>POST <code>/api/upload/presign</code>, <code>/api/site-settings</code>, <code>/api/menus</code>, 권한/역할 관리 일체</td></tr>
+          </tbody>
+        </table>
+        <div class="note">참고: 웹 관리자용 라우트(<code>/facilities</code>·<code>/purchase-orders</code>·<code>/receipts</code>·<code>/delivery-tracking</code> 등)는 존재하나, 관리 기능의 주 무대는 <b>타우리</b>다. 빈 페이지/스텁은 문서②에서 다룬다.</div>
+      </section>
+    </main>
+  </body>
+</html>

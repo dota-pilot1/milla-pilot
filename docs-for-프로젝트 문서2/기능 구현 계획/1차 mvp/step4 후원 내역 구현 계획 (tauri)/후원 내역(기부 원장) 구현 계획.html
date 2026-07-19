@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Step4 — 후원 내역(기부 원장) 구현 계획</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f8fb; --paper: #fff; --text: #111827; --muted: #667085; --line: #d8e0eb; --soft: #f1f5f9;
+        --green: #047857; --green-soft: #ecfdf5; --blue: #0369a1; --blue-soft: #e0f2fe;
+        --amber: #b45309; --amber-soft: #fffbeb; --violet: #6d28d9; --violet-soft: #f5f3ff; --red: #b42318; --red-soft: #fff1f3;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; color: var(--text); background: var(--bg); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.65; }
+      main { max-width: 1080px; margin: 0 auto; padding: 40px 24px 72px; }
+      header, section { border: 1px solid var(--line); border-radius: 18px; background: var(--paper); box-shadow: 0 16px 42px rgba(15,23,42,.05); }
+      header { padding: 30px; } section { margin-top: 18px; padding: 24px; }
+      h1,h2,h3,p { margin-top: 0; } h1 { margin-bottom: 10px; font-size: 30px; letter-spacing: -.01em; }
+      h2 { margin-bottom: 14px; font-size: 21px; letter-spacing: -.01em; } h3 { margin: 18px 0 8px; font-size: 15px; } p { margin-bottom: 12px; }
+      .lead { max-width: 840px; margin-bottom: 0; color: var(--muted); font-size: 16px; }
+      .meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+      .pill { display: inline-flex; align-items: center; min-height: 28px; padding: 0 11px; border: 1px solid var(--line); border-radius: 999px; color: #344054; background: #fff; font-size: 12px; font-weight: 800; }
+      .pill.g { color: var(--green); background: var(--green-soft); border-color: #a7f3d0; }
+      .pill.b { color: var(--blue); background: var(--blue-soft); border-color: #bae6fd; }
+      code { padding: 2px 6px; border-radius: 6px; color: #0f172a; background: var(--soft); font-family: "SFMono-Regular", Consolas, monospace; font-size: .9em; }
+      pre { overflow-x: auto; margin: 10px 0 0; padding: 16px; border: 1px solid var(--line); border-radius: 12px; color: #1f2937; background: #f8fafc; font-size: 12.5px; line-height: 1.7; font-family: "SFMono-Regular", Consolas, monospace; }
+      table { width: 100%; border-collapse: collapse; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; font-size: 13.5px; margin-top: 6px; }
+      th, td { padding: 10px 13px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; } th { color: #475467; background: #f8fafc; font-size: 11.5px; font-weight: 800; text-transform: uppercase; } tr:last-child td { border-bottom: 0; } td code { font-size: 12.5px; }
+      .tag { display: inline-block; font-size: 10.5px; font-weight: 800; padding: 1px 8px; border-radius: 6px; letter-spacing: .02em; }
+      .tag.new { color: var(--green); background: var(--green-soft); } .tag.reuse { color: var(--blue); background: var(--blue-soft); } .tag.todo { color: var(--amber); background: var(--amber-soft); }
+      .callout { margin-top: 14px; padding: 16px; border: 1px solid #a7f3d0; border-radius: 12px; color: #065f46; background: var(--green-soft); }
+      .note { margin-top: 14px; padding: 16px; border: 1px solid #bae6fd; border-radius: 12px; color: var(--blue); background: var(--blue-soft); }
+      .warning { margin-top: 14px; padding: 16px; border: 1px solid #fde68a; border-radius: 12px; color: var(--amber); background: var(--amber-soft); }
+      ul { margin: 0; padding-left: 20px; } li + li { margin-top: 6px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="meta">
+          <span class="pill">Step 4</span>
+          <span class="pill g">후원 내역 · 기부 원장</span>
+          <span class="pill b">관리자(Tauri)</span>
+        </div>
+        <h1>후원 내역(기부 원장) 구현 계획</h1>
+        <p class="lead">
+          관리자가 <b>물품·시설별로 "누가 얼마 후원했는지"</b>를 조회하는 기능. 후원자 화면(내 후원 내역)의
+          <b>운영자 버전</b>이며, 기획이 운영자에게 요구하는 "후원자별 기록으로 추적"을 채운다.
+        </p>
+      </header>
+
+      <section>
+        <h2>1. 기획 근거</h2>
+        <ul>
+          <li><b>§3 운영자 문제→변화</b>: "하나의 <b>후원자별 기록(기부 원장)</b>과 공통 상태값으로 추적"</li>
+          <li><b>F-014</b>: 후원자별 결제 식별·기부 원장 관리</li>
+          <li><b>§9</b>: 플랫폼은 <b>식별·기록·대조</b>·잠금·상태관리·검수를 맡는다</li>
+        </ul>
+        <div class="callout">기록은 이미 <code>Contribution</code> 엔티티로 쌓이고 있다(Step2). 이번 스텝은 그걸 <b>관리자가 읽는 뷰 + 조회 API</b>만 추가한다. 새 엔티티 없음.</div>
+      </section>
+
+      <section>
+        <h2>2. 백엔드</h2>
+        <table>
+          <thead><tr><th>대상</th><th>내용</th><th>구분</th></tr></thead>
+          <tbody>
+            <tr><td><code>ContributionRepository</code></td><td><code>findByDonationItem_IdOrderByCreatedAtDesc(itemId)</code> — 후원자 fetch join</td><td><span class="tag new">추가</span></td></tr>
+            <tr><td><code>ContributionService</code></td><td><code>findByItem(itemId)</code> (+ 옵션 <code>findByFacility(facilityId)</code>)</td><td><span class="tag new">추가</span></td></tr>
+            <tr><td>DTO <code>AdminContributionResponse</code></td><td><code>{ id, amount, createdAt, donor:{id,username,email} }</code></td><td><span class="tag new">추가</span></td></tr>
+            <tr><td><code>ContributionController</code></td><td><code>GET /api/donation-items/{id}/contributions</code></td><td><span class="tag new">추가</span></td></tr>
+            <tr><td>SecurityConfig</td><td>이 엔드포인트는 <b>관리자 전용</b>이어야 함 (아래 5절 authz)</td><td><span class="tag todo">연계</span></td></tr>
+          </tbody>
+        </table>
+        <pre>// 응답 예 — 물품별 기부 원장
+GET /api/donation-items/1/contributions
+[
+  { "id": 12, "amount": 300000, "createdAt": "...", "donor": { "id": 5, "username": "후원자01", "email": "donor01@test.com" } },
+  { "id": 13, "amount": 120000, "createdAt": "...", "donor": { "id": 6, "username": "후원자02", "email": "donor02@test.com" } }
+]</pre>
+        <div class="warning"><b>개인정보:</b> 후원자(성인)의 username·email은 <b>관리자만</b> 본다. 아동 정보와 무관(§4 아동은 후원자 아님). 공개 웹에는 절대 노출하지 않는다.</div>
+      </section>
+
+      <section>
+        <h2>3. 프론트 (Tauri)</h2>
+        <h3>메인 — 물품별 기부 원장 (추천)</h3>
+        <p>시설관리 <b>물품 패널</b>의 각 물품 행에 <b>"후원 내역"</b> 버튼 → <code>Drawer</code>로 그 물품의 후원자 목록 표시. 컨텍스트(어느 물품)와 함께 봐야 의미 있고, <code>Drawer</code>·<code>DataTable</code> primitive를 재사용한다.</p>
+        <table>
+          <thead><tr><th>요소</th><th>내용</th><th>구분</th></tr></thead>
+          <tbody>
+            <tr><td><code>entities/contribution</code> (Tauri)</td><td>타입 + <code>fetchItemContributions(itemId)</code></td><td><span class="tag new">추가</span></td></tr>
+            <tr><td>물품 행 "후원 내역" 버튼 + Drawer</td><td>후원자·금액·일시 <code>DataTable</code> + 합계</td><td><span class="tag reuse">primitive 재사용</span></td></tr>
+            <tr><td>빈 상태</td><td><code>EmptyState</code> "아직 후원이 없습니다"</td><td><span class="tag reuse">재사용</span></td></tr>
+          </tbody>
+        </table>
+        <h3>옵션 — 독립 "후원 내역" 메뉴 화면 (차기)</h3>
+        <p>사이드바 <code>후원 내역</code>(<code>/contributions</code>) 메뉴를 시설·물품 필터가 있는 전용 조회 화면으로. MVP는 위 물품별 Drawer로 충분하므로 <b>후순위</b>.</p>
+      </section>
+
+      <section>
+        <h2>4. 화면 흐름</h2>
+        <pre>시설 관리 → 시설 선택 → 물품 패널
+  → 물품 행 [후원 내역] 클릭
+  → Drawer: "초등 학습 문제집 세트 · 후원 내역"
+       후원자01   300,000원   2026-07-17
+       후원자02   120,000원   2026-07-17
+       ─────────────────────────────
+       합계        420,000원  (2명)</pre>
+      </section>
+
+      <section>
+        <h2>5. authz 연계 (같이/직후)</h2>
+        <p>후원 내역 조회는 <b>관리자만</b> 봐야 한다. 현재 후원 관리 API는 "로그인만 하면" 접근 가능(갭). 이 스텝과 함께 또는 직후에:</p>
+        <ul>
+          <li>후원 관리 엔드포인트(<code>/api/facilities</code> 변경, <code>/api/donation-items</code> 변경, <code>/contributions</code> 조회)를 <b><code>ROLE_PLATFORM_ADMIN</code> 전용</b>으로 제한</li>
+          <li>SecurityConfig <code>requestMatchers(...).hasRole("PLATFORM_ADMIN")</code> 또는 메서드 보안</li>
+        </ul>
+        <div class="note">공개 GET(<code>/api/facilities/**</code> 목록·물품)은 그대로 열어두고, <b>후원 내역·CRUD·상태변경만</b> 관리자로 막는다.</div>
+      </section>
+
+      <section>
+        <h2>6. 범위 안 / 밖</h2>
+        <table>
+          <thead><tr><th>✅ 이번(Step4)</th><th>⛔ 밖</th></tr></thead>
+          <tbody>
+            <tr><td>물품별 기부 원장 조회(관리자)</td><td>후원 취소·환불(결제 영역)</td></tr>
+            <tr><td>후원자·금액·일시·합계 표시</td><td>독립 후원 내역 메뉴 전용 화면(차기)</td></tr>
+            <tr><td>관리자 authz 제한</td><td>정산·대사(회계) 리포트</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>7. 함께 정리</h2>
+        <ul>
+          <li><b>펀딩 캠페인 메뉴 숨김</b> — 기획 밖(파일럿 이후 후보). <code>ADMIN_FUNDING_CAMPAIGNS</code> deprecate.</li>
+          <li>통합구매·배송·증빙은 별도 대형 화면 대신 <b>물품 단계 전환(advancer)</b>으로 흡수(별도 스텝).</li>
+        </ul>
+        <p>정책: <code>공통 관리/후원 관련 정책 정리/후원 정책.md</code> · 선행: <code>step2 내 후원 내역 페이지 구현 계획</code></p>
+      </section>
+    </main>
+  </body>
+</html>

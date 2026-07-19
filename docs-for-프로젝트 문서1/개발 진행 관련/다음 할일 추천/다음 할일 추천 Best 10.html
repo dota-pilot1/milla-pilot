@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>다음 할일 추천 Best 10 (착수 순서 · 구현 여부)</title>
+<style>
+  :root { color-scheme: light; --bg:#f6f8fb; --paper:#fff; --text:#111827; --muted:#667085; --line:#d8e0eb; --soft:#f1f5f9;
+    --green:#047857; --green-soft:#ecfdf5; --blue:#0369a1; --blue-soft:#e0f2fe; --amber:#b45309; --amber-soft:#fffbeb; --violet:#6d28d9; --violet-soft:#f5f3ff; --red:#b42318; --red-soft:#fff1f3; }
+  * { box-sizing:border-box; }
+  body { margin:0; color:var(--text); background:var(--bg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; line-height:1.65; }
+  main { max-width:1080px; margin:0 auto; padding:40px 24px 72px; }
+  header, section { border:1px solid var(--line); border-radius:18px; background:var(--paper); box-shadow:0 16px 42px rgba(15,23,42,.05); }
+  header { padding:30px; } section { margin-top:18px; padding:24px; }
+  h1,h2,h3,p { margin-top:0; } h1 { margin-bottom:10px; font-size:30px; letter-spacing:-.01em; }
+  h2 { margin-bottom:14px; font-size:21px; } h3 { margin:22px 0 8px; font-size:16px; } p { margin-bottom:12px; }
+  .lead { max-width:900px; margin-bottom:0; color:var(--muted); font-size:16px; }
+  .meta { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px; }
+  .pill { display:inline-flex; align-items:center; min-height:28px; padding:0 11px; border:1px solid var(--line); border-radius:999px; color:#344054; background:#fff; font-size:12px; font-weight:800; }
+  .pill.g { color:var(--green); background:var(--green-soft); border-color:#a7f3d0; }
+  .pill.b { color:var(--blue); background:var(--blue-soft); border-color:#bae6fd; }
+  .pill.p0 { color:var(--red); background:var(--red-soft); border-color:#fecdd3; }
+  .pill.p1 { color:var(--amber); background:var(--amber-soft); border-color:#fde68a; }
+  .pill.p2 { color:#475467; background:var(--soft); border-color:var(--line); }
+  code { padding:2px 6px; border-radius:6px; color:#0f172a; background:var(--soft); font-family:"SFMono-Regular",Consolas,monospace; font-size:.86em; }
+  table { width:100%; border-collapse:collapse; overflow:hidden; border:1px solid var(--line); border-radius:12px; font-size:13.5px; margin-top:6px; }
+  th,td { padding:10px 13px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; } th { color:#475467; background:#f8fafc; font-size:11.5px; font-weight:800; text-transform:uppercase; } tr:last-child td { border-bottom:0; } td code { font-size:12px; }
+  .rank { font-weight:900; color:#0f172a; white-space:nowrap; }
+  .tag { display:inline-block; font-size:10.5px; font-weight:800; padding:1px 8px; border-radius:6px; white-space:nowrap; }
+  .tag.web { color:var(--blue); background:var(--blue-soft); } .tag.app { color:var(--violet); background:var(--violet-soft); } .tag.be { color:#334155; background:var(--soft); }
+  .tag.gate { color:var(--amber); background:var(--amber-soft); } .tag.next { color:var(--violet); background:var(--violet-soft); }
+  .st { font-weight:800; white-space:nowrap; font-size:12.5px; }
+  .st.todo { color:var(--muted); }
+  .st.wip  { color:var(--amber); }
+  .st.done { color:var(--green); }
+  .go { color:var(--green); font-weight:800; white-space:nowrap; }
+  .hold { color:var(--amber); font-weight:800; white-space:nowrap; }
+  .later { color:var(--muted); font-weight:800; white-space:nowrap; }
+  .callout { margin-top:14px; padding:16px; border:1px solid #a7f3d0; border-radius:12px; color:#065f46; background:var(--green-soft); }
+  .note { margin-top:14px; padding:16px; border:1px solid #bae6fd; border-radius:12px; color:var(--blue); background:var(--blue-soft); }
+  .warn { margin-top:14px; padding:16px; border:1px solid #fde68a; border-radius:12px; color:#92400e; background:var(--amber-soft); }
+  ul { margin:0; padding-left:20px; } li + li { margin-top:6px; }
+  .src { color:var(--muted); font-size:12px; }
+  .item { margin-top:26px; padding-top:4px; }
+  .item h3 { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+  .kv th { width:104px; white-space:nowrap; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="meta">
+      <span class="pill">Step 999 · 계획</span>
+      <span class="pill g">다음 할일 추천</span>
+      <span class="pill b">착수 순서 · 구현 여부</span>
+    </div>
+    <h1>다음 할일 추천 — Best 10</h1>
+    <p class="lead">
+      <b>① 구현 완료</b>·<b>② 미구현 · 구현 예정</b>을 근거로 한 10가지 할일.
+      순번은 <b>정책 우선순위가 아니라 "지금 바로 착수 가능 + 가시성" 기준 착수 순서</b>로 재정렬했다
+      (정책 우선순위 P0·P1·P2는 배지로 그대로 표시). 각 항목에 <b>현재 · 할 일 · 완료 기준(DoD) · 규모 · 구현 여부</b>를 붙였다.
+      <b>구현 여부</b> 칸(⬜ 미구현 / 🚧 구현 중 / ✅ 완료)으로 진행을 추적한다.
+    </p>
+  </header>
+
+  <section>
+    <h2>한눈에 — 착수 순서 10</h2>
+    <table>
+      <thead>
+        <tr><th>#</th><th>항목</th><th>분류 · 우선순위</th><th>영역</th><th>구현 여부</th><th>착수</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="rank">1</td><td>후원자 알림(인앱 알림함)</td><td>운영 <span class="pill p1">P1</span></td><td><span class="tag be">BE</span> <span class="tag web">WEB</span></td><td class="st todo">⬜ 미구현</td><td class="go">지금</td></tr>
+        <tr><td class="rank">2</td><td>통계 대시보드</td><td>차기 · 부가</td><td><span class="tag web">WEB</span> <span class="tag app">APP</span></td><td class="st done">✅ 완료 <span class="src">(웹 v1)</span></td><td class="go">—</td></tr>
+        <tr><td class="rank">3</td><td>실결제(PG)</td><td>프로덕션 <span class="pill p0">P0</span></td><td><span class="tag be">BE</span> <span class="tag web">WEB</span></td><td class="st todo">⬜ 미구현</td><td class="hold">관문 대기</td></tr>
+        <tr><td class="rank">4</td><td>영수증 발급 단계(RECEIPTED)</td><td>본체 <span class="pill p0">P0</span></td><td><span class="tag be">BE</span> <span class="tag app">APP</span> <span class="tag web">WEB</span></td><td class="st todo">⬜ 미구현</td><td class="go">지금</td></tr>
+        <tr><td class="rank">5</td><td>후원 취소 · 환불(구매 전 취소)</td><td>프로덕션 <span class="pill p0">P0</span></td><td><span class="tag be">BE</span> <span class="tag web">WEB</span></td><td class="st todo">⬜ 미구현</td><td class="later">정책 후</td></tr>
+        <tr><td class="rank">6</td><td>관리자 권한 세분화(permission authz)</td><td>프로덕션 <span class="pill p1">P1</span></td><td><span class="tag be">BE</span></td><td class="st todo">⬜ 미구현</td><td class="go">지금</td></tr>
+        <tr><td class="rank">7</td><td>상태 전환 감사 로그 · 이력</td><td>운영 <span class="pill p1">P1</span></td><td><span class="tag be">BE</span> <span class="tag app">APP</span></td><td class="st todo">⬜ 미구현</td><td class="go">지금</td></tr>
+        <tr><td class="rank">8</td><td>마감일(deadline) 만료 · 목표미달 처리</td><td>운영 <span class="pill p2">P2</span></td><td><span class="tag be">BE</span></td><td class="st todo">⬜ 미구현</td><td class="later">#5 이후</td></tr>
+        <tr><td class="rank">9</td><td>실구매액 ↔ 목표액 차액 정산</td><td>운영 <span class="pill p2">P2</span></td><td><span class="tag be">BE</span> <span class="tag web">WEB</span></td><td class="st todo">⬜ 미구현</td><td class="later">#3 이후</td></tr>
+        <tr><td class="rank">10</td><td>인증 · 인가 견고화(401/403)</td><td>운영 <span class="pill p2">P2</span></td><td><span class="tag be">BE</span></td><td class="st todo">⬜ 미구현</td><td class="go">지금 <span class="src">(소)</span></td></tr>
+      </tbody>
+    </table>
+    <div class="note">
+      <b>순번 = 착수 순서(즉시 구현 가능성 + 가시성).</b> 정책상 필수도(P0&gt;P1&gt;P2)와는 다르다 —
+      알림·대시보드는 정책 우선순위가 높진 않지만 <b>선행 결정·관문 없이 오늘 바로 만들고 눈에 보이는</b> 순수 부가라 맨 앞에 뒀다.
+      본체·프로덕션 P0(영수증·실결제·취소)는 정책상 더 중요하나, 각각 도메인 무게·전문가 관문·정책 확정이 걸려 뒤로 배치했다.
+    </div>
+  </section>
+
+  <section>
+    <h2>재정렬 근거 · 관문</h2>
+    <div class="callout">
+      <b>지금 바로(결정·관문 불필요)</b> — #1 알림 · #2 대시보드 · #4 영수증 · #6 authz · #7 감사 · #10 인증정합화<br>
+      <b>선행조건 있음</b> — #5 취소(취소 허용 범위 <b>정책 확정</b> 후) · #8 마감일(#5 롤백 연동) · #9 차액(#3 실결제 이후)<br>
+      <b>관문 대기</b> — #3 실결제(PG)
+    </div>
+    <div class="warn">
+      <b>#3 실결제는 코드보다 관문이 먼저.</b> 정책·§5·F-016 "결제·환불은 전문가 검토 후 별도 단계".
+      실결제와 그에 딸린 <b>실환불·차액 정산(#9)</b>은 관문 통과 전까지 착수 대상이 아니다.
+      (취소의 <b>구매 전 롤백(#5)</b>은 실결제 없이 가능해 먼저 다룬다.)
+    </div>
+  </section>
+
+  <section>
+    <h2>항목별 착수 가이드</h2>
+
+    <div class="item">
+      <h3><span class="rank">1.</span> 후원자 알림(인앱 알림함) <span class="pill p1">운영 P1</span> <span class="st todo">⬜ 미구현</span> <span class="tag be">BE</span> <span class="tag web">WEB</span></h3>
+      <table class="kv">
+        <tr><th>왜 앞</th><td>선행 결정·관문 없는 순수 additive. 루프 종단 "후원자 화면에 단계 반영"(§8) — 현재는 재방문(pull)만.</td></tr>
+        <tr><th>현재</th><td>서버엔 <code>EmailNotificationService</code>(비번 재설정 메일)뿐, <b>인앱 알림 도메인 없음</b>. 목표달성·구매·배송·수령 시 후원자 통지 채널 부재.</td></tr>
+        <tr><th>할 일</th><td><ul>
+          <li>BE(신규): <code>Notification</code> 엔티티 + 상태 전환 시 후원자에게 emit + <code>GET /api/notifications/me</code> + 읽음 처리</li>
+          <li>WEB: 헤더 종 아이콘 뱃지 + 알림 목록 드롭다운/알림함 (표시는 후원자=웹)</li>
+        </ul></td></tr>
+        <tr><th>완료 기준</th><td>내가 후원한 물품이 배송중→수령으로 바뀌면 웹 알림함에 뱃지 + 항목이 뜬다.</td></tr>
+        <tr><th>규모</th><td>중 — BE 도메인 신규 + WEB 알림함.</td></tr>
+      </table>
+    </div>
+
+    <div class="item">
+      <h3><span class="rank">2.</span> 통계 대시보드 <span class="pill p2">차기 · 부가</span> <span class="st done">✅ 완료 (웹 v1)</span> <span class="tag web">WEB</span> <span class="tag app">APP</span></h3>
+      <table class="kv">
+        <tr><th>왜 앞</th><td>가장 만만함 — 웹 <code>/dashboard</code> 페이지·메뉴가 <b>이미 존재</b>, 집계 소스(후원·물품·시설) API도 다 있음. 관문·정책·도메인 신규 무관. 데모 임팩트 큼.</td></tr>
+        <tr><th>완료(웹 v1)</th><td><b>신규 API 없이</b> <code>GET /api/contributions/me</code> 하나로 클라이언트 집계. <code>src/app/dashboard/page.tsx</code>:
+          <ul>
+            <li>요약 지표 4종 — 내 총 후원액 · 후원 건수 · 참여 물품 · 참여 시설</li>
+            <li>물품 진행 상태 분포(<code>Badge</code> 카운트) · 참여 물품별 진행률(<code>Progress</code>) · 시설별 내 후원</li>
+            <li>로딩 스켈레톤 · 빈 상태 · 에러 상태. 반응형은 자연 접힘 grid만(브레이크포인트 최소화)</li>
+          </ul>
+          기존 공용 UI(<code>Card·Progress·Badge·PageHeader·EmptyState</code>) 재사용. TypeScript 검사 통과.</td></tr>
+        <tr><th>남은(차기)</th><td>운영 전역 통계(관리자용 집계 API·타우리 "운영 현황" 강화)는 데이터 축적 후. 지금은 <b>후원자 개인 대시보드</b> 범위.</td></tr>
+        <tr><th>규모</th><td>완료 — 소(대충 v1).</td></tr>
+      </table>
+    </div>
+
+    <div class="item">
+      <h3><span class="rank">3.</span> 실결제(PG) <span class="pill p0">프로덕션 P0</span> <span class="st todo">⬜ 미구현</span> <span class="tag gate">⚠ 관문 대기</span> <span class="tag be">BE</span> <span class="tag web">WEB</span></h3>
+      <table class="kv">
+        <tr><th>왜 대기</th><td>정책상 "결제는 전문가 검토 후 별도 단계"(§5·F-016). <b>관문 통과가 코드 착수의 선행 조건.</b></td></tr>
+        <tr><th>현재</th><td>공동충당은 <code>RECORDED</code>(가상 리허설) — 실제 돈 이동 없음. 목표달성도 "기록상".</td></tr>
+        <tr><th>할 일 (관문 후)</th><td>PG 선정(단건) → <code>PAID</code> + 결제키 저장. 후원금 = 시설 전용계좌 직접 귀속(정책) 반영.</td></tr>
+        <tr><th>완료 기준</th><td>실제 결제 승인 → <code>PAID</code> 기록 + 시설 계좌 귀속 확인.</td></tr>
+        <tr><th>규모</th><td>대 — 외부 PG 연동 + 정산/보안. 관문·법무 검토 포함.</td></tr>
+      </table>
+    </div>
+
+    <div class="item">
+      <h3><span class="rank">4.</span> 영수증 발급 단계(RECEIPTED) <span class="pill p0">본체 P0</span> <span class="st todo">⬜ 미구현</span> <span class="tag be">BE</span> <span class="tag app">APP</span> <span class="tag web">WEB</span></h3>
+      <table class="kv">
+        <tr><th>왜 지금</th><td>이행 루프의 <b>마지막 칸</b>. 본체 6/6 → 7/7 완결. 외부 관문 없음.</td></tr>
+        <tr><th>현재</th><td><code>ItemStatus.RECEIPTED</code>·메뉴(<code>ADMIN_RECEIPTS</code>·<code>/receipts</code>)는 있으나 <code>markReceipted()</code> 전환·발급 도메인·후원자 노출 전무. <b>RECEIVED에서 멈춤.</b></td></tr>
+        <tr><th>할 일</th><td><ul>
+          <li>BE: <code>DonationItem.markReceipted()</code> + 전환 API, 증빙 묶음(구매영수증+배송완료+수령확인) 발급</li>
+          <li>APP: 타우리 <code>/receipts</code> 스텁 → 실화면 · WEB: 구매현황/후원내역에 "영수증" 노출(세액공제용 아님 유지)</li>
+        </ul></td></tr>
+        <tr><th>완료 기준</th><td>RECEIVED 물품을 타우리에서 영수증 발급 → 웹 후원자 화면에 증빙 묶음 노출.</td></tr>
+        <tr><th>규모</th><td>중 — 도메인 전환 1 + API 1~2 + 화면 2.</td></tr>
+      </table>
+    </div>
+
+    <div class="item">
+      <h3><span class="rank">5.</span> 후원 취소 · 환불 정합성(구매 전 취소) <span class="pill p0">프로덕션 P0</span> <span class="st todo">⬜ 미구현</span> <span class="tag be">BE</span> <span class="tag web">WEB</span></h3>
+      <table class="kv">
+        <tr><th>선행</th><td>"취소 허용 범위" <b>정책 확정</b> 필요(기본선: 구매 BUYING 전까지 허용).</td></tr>
+        <tr><th>현재</th><td>취소/환불 경로 없음. 상태값 <code>RECORDED</code> 하나뿐, 롤백·잠금 해제 규칙 미정.</td></tr>
+        <tr><th>할 일</th><td><ul>
+          <li>BE: <code>ContributionStatus.CANCELLED</code>, 취소 허용 = BUYING 전, 비관락 <code>raisedAmount</code> 차감, 미달 시 <code>LOCKED→RECRUITING</code> 자동 복귀</li>
+          <li>API <code>POST /api/contributions/{id}/cancel</code> + 웹 후원내역 취소 버튼. 구매 후 환불은 별도(실결제 #3와 함께) — 범위 밖</li>
+        </ul></td></tr>
+        <tr><th>완료 기준</th><td>잠긴 물품에서 한 건 취소 → raisedAmount 감소 + 자동 RECRUITING 복귀 + 동시성 안전.</td></tr>
+        <tr><th>규모</th><td>중.</td></tr>
+      </table>
+    </div>
+
+    <div class="item">
+      <h3><span class="rank">6.</span> 관리자 권한 세분화(permission authz) <span class="pill p1">프로덕션 P1</span> <span class="st todo">⬜ 미구현</span> <span class="tag be">BE</span></h3>
+      <table class="kv">
+        <tr><th>왜 지금</th><td>permission·역할-권한 도메인·관리 화면이 <b>이미 있음</b>(①) — 배선만 = ROI 높음. <b>방금 시드한 시설/플랫폼 관리자 계정으로 즉시 검증.</b></td></tr>
+        <tr><th>현재</th><td><code>SecurityConfig</code>는 <code>hasAnyRole</code> 역할 단위만. <code>@PreAuthorize</code> 거의 없음.</td></tr>
+        <tr><th>할 일</th><td>권한 코드(<code>PURCHASE_EXECUTE</code>·<code>FACILITY_WRITE</code> 등) 시더 확장 → 민감 엔드포인트 <code>@PreAuthorize("hasAuthority(...)")</code> → JWT 권한 클레임.</td></tr>
+        <tr><th>완료 기준</th><td>시설 관리자로 통합구매 실행 API → <code>403</code>, 플랫폼 관리자 → <code>200</code>.</td></tr>
+        <tr><th>규모</th><td>중 — 도메인 존재, 배선 위주.</td></tr>
+      </table>
+    </div>
+
+    <div class="item">
+      <h3><span class="rank">7.</span> 상태 전환 감사 로그 · 이력 <span class="pill p1">운영 P1</span> <span class="st todo">⬜ 미구현</span> <span class="tag be">BE</span> <span class="tag app">APP</span></h3>
+      <table class="kv">
+        <tr><th>왜 지금</th><td>"감사메시지 = 프로덕션 필수"(§3). #6 authz와 운영 위생 세트.</td></tr>
+        <tr><th>현재</th><td>물품 상태 전환(<code>LOCKED→BUYING→SHIPPING→RECEIVED</code>)에 누가·언제·왜 이력 없음 — <code>updatedAt</code>만.</td></tr>
+        <tr><th>할 일</th><td>BE: <code>StatusHistory</code>(대상·이전→이후·actor·사유·시각) 추가 → 전환 시 append. APP: 타우리 타임라인 조회.</td></tr>
+        <tr><th>완료 기준</th><td>물품 상세에서 상태 전환 이력이 타임라인으로 보인다.</td></tr>
+        <tr><th>규모</th><td>소~중.</td></tr>
+      </table>
+    </div>
+
+    <div class="item">
+      <h3><span class="rank">8.</span> 마감일(deadline) 만료 · 목표미달 처리 <span class="pill p2">운영 P2</span> <span class="st todo">⬜ 미구현</span> <span class="tag be">BE</span></h3>
+      <table class="kv">
+        <tr><th>현재</th><td><code>DonationItem.deadline</code> 필드만. 만료 자동처리·미달 마감 규칙 없음 — 지난 물품도 계속 "모집중".</td></tr>
+        <tr><th>할 일</th><td>경과 스케줄러/조회 파생상태 → 미달이면 <code>EXPIRED</code> + 후원분 환불과 연동.</td></tr>
+        <tr><th>의존</th><td>취소·환불(#5) 롤백이 선행돼야 만료 환불 성립.</td></tr>
+        <tr><th>규모</th><td>중.</td></tr>
+      </table>
+    </div>
+
+    <div class="item">
+      <h3><span class="rank">9.</span> 실구매액 ↔ 목표액 차액 정산 <span class="pill p2">운영 P2</span> <span class="st todo">⬜ 미구현</span> <span class="tag be">BE</span> <span class="tag web">WEB</span></h3>
+      <table class="kv">
+        <tr><th>현재</th><td><code>purchasedAmount</code>를 목표액과 다르게 기록 가능하나, 잉여/부족 차액 처리·표시 미정.</td></tr>
+        <tr><th>할 일</th><td>차액 정책(잔액 = 시설 후원금 귀속 등) + 구매현황에 "목표 vs 실구매 · 잔액" 표기.</td></tr>
+        <tr><th>의존</th><td>실결제(#3) 붙으면 즉시 실이슈화 — 관문 이후.</td></tr>
+        <tr><th>규모</th><td>중.</td></tr>
+      </table>
+    </div>
+
+    <div class="item">
+      <h3><span class="rank">10.</span> 인증 · 인가 견고화(401/403) <span class="pill p2">운영 P2</span> <span class="st todo">⬜ 미구현</span> <span class="tag be">BE</span></h3>
+      <table class="kv">
+        <tr><th>왜 지금</th><td>#6 authz의 하부 위생. 작아서 끼워넣기 좋음.</td></tr>
+        <tr><th>현재</th><td>권한 거부 시 <code>403</code> 대신 <code>401</code> 등 상태코드 미세 결함. 리프레시 실패·연속실패 잠금 UX 얕음.</td></tr>
+        <tr><th>할 일</th><td>인증 실패 = 401 / 권한 부족 = 403 정합화, 리프레시·잠금 정비.</td></tr>
+        <tr><th>규모</th><td>소.</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>10번 이후 — 그 이후(차기 부가 나머지)</h2>
+    <p>②의 원래 10번 버킷 중 대시보드를 뺀 나머지. 파일럿 이후·데이터 축적 후 검토.</p>
+    <ul>
+      <li>실시간 배송 자동추적(집계 API pull) — step6 Phase 2. MVP는 딥링크까지 완료(①).</li>
+      <li>커뮤니티 · 명예홍보관 · 협력교실 — 파일럿 이후.</li>
+      <li>i18n(다국어) · 펀딩 캠페인 — 펀딩캠페인 메뉴는 현재 숨김.</li>
+      <li>물품/시설 대표 이미지 파이프라인 — 검수 기준 수립 후(지금은 emoji/이니셜).</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>참고 문서</h2>
+    <ul class="src">
+      <li>구현 완료 대조: <code>① 구현 완료 (기획 대비).html</code></li>
+      <li>미구현·예정(우선순위 근거): <code>② 미구현 · 구현 예정 (기획 대비).html</code></li>
+      <li>우선순위 요약 랭킹: <code>아직 미비한 필수 기능 베스트 10.html</code></li>
+      <li>범위/본체: <code>제품 핵심 기능 및 범위.html</code> · 정책: <code>핵심 정책 요약.md</code></li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>
