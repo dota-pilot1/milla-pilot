@@ -325,12 +325,14 @@ function SidebarLink({ item, depth = 0 }: { item: MenuItem; depth?: number }) {
       href={item.path}
       target={item.isExternal ? "_blank" : undefined}
       rel={item.isExternal ? "noopener noreferrer" : undefined}
-      className={`flex h-9 items-center gap-2 rounded-md px-2.5 text-sm transition-colors ${
+      className={cn(
+        "flex items-center rounded-md transition-colors",
+        depth > 0 ? "h-9 gap-2 px-2 text-[13px]" : "h-10 gap-2.5 px-2.5 text-sm",
         active
           ? "bg-primary text-primary-foreground"
-          : "text-muted-foreground hover:bg-accent hover:text-foreground"
-      }`}
-      style={{ paddingLeft: depth > 0 ? 18 : undefined }}
+          : "text-muted-foreground hover:bg-accent hover:text-foreground",
+      )}
+      style={{ paddingLeft: depth > 0 ? 14 : undefined }}
     >
       <Icon className="h-4 w-4 shrink-0" />
       <span className="truncate font-medium">{item.label}</span>
@@ -358,11 +360,11 @@ function SidebarSection({
   }, [active]);
 
   return (
-    <section className="space-y-1">
+    <section className="space-y-0.5">
       <button
         type="button"
         className={cn(
-          "flex h-9 w-full items-center gap-2 rounded-md px-2.5 text-sm font-semibold transition-colors",
+          "flex h-10 w-full items-center gap-2.5 rounded-md px-2.5 text-sm font-semibold transition-colors",
           active
             ? "text-foreground"
             : "text-muted-foreground hover:bg-accent hover:text-foreground",
@@ -380,9 +382,9 @@ function SidebarSection({
         />
       </button>
       {open ? (
-        <div className="ml-3 space-y-1 border-l border-sidebar-border py-1 pl-4">
+        <div className="ml-3 mt-1 space-y-0.5 border-l border-sidebar-border py-0.5 pl-3">
           {items.flatMap((child) => (child.children.length > 0 ? child.children : [child])).map((child) => (
-            <SidebarLink key={child.id} item={child} depth={0} />
+            <SidebarLink key={child.id} item={child} depth={1} />
           ))}
         </div>
       ) : null}
@@ -405,8 +407,8 @@ function Sidebar({ tree }: { tree: MenuItem[] }) {
           DonationPlatform
         </Link>
       </div>
-      <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-4">
-        <div className="space-y-1">
+      <nav className="flex-1 space-y-3 overflow-y-auto px-3 py-3">
+        <div className="space-y-0.5">
           {dashboard && <SidebarLink item={dashboard} />}
         </div>
         {webItems.map((item) =>
@@ -418,7 +420,7 @@ function Sidebar({ tree }: { tree: MenuItem[] }) {
               items={item.children}
             />
           ) : (
-            <div key={item.id} className="space-y-1">
+            <div key={item.id} className="space-y-0.5">
               <SidebarLink item={item} />
             </div>
           ),
@@ -458,12 +460,13 @@ function MobileNavLink({
       rel={item.isExternal ? "noopener noreferrer" : undefined}
       onClick={onSelect}
       className={cn(
-        "flex h-10 items-center gap-2 rounded-md px-3 text-sm transition-colors",
+        "flex items-center rounded-md transition-colors",
+        depth > 0 ? "h-9 gap-2 px-2 text-[13px]" : "h-10 gap-2.5 px-3 text-sm",
         active
           ? "bg-primary text-primary-foreground"
           : "text-muted-foreground hover:bg-accent hover:text-foreground",
       )}
-      style={{ paddingLeft: depth > 0 ? 28 : undefined }}
+      style={{ paddingLeft: depth > 0 ? 18 : undefined }}
     >
       <Icon className="size-4 shrink-0" />
       <span className="truncate font-medium">{item.label}</span>
@@ -492,8 +495,8 @@ function MobileNav({ tree }: { tree: MenuItem[] }) {
         <DialogHeader className="border-b px-4 py-4">
           <DialogTitle>메뉴</DialogTitle>
         </DialogHeader>
-        <nav className="max-h-[calc(100vh-6.5rem)] space-y-5 overflow-y-auto px-3 py-4">
-          <div className="space-y-1">
+        <nav className="max-h-[calc(100vh-6.5rem)] space-y-3 overflow-y-auto px-3 py-3">
+          <div className="space-y-0.5">
             {dashboard ? <MobileNavLink item={dashboard} onSelect={close} /> : null}
           </div>
           {webItems.map((item) => {
@@ -548,7 +551,7 @@ function MobileNavSection({
   }, [active]);
 
   return (
-    <section className="space-y-1">
+    <section className="space-y-0.5">
       <button
         type="button"
         className={cn(
@@ -570,11 +573,11 @@ function MobileNavSection({
         />
       </button>
       {open ? (
-        <div className="ml-4 space-y-1 border-l border-border py-1 pl-3">
+        <div className="ml-4 mt-1 space-y-0.5 border-l border-border py-0.5 pl-3">
           {items
             .flatMap((child) => (child.children.length > 0 ? child.children : [child]))
             .map((child) => (
-              <MobileNavLink key={child.id} item={child} depth={0} onSelect={onSelect} />
+              <MobileNavLink key={child.id} item={child} depth={1} onSelect={onSelect} />
             ))}
         </div>
       ) : null}
