@@ -402,10 +402,10 @@ type SeedAccountBarProps = {
 function SeedAccountBar({ selectedEmail, onSelect, onOpenRoleGuide }: SeedAccountBarProps) {
   return (
     <section
-      className="flex w-full max-w-[940px] items-start gap-2.5 rounded-xl border border-zinc-200 bg-white/95 p-2.5 shadow-[0_16px_44px_rgba(15,23,42,0.12)] backdrop-blur"
+      className="flex w-full max-w-[940px] items-start gap-2.5 rounded-xl border border-zinc-300 bg-white p-2.5 shadow-[0_18px_48px_rgba(15,23,42,0.14)] backdrop-blur"
       aria-label="시드 로그인 계정"
     >
-      <span className="mt-0.5 hidden size-8 shrink-0 place-items-center rounded-lg border border-emerald-100 bg-emerald-50 text-emerald-700 sm:grid" aria-hidden="true">
+      <span className="mt-0.5 hidden size-8 shrink-0 place-items-center rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 sm:grid" aria-hidden="true">
         <Zap size={16} />
       </span>
       <div className="grid min-w-0 flex-1 grid-cols-2 gap-1.5 sm:grid-cols-4 xl:grid-cols-8">
@@ -417,26 +417,26 @@ function SeedAccountBar({ selectedEmail, onSelect, onOpenRoleGuide }: SeedAccoun
             <button
               key={account.email}
               className={cn(
-                "relative flex min-h-[42px] min-w-0 flex-col items-start justify-center gap-0.5 rounded-lg border bg-white px-2.5 py-1.5 pr-6 text-left shadow-sm transition",
-                "hover:-translate-y-px hover:border-zinc-300 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2",
+                "relative flex min-h-[44px] min-w-0 flex-col items-start justify-center gap-1 rounded-lg border px-2.5 py-1.5 pr-6 text-left shadow-[0_1px_2px_rgba(15,23,42,0.08)] transition",
+                "hover:-translate-y-px hover:shadow-[0_7px_16px_rgba(15,23,42,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2",
                 role.cardClassName,
-                selected && "border-emerald-300 bg-emerald-50/80 ring-2 ring-emerald-600/15",
+                selected && "border-zinc-950 bg-white ring-2 ring-zinc-950/10 shadow-[0_8px_18px_rgba(15,23,42,0.16)]",
               )}
               type="button"
               onClick={() => onSelect(account)}
               title={`${account.label} / ${role.label} / ${account.email}`}
             >
-              <span className="block max-w-full truncate text-[12px] font-extrabold leading-none text-zinc-950">{account.label}</span>
-              <small className={cn("inline-flex rounded-md px-1.5 py-0.5 text-[10px] font-black leading-none", role.badgeClassName)}>
+              <span className="block max-w-full truncate text-[12px] font-black leading-none text-zinc-950">{account.label}</span>
+              <small className={cn("inline-flex rounded-md border px-1.5 py-0.5 text-[10px] font-black leading-none", role.badgeClassName)}>
                 {role.label}
               </small>
-              {selected && <Check className="absolute right-2 top-2 text-emerald-700" size={13} />}
+              {selected && <Check className="absolute right-2 top-2 text-zinc-950" size={13} />}
             </button>
           );
         })}
       </div>
       <button
-        className="hidden min-h-[42px] shrink-0 items-center justify-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 text-[12px] font-extrabold text-zinc-800 shadow-sm transition hover:border-zinc-300 hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2 xl:inline-flex"
+        className="hidden min-h-[44px] shrink-0 items-center justify-center gap-1.5 rounded-lg border border-zinc-300 bg-white px-3 text-[12px] font-extrabold text-zinc-900 shadow-[0_1px_2px_rgba(15,23,42,0.08)] transition hover:border-zinc-400 hover:bg-zinc-50 hover:shadow-[0_7px_16px_rgba(15,23,42,0.1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2 xl:inline-flex"
         type="button"
         onClick={onOpenRoleGuide}
       >
@@ -536,23 +536,23 @@ function getSeedRoleView(roleCode: SeedLoginAccount["roleCode"]) {
   if (roleCode === "ROLE_PLATFORM_ADMIN") {
     return {
       label: "플랫폼",
-      cardClassName: "border-rose-200 bg-rose-50/55 hover:border-rose-300",
-      badgeClassName: "bg-rose-600 text-white",
+      cardClassName: "border-rose-200 bg-rose-50/70 hover:border-rose-400",
+      badgeClassName: "border-rose-700 bg-rose-600 text-white",
     };
   }
 
   if (roleCode === "ROLE_FACILITY_ADMIN") {
     return {
       label: "시설",
-      cardClassName: "border-sky-200 bg-sky-50/60 hover:border-sky-300",
-      badgeClassName: "bg-sky-900 text-white",
+      cardClassName: "border-sky-200 bg-sky-50/75 hover:border-sky-500",
+      badgeClassName: "border-sky-950 bg-sky-900 text-white",
     };
   }
 
   return {
     label: "후원자",
-    cardClassName: "border-zinc-200 bg-white hover:border-zinc-300",
-    badgeClassName: "bg-zinc-100 text-zinc-700",
+    cardClassName: "border-zinc-300 bg-white hover:border-zinc-500",
+    badgeClassName: "border-zinc-200 bg-zinc-100 text-zinc-800",
   };
 }
 
