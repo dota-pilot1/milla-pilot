@@ -44,7 +44,7 @@ public class MenuSeeder implements ApplicationRunner {
                 new MenuDef("ADMIN_SYSTEM",          "ADMIN", "시스템 관리",   null,                   null,                "Settings",        RoleSeeder.ROLE_PLATFORM_ADMIN,   3),
                 new MenuDef("ADMIN_FACILITIES",      "ADMIN_FACILITY", "시설 목록",     "nav.facilities",       "/facilities",       "Building2",       RoleSeeder.ROLE_PLATFORM_ADMIN,   0),
                 // ADMIN_DONATION_ITEMS(후원 물품 관리)는 시설 관리 화면 안에서 시설별로 다루므로 독립 메뉴에서 제외.
-                new MenuDef("ADMIN_FUNDING_CAMPAIGNS","ADMIN_DONATION","펀딩 캠페인",   "nav.fundingCampaigns", "/funding-campaigns","HandCoins",       RoleSeeder.ROLE_PLATFORM_ADMIN,   1),
+                new MenuDef("ADMIN_FUNDING_CAMPAIGNS","ADMIN_DONATION","펀딩 캠페인",   "nav.fundingCampaigns", "/funding-campaigns","HandCoins",       RoleSeeder.ROLE_PLATFORM_ADMIN,   2),
                 new MenuDef("ADMIN_CONTRIBUTIONS",   "ADMIN_DONATION", "후원 내역",     "nav.contributions",    "/contributions",    "ReceiptText",     RoleSeeder.ROLE_PLATFORM_ADMIN,   0),
                 new MenuDef("ADMIN_RECEIPTS",        "ADMIN_DONATION", "증빙 관리",     "nav.receipts",         "/receipts",         "FileText",        RoleSeeder.ROLE_PLATFORM_ADMIN,   1),
                 new MenuDef("ADMIN_PURCHASE_ORDERS", "ADMIN_PURCHASE", "통합 구매",     "nav.purchaseOrders",   "/purchase-orders",  "ShoppingCart",    RoleSeeder.ROLE_PLATFORM_ADMIN,   0),
