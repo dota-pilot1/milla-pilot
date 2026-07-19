@@ -154,28 +154,124 @@ button:disabled {
 
 .admin-grid .admin-grid-selection-header .ag-header-cell-comp-wrapper,
 .admin-grid .admin-grid-selection-header .ag-header-cell-label,
-.admin-grid .admin-grid-selection-cell,
 .admin-grid .ag-header-cell[col-id="ag-Grid-SelectionColumn"] .ag-header-cell-comp-wrapper,
-.admin-grid .ag-header-cell[col-id="ag-Grid-SelectionColumn"] .ag-header-cell-label,
-.admin-grid .ag-cell[col-id="ag-Grid-SelectionColumn"],
-.admin-grid .ag-cell[col-id="ag-Grid-SelectionColumn"] .ag-cell-wrapper {
-  justify-content: center !important;
-}
-
-.admin-grid .admin-grid-selection-header .ag-checkbox,
-.admin-grid .admin-grid-selection-cell .ag-checkbox,
-.admin-grid .ag-selection-checkbox {
-  margin: 0 !important;
-}
-
-.admin-grid .ag-cell[col-id="ag-Grid-SelectionColumn"] .ag-cell-wrapper {
+.admin-grid .ag-header-cell[col-id="ag-Grid-SelectionColumn"] .ag-header-cell-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
 }
 
-.admin-grid .ag-cell[col-id="ag-Grid-SelectionColumn"] .ag-selection-checkbox {
-  display: inline-flex;
+.admin-grid .admin-grid-selection-cell .ag-cell-wrapper,
+.admin-grid .ag-cell[col-id="ag-Grid-SelectionColumn"] .ag-cell-wrapper {
+  display: flex;
+  width: 100%;
   align-items: center;
   justify-content: center;
+}
+
+.admin-grid .admin-grid-selection-header .ag-checkbox,
+.admin-grid .admin-grid-selection-cell .ag-selection-checkbox,
+.admin-grid .admin-grid-selection-cell .ag-checkbox,
+.admin-grid.ag-ltr .ag-header-select-all,
+.admin-grid.ag-ltr .ag-selection-checkbox,
+.admin-grid .ag-ltr .ag-header-select-all,
+.admin-grid .ag-ltr .ag-selection-checkbox,
+.admin-grid .ag-header-cell[col-id="ag-Grid-SelectionColumn"] .ag-checkbox,
+.admin-grid .ag-header-cell[col-id="ag-Grid-SelectionColumn"] .ag-header-select-all,
+.admin-grid .ag-cell[col-id="ag-Grid-SelectionColumn"] .ag-selection-checkbox,
+.admin-grid .ag-cell[col-id="ag-Grid-SelectionColumn"] .ag-checkbox {
+  margin: 0 auto !important;
+}
+
+.admin-grid .admin-grid-selection-cell,
+.admin-grid .ag-cell[col-id="ag-Grid-SelectionColumn"] {
+  justify-content: center !important;
+}
+
+.admin-grid .admin-grid-selection-cell .ag-selection-checkbox,
+.admin-grid .ag-cell[col-id="ag-Grid-SelectionColumn"] .ag-selection-checkbox {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-grid .admin-grid-selection-header .ag-header-select-all,
+.admin-grid .ag-header-cell[col-id="ag-Grid-SelectionColumn"] .ag-header-select-all {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-grid .ag-header-select-all {
+  transform: translateX(14px);
+}
+
+.admin-grid .ag-checkbox-input-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid #52525b;
+  border-radius: 3px;
+  background: #ffffff;
+  color: #ffffff;
+  flex: 0 0 auto;
+  line-height: 1;
+}
+
+.admin-grid .ag-checkbox-input-wrapper::before,
+.admin-grid .ag-checkbox-input-wrapper::after {
+  display: none;
+}
+
+.admin-grid .ag-checkbox-input-wrapper.ag-checked {
+  border-color: #059669;
+  background: #059669;
+}
+
+.admin-grid .ag-checkbox-input-wrapper.ag-checked::after {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 0.5px;
+  display: block;
+  width: 5px;
+  height: 9px;
+  border: solid #ffffff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.admin-grid .ag-checkbox-input-wrapper.ag-indeterminate {
+  border-color: #059669;
+  background: #059669;
+}
+
+.admin-grid .ag-checkbox-input-wrapper.ag-indeterminate::after {
+  content: "";
+  position: absolute;
+  left: 2.5px;
+  top: 5.5px;
+  display: block;
+  width: 7px;
+  height: 2px;
+  border-radius: 999px;
+  background: #ffffff;
+}
+
+.admin-grid .ag-checkbox-input-wrapper input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 .admin-grid .ag-cell {
@@ -196,6 +292,11 @@ button:disabled {
 
 .admin-grid .ag-row-hover {
   background: #fafafa;
+}
+
+.admin-grid .ag-row-selected,
+.admin-grid .ag-row-selected::before {
+  background-color: #f8fafc !important;
 }
 
 .ag-popup .ag-menu,

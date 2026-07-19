@@ -182,7 +182,7 @@ export function DashboardScreen({
         </div>
       </section>
 
-      <Tabs items={TABS} value={tab} onValueChange={setTab} className="mt-1" />
+      <Tabs items={TABS} value={tab} onValueChange={setTab} className="mt-2 mb-1" />
 
       {tab === "status" && (
         <div className="flex flex-col gap-5">

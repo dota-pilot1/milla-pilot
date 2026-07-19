@@ -19,6 +19,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import type { UserSummary } from "../../entities/user/model/types";
+import { isAdminAppMenu } from "../../shared/lib/menuScope";
 
 export type MenuRecord = {
   id: number;
@@ -153,10 +154,6 @@ export function buildTree(flat: MenuRecord[], user: UserSummary | null): MenuIte
     items.sort((a, b) => a.displayOrder - b.displayOrder);
   map.forEach((item) => sort(item.children));
   return sort(roots);
-}
-
-function isAdminAppMenu(menu: MenuRecord) {
-  return menu.code === "DASHBOARD" || menu.code === "ADMIN" || menu.code.startsWith("ADMIN_");
 }
 
 function canAccessRole(userRole: string | null, requiredRole: string | null) {

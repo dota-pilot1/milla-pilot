@@ -45,7 +45,10 @@ type UserGridRow = ManagedUser & {
 type ActiveFilter = "all" | "active" | "inactive";
 type UserSortField = "username" | "email" | "phoneNumber" | "roleName" | "roleCode" | "active" | "createdAt";
 type SortDirection = "asc" | "desc";
-type UserHeaderFieldKey = "username" | "phoneNumber" | "roleName" | "active" | "createdAt";
+type UserTextFilterKey = "username" | "phoneNumber" | "roleName";
+type UserHeaderFieldKey = UserTextFilterKey | "active" | "createdAt";
+type UserColumnFilters = Partial<Record<UserTextFilterKey, string>>;
+type RangeFilter = { start: string; end: string };
 
 const pageSize = 20;
 
@@ -72,6 +75,23 @@ const formatDate = (iso: string) =>
     day: "2-digit",
   }).format(new Date(iso));
 
+function includes(value: string | number | null | undefined, query?: string) {
+  if (!query?.trim()) return true;
+  return String(value ?? "")
+    .toLowerCase()
+    .includes(query.trim().toLowerCase());
+}
+
+function isWithinDateRange(iso: string, range: RangeFilter) {
+  if (!range.start && !range.end) return true;
+
+  const time = new Date(iso).getTime();
+  const start = range.start ? new Date(`${range.start}T00:00:00`).getTime() : Number.NEGATIVE_INFINITY;
+  const end = range.end ? new Date(`${range.end}T23:59:59.999`).getTime() : Number.POSITIVE_INFINITY;
+
+  return time >= start && time <= end;
+}
+
 export function UserManagementScreen({ token }: { token: string }) {
   const [usersPage, setUsersPage] = useState<UserPage>(emptyPage);
   const [roles, setRoles] = useState<RoleOption[]>([]);
@@ -81,6 +101,8 @@ export function UserManagementScreen({ token }: { token: string }) {
   const [query, setQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [activeFilter, setActiveFilter] = useState<ActiveFilter>("all");
+  const [columnFilters, setColumnFilters] = useState<UserColumnFilters>({});
+  const [createdAtRangeFilter, setCreatedAtRangeFilter] = useState<RangeFilter>({ start: "", end: "" });
   const [sortField, setSortField] = useState<UserSortField>("createdAt");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const debouncedQuery = useDebouncedValue(query, 250);
@@ -117,7 +139,7 @@ export function UserManagementScreen({ token }: { token: string }) {
     load();
   }, [activeFilter, debouncedQuery, page, roleFilter, sortDirection, sortField, token]);
 
-  const gridRows = useMemo<UserGridRow[]>(
+  const baseGridRows = useMemo<UserGridRow[]>(
     () =>
       usersPage.content.map((user) => ({
         ...user,
@@ -127,6 +149,18 @@ export function UserManagementScreen({ token }: { token: string }) {
         createdAtLabel: formatDate(user.createdAt),
       })),
     [usersPage.content],
+  );
+
+  const gridRows = useMemo(
+    () =>
+      baseGridRows.filter(
+        (row) =>
+          includes(`${row.username} ${row.email}`, columnFilters.username) &&
+          includes(row.phoneNumber, columnFilters.phoneNumber) &&
+          includes(`${row.roleName} ${row.roleCode}`, columnFilters.roleName) &&
+          isWithinDateRange(row.createdAt, createdAtRangeFilter),
+      ),
+    [baseGridRows, columnFilters, createdAtRangeFilter],
   );
 
   const roleById = useMemo(() => new Map(roles.map((role) => [role.id, role])), [roles]);
@@ -250,6 +284,26 @@ export function UserManagementScreen({ token }: { token: string }) {
     setPage(0);
   };
 
+  const setColumnFilter = (field: UserHeaderFieldKey, value: string) => {
+    if (field === "active" || field === "createdAt") return;
+
+    setColumnFilters((current) => {
+      const next = { ...current };
+      if (value.trim()) {
+        next[field] = value;
+      } else {
+        delete next[field];
+      }
+      return next;
+    });
+  };
+
+  const setRangeFilter = (field: UserHeaderFieldKey, value: RangeFilter) => {
+    if (field === "createdAt") {
+      setCreatedAtRangeFilter(value);
+    }
+  };
+
   const columnDefs = useMemo<ColDef<UserGridRow>[]>(
     () => [
       {
@@ -262,9 +316,12 @@ export function UserManagementScreen({ token }: { token: string }) {
         headerComponent: AdminGridHeader<UserGridRow, UserHeaderFieldKey>,
         headerComponentParams: {
           fieldKey: "username",
+          filterValue: columnFilters.username ?? "",
+          filterPlaceholder: "이름 또는 이메일",
           serverSortable: true,
           serverSort: sortField === "username" ? sortDirection : null,
           onServerSortChange: updateServerSort,
+          onFilterChange: setColumnFilter,
         },
         cellRenderer: ({ data }: { data?: UserGridRow }) => {
           if (!data) return null;
@@ -292,9 +349,12 @@ export function UserManagementScreen({ token }: { token: string }) {
         headerComponent: AdminGridHeader<UserGridRow, UserHeaderFieldKey>,
         headerComponentParams: {
           fieldKey: "phoneNumber",
+          filterValue: columnFilters.phoneNumber ?? "",
+          filterPlaceholder: "전화번호 입력",
           serverSortable: true,
           serverSort: sortField === "phoneNumber" ? sortDirection : null,
           onServerSortChange: updateServerSort,
+          onFilterChange: setColumnFilter,
         },
         cellRenderer: ({ data }: { data?: UserGridRow }) => {
           if (!data) return null;
@@ -313,9 +373,12 @@ export function UserManagementScreen({ token }: { token: string }) {
         headerComponent: AdminGridHeader<UserGridRow, UserHeaderFieldKey>,
         headerComponentParams: {
           fieldKey: "roleName",
+          filterValue: columnFilters.roleName ?? "",
+          filterPlaceholder: "역할명 또는 코드",
           serverSortable: true,
           serverSort: sortField === "roleName" ? sortDirection : null,
           onServerSortChange: updateServerSort,
+          onFilterChange: setColumnFilter,
         },
         cellRenderer: ({ data }: { data?: UserGridRow }) => {
           if (!data) return null;
@@ -361,9 +424,13 @@ export function UserManagementScreen({ token }: { token: string }) {
         headerComponent: AdminGridHeader<UserGridRow, UserHeaderFieldKey>,
         headerComponentParams: {
           fieldKey: "createdAt",
+          filterVariant: "date-range",
+          rangeValue: createdAtRangeFilter,
+          popoverAlign: "right",
           serverSortable: true,
           serverSort: sortField === "createdAt" ? sortDirection : null,
           onServerSortChange: updateServerSort,
+          onRangeFilterChange: setRangeFilter,
         },
         valueFormatter: ({ data }) => data?.createdAtLabel ?? "",
       },
@@ -394,7 +461,7 @@ export function UserManagementScreen({ token }: { token: string }) {
         },
       },
     ],
-    [busyUserId, page, sortDirection, sortField, token, usersPage.content.length],
+    [busyUserId, columnFilters, createdAtRangeFilter, page, sortDirection, sortField, token, usersPage.content.length],
   );
 
   return (
@@ -482,6 +549,8 @@ export function UserManagementScreen({ token }: { token: string }) {
                   updateQuery("");
                   updateRoleFilter("all");
                   updateActiveFilter("all");
+                  setColumnFilters({});
+                  setCreatedAtRangeFilter({ start: "", end: "" });
                 }}
               >
                 필터 초기화
@@ -523,7 +592,7 @@ export function UserManagementScreen({ token }: { token: string }) {
           totalPages={usersPage.totalPages}
           totalElements={usersPage.totalElements}
           pageSize={usersPage.size}
-          currentCount={usersPage.content.length}
+          currentCount={gridRows.length}
           loading={loading}
           selectedCount={selectedCount}
           onPageChange={setPage}

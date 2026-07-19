@@ -13,6 +13,7 @@ import { ContributionsScreen } from "../features/contribution-ledger/ui/Contribu
 import { PurchaseOrdersScreen } from "../features/purchase-management/ui/PurchaseOrdersScreen";
 import { UserManagementScreen } from "../features/user-management/ui/UserManagementScreen";
 import { DashboardScreen } from "../features/dashboard/ui/DashboardScreen";
+import { AppMenuManagementScreen } from "../features/app-menu-management/ui/AppMenuManagementScreen";
 import { API_BASE_URL, SERVER_ROOT_PATH } from "../shared/config/server";
 import { AppSidebar } from "../widgets/app-shell/ui/AppSidebar";
 import { AppTopbar } from "../widgets/app-shell/ui/AppTopbar";
@@ -184,6 +185,7 @@ export function App() {
           appUpdate={appUpdate}
           refreshKey={workspaceRefreshKey}
           onNavigate={openMenu}
+          onMenusChanged={refreshWorkspace}
         />
       </div>
     </div>
@@ -199,6 +201,7 @@ function AdminWorkspace({
   appUpdate,
   refreshKey,
   onNavigate,
+  onMenusChanged,
 }: {
   activeMenu: string;
   activeWebMenu: AdminMenu;
@@ -208,6 +211,7 @@ function AdminWorkspace({
   appUpdate: ReturnType<typeof useAppUpdate>;
   refreshKey: number;
   onNavigate: (menu: string) => void;
+  onMenusChanged: () => Promise<void>;
 }) {
   if (activeMenu === "settings") {
     return (
@@ -257,6 +261,14 @@ function AdminWorkspace({
 
   if (activeMenu === "ADMIN_USERS") {
     return <UserManagementScreen token={token} />;
+  }
+
+  if (activeMenu === "ADMIN_MENU_MANAGEMENT") {
+    return <AppMenuManagementScreen token={token} scope="web" onSaved={onMenusChanged} />;
+  }
+
+  if (activeMenu === "ADMIN_APP_MENU_MANAGEMENT") {
+    return <AppMenuManagementScreen token={token} scope="admin-app" onSaved={onMenusChanged} />;
   }
 
   if (activeMenu === "DASHBOARD") {
