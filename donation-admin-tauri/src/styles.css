@@ -145,6 +145,22 @@ button:disabled {
   justify-content: center;
 }
 
+.admin-grid .admin-grid-selection-header,
+.admin-grid .admin-grid-selection-cell {
+  padding-inline: 0;
+}
+
+.admin-grid .admin-grid-selection-header .ag-header-cell-comp-wrapper,
+.admin-grid .admin-grid-selection-header .ag-header-cell-label,
+.admin-grid .admin-grid-selection-cell {
+  justify-content: center;
+}
+
+.admin-grid .admin-grid-selection-header .ag-checkbox,
+.admin-grid .admin-grid-selection-cell .ag-checkbox {
+  margin: 0;
+}
+
 .admin-grid .ag-cell {
   display: flex;
   align-items: center;

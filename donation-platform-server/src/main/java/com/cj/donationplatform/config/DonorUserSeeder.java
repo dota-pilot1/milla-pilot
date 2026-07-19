@@ -33,32 +33,32 @@ public class DonorUserSeeder implements ApplicationRunner {
     public static final String DEMO_DONOR_2 = "junho.lee@naver.com";
     public static final String DEMO_DONOR_3 = "jiwoo.park@daum.net";
 
-    private record DonorDef(String email, String name) {}
+    private record DonorDef(String email, String name, String phoneNumber) {}
 
     private static final List<DonorDef> DONORS = List.of(
-            new DonorDef(DEMO_DONOR_1, "김서연"),
-            new DonorDef(DEMO_DONOR_2, "이준호"),
-            new DonorDef(DEMO_DONOR_3, "박지우"),
-            new DonorDef("minjun.choi@gmail.com", "최민준"),
-            new DonorDef("hayoon.jung@naver.com", "정하윤"),
-            new DonorDef("doyoon.kang@kakao.com", "강도윤"),
-            new DonorDef("seojun.yoon@gmail.com", "윤서준"),
-            new DonorDef("jiho.lim@naver.com", "임지호"),
-            new DonorDef("yeeun.han@daum.net", "한예은"),
-            new DonorDef("siwoo.oh@gmail.com", "오시우")
+            new DonorDef(DEMO_DONOR_1, "김서연", "010-4101-2001"),
+            new DonorDef(DEMO_DONOR_2, "이준호", "010-4101-2002"),
+            new DonorDef(DEMO_DONOR_3, "박지우", "010-4101-2003"),
+            new DonorDef("minjun.choi@gmail.com", "최민준", "010-4101-2004"),
+            new DonorDef("hayoon.jung@naver.com", "정하윤", "010-4101-2005"),
+            new DonorDef("doyoon.kang@kakao.com", "강도윤", "010-4101-2006"),
+            new DonorDef("seojun.yoon@gmail.com", "윤서준", "010-4101-2007"),
+            new DonorDef("jiho.lim@naver.com", "임지호", "010-4101-2008"),
+            new DonorDef("yeeun.han@daum.net", "한예은", "010-4101-2009"),
+            new DonorDef("siwoo.oh@gmail.com", "오시우", "010-4101-2010")
     );
 
     private static final List<DonorDef> LEGACY_DONORS = List.of(
-            new DonorDef("donor01@test.com", "김서연"),
-            new DonorDef("donor02@test.com", "이준호"),
-            new DonorDef("donor03@test.com", "박지우"),
-            new DonorDef("donor04@test.com", "최민준"),
-            new DonorDef("donor05@test.com", "정하윤"),
-            new DonorDef("donor06@test.com", "강도윤"),
-            new DonorDef("donor07@test.com", "윤서준"),
-            new DonorDef("donor08@test.com", "임지호"),
-            new DonorDef("donor09@test.com", "한예은"),
-            new DonorDef("donor10@test.com", "오시우")
+            new DonorDef("donor01@test.com", "김서연", "010-4201-2001"),
+            new DonorDef("donor02@test.com", "이준호", "010-4201-2002"),
+            new DonorDef("donor03@test.com", "박지우", "010-4201-2003"),
+            new DonorDef("donor04@test.com", "최민준", "010-4201-2004"),
+            new DonorDef("donor05@test.com", "정하윤", "010-4201-2005"),
+            new DonorDef("donor06@test.com", "강도윤", "010-4201-2006"),
+            new DonorDef("donor07@test.com", "윤서준", "010-4201-2007"),
+            new DonorDef("donor08@test.com", "임지호", "010-4201-2008"),
+            new DonorDef("donor09@test.com", "한예은", "010-4201-2009"),
+            new DonorDef("donor10@test.com", "오시우", "010-4201-2010")
     );
 
     public static final int DONOR_COUNT = DONORS.size();
@@ -90,6 +90,7 @@ public class DonorUserSeeder implements ApplicationRunner {
                     donor.email(),
                     passwordHash,
                     donor.name(),
+                    donor.phoneNumber(),
                     donorRole
             ));
             created++;
@@ -110,7 +111,7 @@ public class DonorUserSeeder implements ApplicationRunner {
     }
 
     private void syncDonor(User user, DonorDef donor, String passwordHash, Role donorRole) {
-        user.updateProfile(user.getEmail(), donor.name());
+        user.updateProfile(user.getEmail(), donor.name(), donor.phoneNumber());
         user.changePassword(passwordHash);
         user.changeRole(donorRole);
         user.activate();

@@ -255,8 +255,8 @@ export function UserManagementScreen({ token }: { token: string }) {
       {
         field: "username",
         headerName: "계정",
-        flex: 1.3,
-        minWidth: 240,
+        flex: 1,
+        minWidth: 300,
         pinned: null,
         sortable: false,
         headerComponent: AdminGridHeader<UserGridRow, UserHeaderFieldKey>,
@@ -285,7 +285,8 @@ export function UserManagementScreen({ token }: { token: string }) {
       {
         field: "phoneNumber",
         headerName: "전화번호",
-        width: 150,
+        flex: 0.5,
+        minWidth: 160,
         pinned: null,
         sortable: false,
         headerComponent: AdminGridHeader<UserGridRow, UserHeaderFieldKey>,
@@ -305,7 +306,8 @@ export function UserManagementScreen({ token }: { token: string }) {
       {
         field: "roleName",
         headerName: "역할",
-        width: 190,
+        flex: 0.7,
+        minWidth: 190,
         pinned: null,
         sortable: false,
         headerComponent: AdminGridHeader<UserGridRow, UserHeaderFieldKey>,
@@ -329,7 +331,8 @@ export function UserManagementScreen({ token }: { token: string }) {
       {
         field: "active",
         headerName: "상태",
-        width: 120,
+        flex: 0.42,
+        minWidth: 120,
         pinned: null,
         sortable: false,
         headerComponent: AdminGridHeader<UserGridRow, UserHeaderFieldKey>,
@@ -351,7 +354,8 @@ export function UserManagementScreen({ token }: { token: string }) {
       {
         field: "createdAt",
         headerName: "가입일",
-        width: 160,
+        flex: 0.5,
+        minWidth: 150,
         pinned: null,
         sortable: false,
         headerComponent: AdminGridHeader<UserGridRow, UserHeaderFieldKey>,
@@ -498,11 +502,13 @@ export function UserManagementScreen({ token }: { token: string }) {
               enableClickSelection: false,
             }}
             selectionColumnDef={{
-              width: 48,
-              minWidth: 48,
-              maxWidth: 48,
+              width: 44,
+              minWidth: 44,
+              maxWidth: 44,
               resizable: false,
               pinned: null,
+              headerClass: "admin-grid-selection-header",
+              cellClass: "admin-grid-selection-cell",
             }}
             onSelectionChanged={(event: SelectionChangedEvent<UserGridRow>) => {
               setSelectedCount(event.api.getSelectedRows().length);

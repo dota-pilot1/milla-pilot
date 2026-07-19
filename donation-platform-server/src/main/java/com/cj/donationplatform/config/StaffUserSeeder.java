@@ -28,17 +28,17 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StaffUserSeeder implements ApplicationRunner {
 
-    private record StaffDef(String email, String name, String roleCode) {}
+    private record StaffDef(String email, String name, String phoneNumber, String roleCode) {}
 
     private static final List<StaffDef> STAFF = List.of(
             // 플랫폼 관리자 — donation-admin-tauri 로그인 대상
-            new StaffDef("admin@milla.im", "배준영", RoleSeeder.ROLE_PLATFORM_ADMIN),
-            new StaffDef("ops@milla.im", "서민재", RoleSeeder.ROLE_PLATFORM_ADMIN),
+            new StaffDef("admin@milla.im", "배준영", "010-4000-1001", RoleSeeder.ROLE_PLATFORM_ADMIN),
+            new StaffDef("ops@milla.im", "서민재", "010-4000-1002", RoleSeeder.ROLE_PLATFORM_ADMIN),
             // 시설 관리자 — 시설별 담당 (데이터상 시설 FK 없음, 역할만 부여)
-            new StaffDef("haetsal.admin@milla.im", "오은주", RoleSeeder.ROLE_FACILITY_ADMIN),
-            new StaffDef("pureunsup.admin@milla.im", "신재훈", RoleSeeder.ROLE_FACILITY_ADMIN),
-            new StaffDef("onmaeul.admin@milla.im", "문가영", RoleSeeder.ROLE_FACILITY_ADMIN),
-            new StaffDef("saessak.admin@milla.im", "조성민", RoleSeeder.ROLE_FACILITY_ADMIN)
+            new StaffDef("haetsal.admin@milla.im", "오은주", "010-4000-1101", RoleSeeder.ROLE_FACILITY_ADMIN),
+            new StaffDef("pureunsup.admin@milla.im", "신재훈", "010-4000-1102", RoleSeeder.ROLE_FACILITY_ADMIN),
+            new StaffDef("onmaeul.admin@milla.im", "문가영", "010-4000-1103", RoleSeeder.ROLE_FACILITY_ADMIN),
+            new StaffDef("saessak.admin@milla.im", "조성민", "010-4000-1104", RoleSeeder.ROLE_FACILITY_ADMIN)
     );
 
     private final UserRepository userRepository;
@@ -59,6 +59,7 @@ public class StaffUserSeeder implements ApplicationRunner {
             String passwordHash = passwordEncoder.encode(DonorUserSeeder.TEST_PASSWORD);
             User existing = userRepository.findByEmail(staff.email()).orElse(null);
             if (existing != null) {
+                existing.updateProfile(existing.getEmail(), staff.name(), staff.phoneNumber());
                 existing.changePassword(passwordHash);
                 existing.changeRole(role);
                 existing.activate();
@@ -69,6 +70,7 @@ public class StaffUserSeeder implements ApplicationRunner {
                     staff.email(),
                     passwordHash,
                     staff.name(),
+                    staff.phoneNumber(),
                     role
             ));
             created++;

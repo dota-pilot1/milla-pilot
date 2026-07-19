@@ -393,11 +393,8 @@ function SidebarSection({
 }
 
 function Sidebar({ tree }: { tree: MenuItem[] }) {
-  const dashboard = tree.find((item) => item.code === "DASHBOARD");
   const admin = tree.find((item) => item.code === "ADMIN");
-  const webItems = tree.filter(
-    (item) => item.code !== "DASHBOARD" && item.code !== "ADMIN"
-  );
+  const webItems = tree.filter((item) => item.code !== "ADMIN");
   const sections = normalizeAdminSections(admin);
 
   return (
@@ -408,9 +405,6 @@ function Sidebar({ tree }: { tree: MenuItem[] }) {
         </Link>
       </div>
       <nav className="flex-1 space-y-3 overflow-y-auto px-3 py-3">
-        <div className="space-y-0.5">
-          {dashboard && <SidebarLink item={dashboard} />}
-        </div>
         {webItems.map((item) =>
           item.children.length > 0 ? (
             <SidebarSection
@@ -476,11 +470,8 @@ function MobileNavLink({
 
 function MobileNav({ tree }: { tree: MenuItem[] }) {
   const [open, setOpen] = useState(false);
-  const dashboard = tree.find((item) => item.code === "DASHBOARD");
   const admin = tree.find((item) => item.code === "ADMIN");
-  const webItems = tree.filter(
-    (item) => item.code !== "DASHBOARD" && item.code !== "ADMIN"
-  );
+  const webItems = tree.filter((item) => item.code !== "ADMIN");
   const sections = normalizeAdminSections(admin);
   const close = () => setOpen(false);
 
@@ -496,9 +487,6 @@ function MobileNav({ tree }: { tree: MenuItem[] }) {
           <DialogTitle>메뉴</DialogTitle>
         </DialogHeader>
         <nav className="max-h-[calc(100vh-6.5rem)] space-y-3 overflow-y-auto px-3 py-3">
-          <div className="space-y-0.5">
-            {dashboard ? <MobileNavLink item={dashboard} onSelect={close} /> : null}
-          </div>
           {webItems.map((item) => {
             if (item.children.length === 0) {
               return <MobileNavLink key={item.id} item={item} onSelect={close} />;
