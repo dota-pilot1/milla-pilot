@@ -58,7 +58,14 @@ jobs:
         with:
           tagName: ${{ github.ref_name }}
           releaseName: "Donation Admin ${{ github.ref_name }}"
-          releaseBody: "자동 빌드된 릴리스입니다. macOS는 .dmg, Windows는 .exe 설치 파일을 받아 설치하세요."
+          releaseBody: |
+            자동 빌드된 릴리스입니다.
+
+            - macOS: .dmg 설치 파일
+            - Windows: .exe 설치 파일
+            - updater: latest.json 및 서명 파일
+
+            macOS는 GitHub Actions에 등록된 Apple Developer ID 인증서로 서명과 공증을 시도합니다.
           releaseDraft: false
-          prerelease: true
+          prerelease: false
           args: ${{ matrix.args }}

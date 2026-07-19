@@ -1913,6 +1913,14 @@ button:disabled {
   font-weight: 700;
 }
 
+.app-update-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .app-update-panel button {
   display: inline-flex;
   align-items: center;
@@ -1941,12 +1949,20 @@ button:disabled {
 .app-update-message {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
   margin: 14px 16px 16px;
   padding: 10px 12px;
   border-radius: 9px;
   font-size: 13px;
   font-weight: 800;
+}
+
+.app-update-message > span {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
 }
 
 .app-update-message.success {
@@ -1959,6 +1975,21 @@ button:disabled {
   color: #b91c1c;
   border: 1px solid #fecaca;
   background: #fef2f2;
+}
+
+.app-update-panel .app-update-link-button {
+  flex: 0 0 auto;
+  min-height: 30px;
+  padding: 0 10px;
+  border-color: rgba(185, 28, 28, 0.18);
+  color: #991b1b;
+  background: #ffffff;
+  font-size: 12px;
+}
+
+.app-update-panel .app-update-link-button:hover:not(:disabled) {
+  border-color: rgba(185, 28, 28, 0.34);
+  background: #fff7f7;
 }
 
 .app-update-available {
