@@ -502,9 +502,9 @@ export function UserManagementScreen({ token }: { token: string }) {
               enableClickSelection: false,
             }}
             selectionColumnDef={{
-              width: 44,
-              minWidth: 44,
-              maxWidth: 44,
+              width: 46,
+              minWidth: 46,
+              maxWidth: 46,
               resizable: false,
               pinned: null,
               headerClass: "admin-grid-selection-header",
