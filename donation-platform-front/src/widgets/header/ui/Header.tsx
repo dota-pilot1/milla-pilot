@@ -81,7 +81,9 @@ const menuIcons: Record<string, LucideIcon> = {
   WEB_DONATION_ITEMS: PackagePlus,
   WEB_MY_CONTRIBUTIONS: ReceiptText,
   ADMIN: Settings,
+  ADMIN_FACILITY: Building2,
   ADMIN_DONATION: HandCoins,
+  ADMIN_PURCHASE: ShoppingCart,
   ADMIN_SYSTEM: Settings,
   ADMIN_DONATION_ITEMS: PackagePlus,
   ADMIN_FUNDING_CAMPAIGNS: HandCoins,
@@ -102,18 +104,31 @@ const menuIcons: Record<string, LucideIcon> = {
 const fallbackSections = [
   {
     id: -1,
-    label: "후원 관리",
+    label: "시설 관리",
     codes: [
+      "ADMIN_FACILITIES",
       "ADMIN_DONATION_ITEMS",
-      "ADMIN_FUNDING_CAMPAIGNS",
-      "ADMIN_CONTRIBUTIONS",
-      "ADMIN_PURCHASE_ORDERS",
-      "ADMIN_DELIVERY_TRACKING",
-      "ADMIN_RECEIPTS",
     ],
   },
   {
     id: -2,
+    label: "후원 관리",
+    codes: [
+      "ADMIN_FUNDING_CAMPAIGNS",
+      "ADMIN_CONTRIBUTIONS",
+      "ADMIN_RECEIPTS",
+    ],
+  },
+  {
+    id: -3,
+    label: "구매·배송",
+    codes: [
+      "ADMIN_PURCHASE_ORDERS",
+      "ADMIN_DELIVERY_TRACKING",
+    ],
+  },
+  {
+    id: -4,
     label: "시스템 관리",
     codes: [
       "ADMIN_USERS",
@@ -153,7 +168,12 @@ function normalizeAdminSections(admin: MenuItem | undefined) {
         .map((code) => admin.children.find((child) => child.code === code))
         .filter((child): child is MenuItem => Boolean(child));
       children.forEach((child) => used.add(child.code));
-      return { ...section, icon: section.id === -1 ? HandCoins : Settings, children };
+      const icon =
+        section.id === -1 ? Building2 :
+        section.id === -2 ? HandCoins :
+        section.id === -3 ? ShoppingCart :
+        Settings;
+      return { ...section, icon, children };
     })
     .filter((section) => section.children.length > 0);
 
@@ -354,8 +374,8 @@ function Sidebar({ tree }: { tree: MenuItem[] }) {
   const sections = normalizeAdminSections(admin);
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-border bg-background lg:flex lg:flex-col">
-      <div className="flex h-14 items-center border-b border-border px-4">
+    <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-sidebar-border bg-sidebar lg:flex lg:flex-col">
+      <div className="flex h-14 items-center border-b border-sidebar-border bg-sidebar px-4">
         <Link href="/dashboard" className="text-sm font-bold tracking-tight">
           DonationPlatform
         </Link>
@@ -492,22 +512,22 @@ function AppShell({
   const title = useMemo(() => getCurrentPageTitle(pathname, tree), [pathname, tree]);
 
   return (
-    <div className="min-h-screen bg-muted/25">
+    <div className="min-h-screen bg-background">
       <Sidebar tree={tree} />
       <div className="min-h-screen lg:pl-64">
-        <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-background/90 px-4 backdrop-blur-sm">
+        <header className="fixed left-0 right-0 top-0 z-30 box-border flex h-14 items-center justify-between border-b border-border bg-sidebar px-4 text-sidebar-foreground lg:left-64">
           <div className="flex min-w-0 items-center gap-2.5">
             <MobileNav tree={tree} />
             <div className="min-w-0 lg:hidden">
               <Link
                 href="/dashboard"
-                className="block truncate text-sm font-bold leading-tight tracking-tight text-foreground"
+                className="block truncate text-sm font-bold leading-tight tracking-tight text-sidebar-foreground"
               >
                 Milla
               </Link>
               <p className="truncate text-xs leading-tight text-muted-foreground">{title}</p>
             </div>
-            <p className="hidden truncate text-sm font-semibold text-foreground lg:block">{title}</p>
+            <p className="hidden truncate text-sm font-semibold text-sidebar-foreground lg:block">{title}</p>
           </div>
           <div className="flex items-center gap-2">
             <LanguageSelect />
@@ -515,7 +535,7 @@ function AppShell({
             <UserDropdown displayName={displayName} user={user} onLogout={onLogout} />
           </div>
         </header>
-        {children}
+        <div className="pt-14">{children}</div>
       </div>
     </div>
   );

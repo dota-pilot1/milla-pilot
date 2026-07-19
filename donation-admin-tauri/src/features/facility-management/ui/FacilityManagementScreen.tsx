@@ -250,6 +250,7 @@ export function FacilityManagementScreen({ token }: { token: string }) {
               <DataTable>
                 <DataTableHead>
                   <tr>
+                    <DataTableHeaderCell className="w-12 px-3" aria-label="순서 변경" />
                     <DataTableHeaderCell>시설</DataTableHeaderCell>
                     <DataTableHeaderCell>지역 · 유형</DataTableHeaderCell>
                     <DataTableHeaderCell>상태</DataTableHeaderCell>
@@ -274,7 +275,17 @@ export function FacilityManagementScreen({ token }: { token: string }) {
         )}
       </Panel>
 
-      {selected && <DonationItemPanel token={token} facility={selected} />}
+      <Drawer
+        open={!!selected}
+        onOpenChange={(open) => {
+          if (!open) setSelected(null);
+        }}
+        title={selected ? `${selected.name} · 후원 물품` : "후원 물품"}
+        description="시설 목록을 닫지 않고 선택한 시설의 준비물 목표를 관리합니다."
+        className="w-[760px]"
+      >
+        {selected ? <DonationItemPanel token={token} facility={selected} embedded /> : null}
+      </Drawer>
 
       <Drawer
         open={formOpen}
@@ -379,22 +390,24 @@ function SortableFacilityRow({ facility, selected, onSelect, onEdit, onRemove }:
       )}
       onClick={onSelect}
     >
-      <DataTableCell className="py-2.5 pl-3">
+      <DataTableCell className="w-12 px-3 py-2.5 align-middle">
+        <button
+          type="button"
+          className={cn(
+            "grid size-8 cursor-grab place-items-center rounded-md border border-transparent bg-transparent text-zinc-400 transition-colors",
+            "hover:border-zinc-200 hover:bg-zinc-50 hover:text-zinc-600 focus-visible:border-zinc-300 focus-visible:bg-zinc-50 focus-visible:text-zinc-600 focus-visible:outline-none",
+            isDragging && "cursor-grabbing border-zinc-300 bg-zinc-50 text-zinc-700 shadow-sm",
+          )}
+          aria-label={`${facility.name} 순서 변경`}
+          onClick={(e) => e.stopPropagation()}
+          {...attributes}
+          {...listeners}
+        >
+          <GripVertical size={15} strokeWidth={1.75} />
+        </button>
+      </DataTableCell>
+      <DataTableCell className="py-2.5 pl-0">
         <div className="flex min-w-0 items-center gap-2.5 font-bold text-zinc-900">
-          <button
-            type="button"
-            className={cn(
-              "grid h-7 w-7 shrink-0 cursor-grab place-items-center rounded-md border border-zinc-200 bg-transparent text-zinc-400 transition-colors",
-              "hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-600 focus-visible:border-zinc-300 focus-visible:bg-zinc-50 focus-visible:text-zinc-600 focus-visible:outline-none",
-              isDragging && "cursor-grabbing border-zinc-400 bg-zinc-50 text-zinc-700 shadow-sm",
-            )}
-            aria-label={`${facility.name} 순서 변경`}
-            onClick={(e) => e.stopPropagation()}
-            {...attributes}
-            {...listeners}
-          >
-            <GripVertical size={14} strokeWidth={1.75} />
-          </button>
           <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-emerald-50 text-emerald-700">
             {facility.avatarInitial || facility.name.charAt(0)}
           </span>
@@ -413,7 +426,7 @@ function SortableFacilityRow({ facility, selected, onSelect, onEdit, onRemove }:
       <DataTableCell onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-end gap-1">
           <Button size="sm" variant="ghost" onClick={onSelect}>
-            <PackageOpen size={14} /> 물품
+            <PackageOpen size={14} /> 물품 관리
           </Button>
           <Button size="sm" variant="ghost" onClick={onEdit}>
             <Pencil size={14} />

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { CheckCircle2, Plus, ShoppingCart, Truck } from "lucide-react";
-import { Panel, PanelHeader } from "../../../shared/ui/Panel";
+import { Panel } from "../../../shared/ui/Panel";
 import {
   DataTable,
   DataTableCell,
@@ -199,25 +199,34 @@ export function PurchaseOrdersScreen({ token }: { token: string }) {
   };
 
   return (
-    <main className="workspace-page space-y-5">
-      <section className="workspace-hero">
-        <div className="workspace-hero-mark">
-          <ShoppingCart size={26} />
+    <main className="workspace-page space-y-4">
+      <Panel className="p-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="grid size-10 shrink-0 place-items-center rounded-xl border border-emerald-100 bg-emerald-50 text-emerald-700">
+              <ShoppingCart size={20} />
+            </div>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <h1 className="text-[16px] font-extrabold text-zinc-950">통합 구매</h1>
+                <span className="text-[12px] font-semibold text-zinc-400">
+                  대기 {pending.length}건 · 완료 {orders.length}건
+                </span>
+              </div>
+              <p className="mt-1 text-[12px] leading-5 text-zinc-500">
+                목표달성 물품의 외부 구매 결과, 실구매액, 증빙을 한 흐름으로 기록합니다.
+              </p>
+            </div>
+          </div>
         </div>
-        <p className="eyebrow">DonationPlatform Admin</p>
-        <h1>통합 구매</h1>
-        <p>
-          목표달성한 물품을 한 번만 통합구매하고 판매처·실구매액·증빙을 기록합니다. (실결제 없음 —
-          외부 구매 결과 기록)
-        </p>
-      </section>
+      </Panel>
 
       {error && <p className="text-[13px] font-semibold text-red-600">{error}</p>}
 
-      <Panel>
-        <PanelHeader
+      <Panel className="p-4">
+        <CompactSectionHeader
           title={`구매 대기 · ${pending.length}건`}
-          description="목표달성(잠금) 물품 — 통합구매를 실행하세요."
+          description="목표달성된 물품을 통합구매로 전환합니다."
         />
         {loading ? (
           <p className="text-[13px] text-zinc-500">불러오는 중...</p>
@@ -262,8 +271,11 @@ export function PurchaseOrdersScreen({ token }: { token: string }) {
         )}
       </Panel>
 
-      <Panel>
-        <PanelHeader title={`통합구매 완료 · ${orders.length}건`} />
+      <Panel className="p-4">
+        <CompactSectionHeader
+          title={`통합구매 완료 · ${orders.length}건`}
+          description="판매처, 실구매액, 배송 처리 상태를 확인합니다."
+        />
         {loading ? null : orders.length === 0 ? (
           <EmptyState title="완료된 통합구매가 없습니다." />
         ) : (
@@ -518,6 +530,23 @@ export function PurchaseOrdersScreen({ token }: { token: string }) {
         </div>
       </Drawer>
     </main>
+  );
+}
+
+function CompactSectionHeader({
+  title,
+  description,
+}: {
+  title: string;
+  description?: string;
+}) {
+  return (
+    <div className="mb-3 flex items-start justify-between gap-3">
+      <div className="min-w-0">
+        <h2 className="text-[14px] font-extrabold text-zinc-950">{title}</h2>
+        {description && <p className="mt-1 text-[12px] leading-5 text-zinc-500">{description}</p>}
+      </div>
+    </div>
   );
 }
 

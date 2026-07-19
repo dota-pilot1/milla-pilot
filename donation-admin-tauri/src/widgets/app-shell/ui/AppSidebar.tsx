@@ -48,6 +48,21 @@ export function AppSidebar({
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
   const [refreshing, setRefreshing] = useState(false);
 
+  useEffect(() => {
+    const activeGroupIds = getActiveGroupIds(menus, activeMenu);
+    setCollapsedGroups(new Set(getGroupIds(menus).filter((id) => !activeGroupIds.has(id))));
+  }, [menus]);
+
+  useEffect(() => {
+    const activeGroupIds = getActiveGroupIds(menus, activeMenu);
+    if (!activeGroupIds.size) return;
+    setCollapsedGroups((prev) => {
+      const next = new Set(prev);
+      activeGroupIds.forEach((id) => next.delete(id));
+      return next;
+    });
+  }, [activeMenu, menus]);
+
   const toggleGroup = (id: string) =>
     setCollapsedGroups((prev) => {
       const next = new Set(prev);
@@ -132,7 +147,7 @@ export function AppSidebar({
             className="sidebar-icon-action"
             onClick={handleRefresh}
             disabled={refreshing || !onRefreshMenus}
-            title="메뉴 새로고침"
+            title="현재 화면 새로고침"
           >
             <RefreshCw size={15} className={refreshing ? "spin" : ""} />
           </button>
@@ -158,26 +173,40 @@ export function AppSidebar({
           </button>
         )}
         <div className="account-panel" ref={accountRef}>
-          <button
-            type="button"
-            className={`account-trigger ${accountOpen ? "active" : ""}`}
-            onClick={() => setAccountOpen((open) => !open)}
-            aria-expanded={accountOpen}
-            title={`${displayName} · ${roleName}`}
-          >
-            <div className="account-card">
-              <div className="account-avatar">{displayName.slice(0, 2).toUpperCase()}</div>
-              <div className={`account-status ${connectionStatus}`} aria-label={statusLabel[connectionStatus]}>
-                {connectionStatus === "checking" && <Loader2 className="spin" size={13} />}
-                {connectionStatus === "online" && <CheckCircle2 size={13} />}
-                {connectionStatus === "offline" && <CircleAlert size={13} />}
+          <div className={`account-trigger ${accountOpen ? "active" : ""}`}>
+            <button
+              type="button"
+              className="account-trigger-main"
+              onClick={() => setAccountOpen((open) => !open)}
+              aria-expanded={accountOpen}
+              title={`${displayName} · ${roleName}`}
+            >
+              <div className="account-card">
+                <div className="account-avatar">{displayName.slice(0, 2).toUpperCase()}</div>
+                <div className={`account-status ${connectionStatus}`} aria-label={statusLabel[connectionStatus]}>
+                  {connectionStatus === "checking" && <Loader2 className="spin" size={13} />}
+                  {connectionStatus === "online" && <CheckCircle2 size={13} />}
+                  {connectionStatus === "offline" && <CircleAlert size={13} />}
+                </div>
               </div>
-            </div>
-            <span className="account-trigger-copy">
-              <strong>{displayName}</strong>
-              <small>{roleName}</small>
-            </span>
-          </button>
+              <span className="account-trigger-copy">
+                <strong>{displayName}</strong>
+                <small>{roleName}</small>
+              </span>
+            </button>
+            <button
+              type="button"
+              className="account-quick-logout"
+              aria-label="로그아웃"
+              title="로그아웃"
+              onClick={() => {
+                setAccountOpen(false);
+                onLogout();
+              }}
+            >
+              <LogOut size={15} />
+            </button>
+          </div>
 
           {accountOpen && (
             <div className="account-popover">
@@ -319,4 +348,31 @@ function SidebarButton({
       <strong>{menu.label}</strong>
     </button>
   );
+}
+
+function getGroupIds(menus: AdminMenu[]): string[] {
+  return menus.flatMap((menu) => [
+    ...(menu.children.length ? [menu.id] : []),
+    ...getGroupIds(menu.children),
+  ]);
+}
+
+function getActiveGroupIds(menus: AdminMenu[], activeMenu: string): Set<string> {
+  const result = new Set<string>();
+
+  const visit = (menu: AdminMenu, parents: string[]): boolean => {
+    if (menu.id === activeMenu) {
+      parents.forEach((id) => result.add(id));
+      return true;
+    }
+
+    for (const child of menu.children) {
+      if (visit(child, [...parents, menu.id])) return true;
+    }
+
+    return false;
+  };
+
+  menus.forEach((menu) => visit(menu, []));
+  return result;
 }

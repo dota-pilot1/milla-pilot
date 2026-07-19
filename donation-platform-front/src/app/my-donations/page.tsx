@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ReceiptText } from "lucide-react";
 import { RequireAuth } from "@/widgets/guards/RequireAuth";
 import { PageHeader } from "@/shared/ui/PageHeader";
+import { PageShell } from "@/shared/ui/PageShell";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { buttonVariants } from "@/shared/ui/Button";
 import { contributionApi } from "@/entities/contribution/api/contributionApi";
@@ -26,7 +27,7 @@ function MyDonationsInner() {
   });
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
+    <PageShell>
       <div className="space-y-6">
         <PageHeader
           icon={ReceiptText}
@@ -57,6 +58,6 @@ function MyDonationsInner() {
           <MyDonationsList contributions={data} />
         )}
       </div>
-    </main>
+    </PageShell>
   );
 }

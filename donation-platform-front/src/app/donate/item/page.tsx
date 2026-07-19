@@ -9,6 +9,7 @@ import { Badge } from "@/shared/ui/Badge";
 import { Progress } from "@/shared/ui/Progress";
 import { StatusTimeline } from "@/shared/ui/StatusTimeline";
 import { EmptyState } from "@/shared/ui/EmptyState";
+import { PageShell } from "@/shared/ui/PageShell";
 import { pctOf } from "@/shared/lib/format";
 import { facilityApi } from "@/entities/facility/api/facilityApi";
 import { donationItemApi } from "@/entities/donation-item/api/donationItemApi";
@@ -54,7 +55,7 @@ function DonationItemDetail() {
   const full = item ? item.raisedAmount >= item.goalAmount : false;
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+    <PageShell width="content">
       <div className="space-y-6">
         <Link
           href={backHref}
@@ -119,13 +120,13 @@ function DonationItemDetail() {
           </div>
         )}
       </div>
-    </main>
+    </PageShell>
   );
 }
 
 export default function DonationItemDetailPage() {
   return (
-    <Suspense fallback={<div className="mx-auto max-w-4xl px-4 py-8" />}>
+    <Suspense fallback={<PageShell width="content" />}>
       <DonationItemDetail />
     </Suspense>
   );

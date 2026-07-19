@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, PackageOpen } from "lucide-react";
 import { Badge } from "@/shared/ui/Badge";
 import { EmptyState } from "@/shared/ui/EmptyState";
+import { PageShell } from "@/shared/ui/PageShell";
 import { Progress } from "@/shared/ui/Progress";
 import { formatKRW, pctOf } from "@/shared/lib/format";
 import { facilityApi } from "@/entities/facility/api/facilityApi";
@@ -72,13 +73,13 @@ function FacilityDonate() {
   const stats = summarize(items);
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+    <PageShell>
       <div className="space-y-6">
         <Link
           href="/donate"
           className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
-          <ArrowLeft className="size-4" /> 후원하기
+          <ArrowLeft className="size-4" /> 시설 목록으로
         </Link>
 
         {facility ? (
@@ -88,7 +89,10 @@ function FacilityDonate() {
                 {facility.avatarInitial || facility.name.charAt(0)}
               </span>
               <div className="min-w-0 flex-1 space-y-2">
-                <h1 className="text-2xl font-semibold tracking-tight">{facility.name}</h1>
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground">선택한 시설</p>
+                  <h1 className="text-2xl font-semibold tracking-tight">{facility.name}</h1>
+                </div>
                 <div className="flex flex-wrap items-center gap-2">
                   {facility.verified ? <Badge variant="verified">✓ 자격확인</Badge> : null}
                   <Badge variant={FACILITY_STATUS_VARIANT[facility.status]}>
@@ -163,7 +167,7 @@ function FacilityDonate() {
         </div>
 
         {itemsQuery.isLoading ? (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-5 sm:grid-cols-2">
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="h-48 animate-pulse rounded-xl border bg-card" />
             ))}
@@ -177,7 +181,7 @@ function FacilityDonate() {
             description="이 시설의 준비물 목표가 곧 올라옵니다."
           />
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-5 sm:grid-cols-2">
             {items.map((item) => (
               <DonationItemCard
                 key={item.id}
@@ -188,13 +192,13 @@ function FacilityDonate() {
           </div>
         )}
       </div>
-    </main>
+    </PageShell>
   );
 }
 
 export default function FacilityDonatePage() {
   return (
-    <Suspense fallback={<div className="mx-auto max-w-4xl px-4 py-8" />}>
+    <Suspense fallback={<PageShell />}>
       <FacilityDonate />
     </Suspense>
   );

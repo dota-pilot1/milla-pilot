@@ -73,7 +73,13 @@ const itemStatusTone: Record<ItemStatus, "success" | "warning" | "info" | "neutr
   RECEIPTED: "success",
 };
 
-export function DonationItemPanel({ token, facility }: { token: string; facility: Facility }) {
+type DonationItemPanelProps = {
+  token: string;
+  facility: Facility;
+  embedded?: boolean;
+};
+
+export function DonationItemPanel({ token, facility, embedded = false }: DonationItemPanelProps) {
   const [items, setItems] = useState<DonationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -164,12 +170,15 @@ export function DonationItemPanel({ token, facility }: { token: string; facility
     }
   };
 
-  return (
+  const content = (
     <>
-      <Panel className="mt-4">
         <PanelHeader
-          title={`${facility.name} · 후원 물품`}
-          description={`이 시설의 준비물 목표를 관리합니다. 총 ${items.length}종`}
+          title={embedded ? `물품 목록 · ${items.length}종` : `${facility.name} · 후원 물품`}
+          description={
+            embedded
+              ? "선택한 시설의 준비물 목표를 관리합니다."
+              : `이 시설의 준비물 목표를 관리합니다. 총 ${items.length}종`
+          }
           action={
             <Button size="sm" onClick={openCreate}>
               <Plus size={15} /> 물품 추가
@@ -245,7 +254,12 @@ export function DonationItemPanel({ token, facility }: { token: string; facility
             </tbody>
           </DataTable>
         )}
-      </Panel>
+    </>
+  );
+
+  return (
+    <>
+      {embedded ? <div>{content}</div> : <Panel className="mt-4">{content}</Panel>}
 
       <Drawer
         open={formOpen}

@@ -1,8 +1,12 @@
+"use client";
+
 import Link from "next/link";
-import { ArrowRight, ChevronRight, MapPin } from "lucide-react";
+import { useState, type MouseEvent } from "react";
+import { ArrowRight, ChevronRight, Loader2, MapPin } from "lucide-react";
 import { Card } from "@/shared/ui/Card";
 import { Badge } from "@/shared/ui/Badge";
 import { buttonVariants } from "@/shared/ui/Button";
+import { cn } from "@/shared/lib/utils";
 import {
   FACILITY_STATUS_LABEL,
   FACILITY_STATUS_VARIANT,
@@ -10,14 +14,36 @@ import {
   type Facility,
 } from "../model/types";
 
+function shouldShowPending(event: MouseEvent<HTMLAnchorElement>) {
+  return !(
+    event.defaultPrevented ||
+    event.metaKey ||
+    event.ctrlKey ||
+    event.shiftKey ||
+    event.altKey ||
+    event.button !== 0
+  );
+}
+
 export function FacilityCard({ facility }: { facility: Facility }) {
+  const [pending, setPending] = useState(false);
+
   return (
     <Link
       href={`/donate/facility?id=${facility.id}`}
+      onClick={(event) => {
+        if (shouldShowPending(event)) setPending(true);
+      }}
       className="group block h-full rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       aria-label={`${facility.name} 필요 물품 보기`}
+      aria-busy={pending}
     >
-      <Card className="flex h-full flex-col p-5 transition-all duration-150 group-hover:-translate-y-0.5 group-hover:border-primary/40 group-hover:shadow-md group-active:translate-y-0 group-active:scale-[0.99]">
+      <Card
+        className={cn(
+          "relative flex h-full flex-col p-5 transition-all duration-150 group-hover:-translate-y-0.5 group-hover:border-primary/40 group-hover:shadow-md group-active:translate-y-0 group-active:scale-[0.99]",
+          pending && "border-primary/50 bg-muted/20 shadow-md ring-2 ring-ring/25",
+        )}
+      >
         <div className="flex items-start gap-3">
           <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-base font-bold text-primary">
             {facility.avatarInitial || facility.name.charAt(0)}
@@ -64,9 +90,18 @@ export function FacilityCard({ facility }: { facility: Facility }) {
           <span className="min-w-0 truncate text-xs text-muted-foreground">
             준비물 목표로 이동
           </span>
-          <span className={buttonVariants({ variant: "outline", size: "sm" })}>
-            필요 물품 보기
-            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+          <span
+            className={cn(
+              buttonVariants({ variant: pending ? "default" : "outline", size: "sm" }),
+              "min-w-28",
+            )}
+          >
+            {pending ? "여는 중" : "필요 물품 보기"}
+            {pending ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+            )}
           </span>
         </div>
       </Card>

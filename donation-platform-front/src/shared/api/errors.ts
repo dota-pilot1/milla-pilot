@@ -13,3 +13,7 @@ export function getFieldErrors(e: unknown): Record<string, string> {
 export function getErrorMessage(e: unknown, fallback = "요청을 처리하지 못했습니다."): string {
   return getApiError(e)?.message ?? fallback;
 }
+
+export function isNetworkError(e: unknown): boolean {
+  return isAxiosError(e) && !e.response;
+}

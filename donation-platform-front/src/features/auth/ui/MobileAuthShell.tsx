@@ -75,6 +75,7 @@ export function MobileAuthShell({
                       onSeedAccountSelect(account);
                       setSeedOpen(false);
                     }}
+                    selectedEmail={seedAccount?.email}
                     compact
                   />
                 </div>

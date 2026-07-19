@@ -82,7 +82,7 @@ export function AuthModeShell({ initialMode, nextPath }: AuthModeShellProps) {
       <div className="mx-auto w-full max-w-6xl space-y-3">
         {isDev ? (
           <div className="hidden lg:block">
-            <SeedAccountPicker onSelect={selectSeedAccount} />
+            <SeedAccountPicker onSelect={selectSeedAccount} selectedEmail={seedAccount?.email} />
           </div>
         ) : null}
 

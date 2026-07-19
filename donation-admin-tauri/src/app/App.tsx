@@ -3,7 +3,9 @@ import { Activity, Database, RefreshCw } from "lucide-react";
 import { AppUpdatePanel } from "../shared/ui/AppUpdatePanel";
 import { LoginScreen } from "../features/auth/login/LoginScreen";
 import { useAppUpdate } from "../shared/lib/useAppUpdate";
+import { configureAuthSession } from "../shared/api/client";
 import type { UserSummary } from "../entities/user/model/types";
+import type { TokenResponse } from "../entities/user/model/types";
 import { login, logout, me, signup } from "../features/auth/api/authApi";
 import { fetchMenus } from "../features/menu/api/menuApi";
 import { FacilityManagementScreen } from "../features/facility-management/ui/FacilityManagementScreen";
@@ -35,8 +37,36 @@ export function App() {
   const [menuError, setMenuError] = useState("");
   const [booting, setBooting] = useState(true);
   const [activeMenu, setActiveMenu] = useState("DASHBOARD");
+  const [workspaceRefreshKey, setWorkspaceRefreshKey] = useState(0);
   const appUpdate = useAppUpdate(appVersion);
   const isLoggedIn = Boolean(token && user);
+
+  const clearSession = useCallback(() => {
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
+    setToken("");
+    setRefreshToken("");
+    setUser(null);
+    setMenus([]);
+  }, []);
+
+  const applyTokens = useCallback((result: TokenResponse) => {
+    localStorage.setItem(ACCESS_TOKEN_KEY, result.accessToken);
+    localStorage.setItem(REFRESH_TOKEN_KEY, result.refreshToken);
+    setToken(result.accessToken);
+    setRefreshToken(result.refreshToken);
+    setUser(result.user);
+  }, []);
+
+  useEffect(() => {
+    configureAuthSession({
+      getRefreshToken: () => localStorage.getItem(REFRESH_TOKEN_KEY) || "",
+      onRefresh: applyTokens,
+      onExpired: clearSession,
+    });
+
+    return () => configureAuthSession(null);
+  }, [applyTokens, clearSession]);
 
   useEffect(() => {
     if (isLoggedIn) appUpdate.checkOnceOnStartup();
@@ -50,15 +80,9 @@ export function App() {
 
     me(token)
       .then(setUser)
-      .catch(() => {
-        localStorage.removeItem(ACCESS_TOKEN_KEY);
-        localStorage.removeItem(REFRESH_TOKEN_KEY);
-        setToken("");
-        setRefreshToken("");
-        setUser(null);
-      })
+      .catch(clearSession)
       .finally(() => setBooting(false));
-  }, [token]);
+  }, [clearSession, token]);
 
   const loadMenus = useCallback(() => {
     if (!token || !user) return Promise.resolve();
@@ -96,11 +120,7 @@ export function App() {
 
   const handleLogin = async (email: string, password: string) => {
     const result = await login(email.trim(), password);
-    localStorage.setItem(ACCESS_TOKEN_KEY, result.accessToken);
-    localStorage.setItem(REFRESH_TOKEN_KEY, result.refreshToken);
-    setToken(result.accessToken);
-    setRefreshToken(result.refreshToken);
-    setUser(result.user);
+    applyTokens(result);
   };
 
   const handleSignup = async (email: string, username: string, password: string) => {
@@ -111,17 +131,17 @@ export function App() {
     if (token) {
       await logout(token).catch(() => undefined);
     }
-    localStorage.removeItem(ACCESS_TOKEN_KEY);
-    localStorage.removeItem(REFRESH_TOKEN_KEY);
-    setToken("");
-    setRefreshToken("");
-    setUser(null);
-    setMenus([]);
+    clearSession();
   };
 
   const openMenu = (menu: string) => {
     if (!canAccessMenu(user, menu)) return;
     setActiveMenu(menu);
+  };
+
+  const refreshWorkspace = async () => {
+    await loadMenus();
+    setWorkspaceRefreshKey((key) => key + 1);
   };
 
   if (booting) {
@@ -148,7 +168,7 @@ export function App() {
         updateState={appUpdate.state}
         updateBusy={appUpdate.busy}
         onOpenMenu={openMenu}
-        onRefreshMenus={loadMenus}
+        onRefreshMenus={refreshWorkspace}
         onInstallUpdate={() => void appUpdate.installUpdate()}
         onLogout={handleLogout}
       />
@@ -162,6 +182,7 @@ export function App() {
           refreshToken={refreshToken}
           menuError={menuError}
           appUpdate={appUpdate}
+          refreshKey={workspaceRefreshKey}
         />
       </div>
     </div>
@@ -176,6 +197,7 @@ function AdminWorkspace({
   refreshToken,
   menuError,
   appUpdate,
+  refreshKey,
 }: {
   activeMenu: string;
   activeWebMenu: AdminMenu;
@@ -184,6 +206,7 @@ function AdminWorkspace({
   refreshToken: string;
   menuError: string;
   appUpdate: ReturnType<typeof useAppUpdate>;
+  refreshKey: number;
 }) {
   if (activeMenu === "settings") {
     return (
@@ -220,7 +243,7 @@ function AdminWorkspace({
   }
 
   if (activeMenu === "ADMIN_CONTRIBUTIONS") {
-    return <ContributionsScreen token={token} />;
+    return <ContributionsScreen token={token} refreshKey={refreshKey} />;
   }
 
   if (activeMenu === "ADMIN_PURCHASE_ORDERS") {

@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Building2, HandCoins, SearchX } from "lucide-react";
 import { PageHeader } from "@/shared/ui/PageHeader";
+import { PageShell } from "@/shared/ui/PageShell";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { useDebouncedValue } from "@/shared/lib/useDebouncedValue";
 import { facilityApi } from "@/entities/facility/api/facilityApi";
@@ -34,7 +35,7 @@ export default function DonatePage() {
   );
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+    <PageShell>
       <div className="space-y-6">
         <PageHeader
           icon={HandCoins}
@@ -79,6 +80,6 @@ export default function DonatePage() {
           </div>
         )}
       </div>
-    </main>
+    </PageShell>
   );
 }

@@ -33,6 +33,7 @@ public class StaffUserSeeder implements ApplicationRunner {
     private static final List<StaffDef> STAFF = List.of(
             // 플랫폼 관리자 — donation-admin-tauri 로그인 대상
             new StaffDef("admin@milla.im", "배준영", RoleSeeder.ROLE_PLATFORM_ADMIN),
+            new StaffDef("ops@milla.im", "서민재", RoleSeeder.ROLE_PLATFORM_ADMIN),
             // 시설 관리자 — 시설별 담당 (데이터상 시설 FK 없음, 역할만 부여)
             new StaffDef("haetsal.admin@milla.im", "오은주", RoleSeeder.ROLE_FACILITY_ADMIN),
             new StaffDef("pureunsup.admin@milla.im", "신재훈", RoleSeeder.ROLE_FACILITY_ADMIN),
@@ -48,21 +49,30 @@ public class StaffUserSeeder implements ApplicationRunner {
     @Transactional
     public void run(ApplicationArguments args) {
         int created = 0;
+        int synced = 0;
         for (StaffDef staff : STAFF) {
             Role role = roleRepository.findByCode(staff.roleCode()).orElse(null);
             if (role == null) {
                 log.warn("[StaffUserSeeder] 역할 {} 없음 — {} 시드 건너뜀", staff.roleCode(), staff.email());
                 continue;
             }
-            if (userRepository.existsByEmail(staff.email())) continue;
+            String passwordHash = passwordEncoder.encode(DonorUserSeeder.TEST_PASSWORD);
+            User existing = userRepository.findByEmail(staff.email()).orElse(null);
+            if (existing != null) {
+                existing.changePassword(passwordHash);
+                existing.changeRole(role);
+                existing.activate();
+                synced++;
+                continue;
+            }
             userRepository.save(User.createNewUser(
                     staff.email(),
-                    passwordEncoder.encode(DonorUserSeeder.TEST_PASSWORD),
+                    passwordHash,
                     staff.name(),
                     role
             ));
             created++;
         }
-        log.info("[StaffUserSeeder] 운영 계정 {}명 신규 시드 (총 {}명 목표)", created, STAFF.size());
+        log.info("[StaffUserSeeder] 운영 계정 {}명 신규 시드, {}명 동기화 (총 {}명 목표)", created, synced, STAFF.size());
     }
 }

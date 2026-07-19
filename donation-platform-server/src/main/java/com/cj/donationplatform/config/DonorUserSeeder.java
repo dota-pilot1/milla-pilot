@@ -48,6 +48,19 @@ public class DonorUserSeeder implements ApplicationRunner {
             new DonorDef("siwoo.oh@gmail.com", "오시우")
     );
 
+    private static final List<DonorDef> LEGACY_DONORS = List.of(
+            new DonorDef("donor01@test.com", "김서연"),
+            new DonorDef("donor02@test.com", "이준호"),
+            new DonorDef("donor03@test.com", "박지우"),
+            new DonorDef("donor04@test.com", "최민준"),
+            new DonorDef("donor05@test.com", "정하윤"),
+            new DonorDef("donor06@test.com", "강도윤"),
+            new DonorDef("donor07@test.com", "윤서준"),
+            new DonorDef("donor08@test.com", "임지호"),
+            new DonorDef("donor09@test.com", "한예은"),
+            new DonorDef("donor10@test.com", "오시우")
+    );
+
     public static final int DONOR_COUNT = DONORS.size();
 
     private final UserRepository userRepository;
@@ -64,16 +77,42 @@ public class DonorUserSeeder implements ApplicationRunner {
         }
 
         int created = 0;
+        int synced = 0;
         for (DonorDef donor : DONORS) {
-            if (userRepository.existsByEmail(donor.email())) continue;
+            String passwordHash = passwordEncoder.encode(TEST_PASSWORD);
+            User existing = userRepository.findByEmail(donor.email()).orElse(null);
+            if (existing != null) {
+                syncDonor(existing, donor, passwordHash, donorRole);
+                synced++;
+                continue;
+            }
             userRepository.save(User.createNewUser(
                     donor.email(),
-                    passwordEncoder.encode(TEST_PASSWORD),
+                    passwordHash,
                     donor.name(),
                     donorRole
             ));
             created++;
         }
-        log.info("[DonorUserSeeder] 후원자 유저 {}명 신규 시드 (총 {}명 목표)", created, DONOR_COUNT);
+
+        int legacySynced = 0;
+        for (DonorDef donor : LEGACY_DONORS) {
+            User existing = userRepository.findByEmail(donor.email()).orElse(null);
+            if (existing == null) continue;
+            syncDonor(existing, donor, passwordEncoder.encode(TEST_PASSWORD), donorRole);
+            legacySynced++;
+        }
+
+        log.info(
+                "[DonorUserSeeder] 후원자 유저 {}명 신규 시드, {}명 동기화, 레거시 {}명 동기화 (총 {}명 목표)",
+                created, synced, legacySynced, DONOR_COUNT
+        );
+    }
+
+    private void syncDonor(User user, DonorDef donor, String passwordHash, Role donorRole) {
+        user.updateProfile(user.getEmail(), donor.name());
+        user.changePassword(passwordHash);
+        user.changeRole(donorRole);
+        user.activate();
     }
 }

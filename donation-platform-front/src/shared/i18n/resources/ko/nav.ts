@@ -1,5 +1,5 @@
 export const nav = {
-  dashboard: "대시보드",
+  dashboard: "프로젝트 소개",
   admin: "관리",
   donationItems: "후원 물품 관리",
   fundingCampaigns: "펀딩 캠페인",

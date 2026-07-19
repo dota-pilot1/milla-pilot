@@ -71,7 +71,9 @@ export const SETTINGS_MENU: AdminMenu = {
 export const iconByCode: Record<string, LucideIcon> = {
   DASHBOARD: LayoutDashboard,
   ADMIN: Settings,
+  ADMIN_FACILITY: Building2,
   ADMIN_DONATION: HandCoins,
+  ADMIN_PURCHASE: ShoppingCart,
   ADMIN_SYSTEM: Settings,
   ADMIN_FACILITIES: Building2,
   ADMIN_DONATION_ITEMS: PackagePlus,
@@ -92,9 +94,11 @@ export const iconByCode: Record<string, LucideIcon> = {
 
 const subtitles: Record<string, string> = {
   DASHBOARD: "운영 현황",
-  ADMIN_DONATION: "물품 · 캠페인 · 주문",
+  ADMIN_FACILITY: "시설과 요청 물품",
+  ADMIN_DONATION: "후원 원장과 증빙",
+  ADMIN_PURCHASE: "구매와 배송 처리",
   ADMIN_SYSTEM: "계정 · 권한 · 설정",
-  ADMIN_FACILITIES: "시설물 · 후원 물품",
+  ADMIN_FACILITIES: "시설 기본 정보",
   ADMIN_DONATION_ITEMS: "시설 요청 물품",
   ADMIN_FUNDING_CAMPAIGNS: "공동구매 펀딩",
   ADMIN_CONTRIBUTIONS: "후원 결제 내역",

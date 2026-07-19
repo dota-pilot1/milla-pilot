@@ -1,5 +1,5 @@
 export const nav = {
-  dashboard: "ダッシュボード",
+  dashboard: "プロジェクト紹介",
   admin: "管理",
   donationItems: "寄付物品管理",
   fundingCampaigns: "ファンディング",

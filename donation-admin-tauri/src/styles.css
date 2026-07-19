@@ -1,5 +1,7 @@
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
+@import "ag-grid-community/styles/ag-grid.css";
+@import "ag-grid-community/styles/ag-theme-quartz.css";
 
 :root {
   color: #18181b;
@@ -36,6 +38,171 @@ button {
 
 button:disabled {
   cursor: not-allowed;
+}
+
+.admin-grid {
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  --ag-font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  --ag-font-size: 13px;
+  --ag-background-color: #ffffff;
+  --ag-foreground-color: #27272a;
+  --ag-secondary-foreground-color: #71717a;
+  --ag-header-background-color: #f3f6f8;
+  --ag-header-foreground-color: #3f3f46;
+  --ag-border-color: #f1f3f5;
+  --ag-row-border-color: #f4f4f5;
+  --ag-row-hover-color: #f8fafc;
+  --ag-selected-row-background-color: #ecfdf5;
+  --ag-odd-row-background-color: #ffffff;
+  --ag-control-panel-background-color: #ffffff;
+  --ag-input-border-color: #e4e4e7;
+  --ag-input-focus-border-color: #94a3b8;
+  --ag-checkbox-checked-color: #059669;
+  --ag-range-selection-border-color: #059669;
+  --ag-border-radius: 10px;
+  --ag-cell-horizontal-padding: 16px;
+  --ag-header-column-resize-handle-color: #e4e4e7;
+  --ag-header-column-separator-color: #f1f3f5;
+  --ag-card-shadow: 0 18px 48px rgba(15, 23, 42, 0.12);
+}
+
+.admin-grid .ag-root-wrapper {
+  border: 0;
+  overflow: visible;
+}
+
+.admin-grid .ag-root,
+.admin-grid .ag-header,
+.admin-grid .ag-header-viewport,
+.admin-grid .ag-header-container,
+.admin-grid .ag-pinned-left-header,
+.admin-grid .ag-header-row,
+.admin-grid .ag-header-cell,
+.admin-grid .ag-header-cell-comp-wrapper {
+  overflow: visible;
+}
+
+.admin-grid .ag-header-cell-label {
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.admin-grid .ag-header {
+  border-bottom: 1px solid #dde5ee;
+  box-shadow: inset 0 -1px 0 rgba(15, 23, 42, 0.03);
+}
+
+.admin-grid .ag-header-cell {
+  padding-inline: 14px;
+  background: linear-gradient(180deg, #f7f9fb 0%, #eef3f7 100%);
+}
+
+.admin-grid .ag-header-cell-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-grid .ag-header-cell-label,
+.admin-grid .ag-header-cell-text,
+.admin-grid .ag-header-cell-comp-wrapper,
+.admin-grid .ag-header-cell-label button {
+  background: transparent;
+}
+
+.admin-grid .ag-header-cell-menu-button,
+.admin-grid .ag-header-cell-filter-button,
+.admin-grid .ag-sort-indicator-icon {
+  color: #a1a1aa;
+}
+
+.admin-grid .ag-cell {
+  display: flex;
+  align-items: center;
+  line-height: 1.45;
+  border-right-color: #f5f5f5;
+}
+
+.admin-grid .ag-row {
+  border-color: #f4f4f5;
+}
+
+.admin-grid .ag-row-odd {
+  background: #ffffff;
+}
+
+.admin-grid .ag-row-hover {
+  background: #fafafa;
+}
+
+.ag-popup .ag-menu,
+.ag-popup .ag-filter,
+.ag-popup .ag-filter-wrapper {
+  border: 1px solid #dbe3ec;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.16);
+}
+
+.ag-popup .ag-filter {
+  min-width: 240px;
+  padding: 10px;
+}
+
+.ag-popup .ag-filter-select {
+  display: none;
+}
+
+.ag-popup .ag-input-wrapper,
+.ag-popup .ag-picker-field-wrapper {
+  min-height: 34px;
+  border-radius: 10px;
+}
+
+.ag-popup input,
+.ag-popup select,
+.ag-popup textarea {
+  min-height: 34px;
+  border: 1px solid #e4e4e7;
+  border-radius: 10px;
+  color: #27272a;
+  background: #f8fafc;
+  font-size: 13px;
+  font-weight: 700;
+  outline: none;
+}
+
+.ag-popup input::placeholder,
+.ag-popup textarea::placeholder {
+  color: #a1a1aa;
+  font-weight: 600;
+}
+
+.ag-popup input:focus,
+.ag-popup select:focus,
+.ag-popup textarea:focus {
+  border-color: #94a3b8;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.18);
+}
+
+.ag-popup .ag-filter-condition,
+.ag-popup .ag-filter-body-wrapper {
+  gap: 0;
+}
+
+.ag-popup .ag-filter-body {
+  gap: 0;
+}
+
+.ag-popup .ag-filter-no-matches {
+  color: #71717a;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .boot-screen {
@@ -1157,7 +1324,7 @@ button:disabled {
 
 .sidebar-menu button.nested {
   min-height: 33px;
-  padding-left: 10px;
+  padding-left: 13px;
 }
 
 /* 그룹 접기/펼치기 — grid-template-rows 0fr↔1fr 로 부드럽게 */
@@ -1176,9 +1343,9 @@ button:disabled {
   gap: 4px;
   min-height: 0;
   overflow: hidden;
-  margin: 4px 0 3px 11px;
-  padding-left: 11px;
-  border-left: 1px solid #dbe3ec;
+  margin: 5px 0 4px 17px;
+  padding-left: 14px;
+  border-left: 2px solid #dbe3ec;
 }
 
 .sidebar-chevron {
@@ -1342,11 +1509,11 @@ button:disabled {
 .account-trigger {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
   gap: 8px;
   width: 100%;
   min-height: 44px;
-  padding: 6px 7px;
+  padding: 5px;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   color: #475569;
@@ -1364,6 +1531,47 @@ button:disabled {
   border-color: #b7f7d3;
   background: #ffffff;
   box-shadow: 0 8px 16px rgba(15, 23, 42, 0.07);
+}
+
+.account-trigger-main {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 9px;
+  color: inherit;
+  background: transparent;
+  text-align: left;
+}
+
+.account-trigger-main:focus-visible,
+.account-quick-logout:focus-visible {
+  outline: 2px solid rgba(15, 23, 42, 0.18);
+  outline-offset: 2px;
+}
+
+.account-quick-logout {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  color: #94a3b8;
+  background: transparent;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    color 160ms ease;
+}
+
+.account-quick-logout:hover {
+  border-color: #fecaca;
+  color: #dc2626;
+  background: #fef2f2;
 }
 
 .account-card {
@@ -1468,11 +1676,11 @@ button:disabled {
 
 .account-popover {
   position: absolute;
-  left: calc(100% + 12px);
-  bottom: -2px;
+  right: 0;
+  bottom: calc(100% + 10px);
+  left: 0;
   z-index: 30;
-  width: 248px;
-  overflow: hidden;
+  overflow: visible;
   border: 1px solid #d8e0ea;
   border-radius: 12px;
   background: #ffffff;
@@ -1481,11 +1689,11 @@ button:disabled {
 
 .account-popover::before {
   position: absolute;
-  left: -7px;
-  bottom: 49px;
+  left: 18px;
+  bottom: -7px;
   width: 12px;
   height: 12px;
-  border-left: 1px solid #d8e0ea;
+  border-right: 1px solid #d8e0ea;
   border-bottom: 1px solid #d8e0ea;
   background: #ffffff;
   content: "";

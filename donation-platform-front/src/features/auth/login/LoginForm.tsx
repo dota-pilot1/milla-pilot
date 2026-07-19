@@ -10,7 +10,7 @@ import { AlertCircle, LogIn } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { loginSchema, type LoginFormValues } from "@/shared/lib/validation/auth.schema";
 import { authActions } from "@/entities/user/model/authStore";
-import { getApiError } from "@/shared/api/errors";
+import { getApiError, isNetworkError } from "@/shared/api/errors";
 import { Button } from "@/shared/ui/Button";
 import { FormField } from "@/shared/ui/FormField";
 import { TextInput } from "@/shared/ui/TextInput";
@@ -32,6 +32,42 @@ export type DevLoginAccount = {
 };
 
 export const devLoginAccounts: DevLoginAccount[] = [
+  {
+    label: "배준영",
+    description: "ROLE_PLATFORM_ADMIN",
+    email: "admin@milla.im",
+    password: "password123",
+  },
+  {
+    label: "서민재",
+    description: "ROLE_PLATFORM_ADMIN",
+    email: "ops@milla.im",
+    password: "password123",
+  },
+  {
+    label: "오은주",
+    description: "ROLE_FACILITY_ADMIN",
+    email: "haetsal.admin@milla.im",
+    password: "password123",
+  },
+  {
+    label: "신재훈",
+    description: "ROLE_FACILITY_ADMIN",
+    email: "pureunsup.admin@milla.im",
+    password: "password123",
+  },
+  {
+    label: "문가영",
+    description: "ROLE_FACILITY_ADMIN",
+    email: "onmaeul.admin@milla.im",
+    password: "password123",
+  },
+  {
+    label: "조성민",
+    description: "ROLE_FACILITY_ADMIN",
+    email: "saessak.admin@milla.im",
+    password: "password123",
+  },
   {
     label: "김서연",
     description: "ROLE_DONOR",
@@ -90,36 +126,6 @@ export const devLoginAccounts: DevLoginAccount[] = [
     label: "오시우",
     description: "ROLE_DONOR",
     email: "siwoo.oh@gmail.com",
-    password: "password123",
-  },
-  {
-    label: "배준영",
-    description: "ROLE_PLATFORM_ADMIN",
-    email: "admin@milla.im",
-    password: "password123",
-  },
-  {
-    label: "오은주",
-    description: "ROLE_FACILITY_ADMIN",
-    email: "haetsal.admin@milla.im",
-    password: "password123",
-  },
-  {
-    label: "신재훈",
-    description: "ROLE_FACILITY_ADMIN",
-    email: "pureunsup.admin@milla.im",
-    password: "password123",
-  },
-  {
-    label: "문가영",
-    description: "ROLE_FACILITY_ADMIN",
-    email: "onmaeul.admin@milla.im",
-    password: "password123",
-  },
-  {
-    label: "조성민",
-    description: "ROLE_FACILITY_ADMIN",
-    email: "saessak.admin@milla.im",
     password: "password123",
   },
 ];
@@ -190,6 +196,10 @@ export function LoginForm({
       toast.success(t("loginSuccess"));
       router.replace(safePath);
     } catch (e) {
+      if (isNetworkError(e)) {
+        setFormError("API 서버에 연결하지 못했습니다. 백엔드 서버가 실행 중인지 확인해주세요.");
+        return;
+      }
       const apiError = getApiError(e);
       if (apiError?.code === "AUTH_003") {
         setError("password", { type: "server", message: apiError.message });
