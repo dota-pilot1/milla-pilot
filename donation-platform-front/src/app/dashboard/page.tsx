@@ -6,14 +6,15 @@ import { HandCoins, LayoutDashboard, Package, Building2, Target } from "lucide-r
 import type { LucideIcon } from "lucide-react";
 import { RequireAuth } from "@/widgets/guards/RequireAuth";
 import { PageHeader } from "@/shared/ui/PageHeader";
+import { PageShell } from "@/shared/ui/PageShell";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { Card } from "@/shared/ui/Card";
-import { Progress } from "@/shared/ui/Progress";
 import { Badge } from "@/shared/ui/Badge";
 import { buttonVariants } from "@/shared/ui/Button";
 import { facilityApi } from "@/entities/facility/api/facilityApi";
 import { donationItemApi } from "@/entities/donation-item/api/donationItemApi";
 import type { Facility } from "@/entities/facility/model/types";
+import { FacilityFundingList } from "@/entities/facility/ui/FacilityFundingList";
 import type { DonationItem } from "@/entities/donation-item/model/types";
 import {
   ITEM_STATUS_LABEL,
@@ -56,12 +57,12 @@ function DashboardInner() {
   });
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+    <PageShell width="wide">
       <div className="space-y-6">
         <PageHeader
           icon={LayoutDashboard}
-          title="대시보드"
-          description="플랫폼 전체 후원 현황을 한눈에 확인합니다."
+          title="프로젝트 소개"
+          description="참여 시설과 필요한 물품, 후원 진행 흐름을 한눈에 확인합니다."
           actions={
             <Link href="/donate" className={buttonVariants({ size: "sm" })}>
               후원하러 가기
@@ -79,7 +80,7 @@ function DashboardInner() {
           <Overview facilities={data.facilities} items={data.items} />
         )}
       </div>
-    </main>
+    </PageShell>
   );
 }
 
@@ -137,34 +138,7 @@ function Overview({ facilities, items }: { facilities: Facility[]; items: Donati
       </Card>
 
       {/* 시설별 현황 */}
-      <Card className="p-5">
-        <h2 className="mb-4 text-sm font-semibold text-muted-foreground">시설별 후원 현황</h2>
-        <ul className="space-y-4">
-          {perFacility.map(({ facility, itemCount, goal, raised }) => (
-            <li key={facility.id} className="space-y-2">
-              <div className="flex items-center gap-3">
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
-                  {facility.avatarInitial ?? facility.name.charAt(0)}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">{facility.name}</p>
-                  <p className="truncate text-xs text-muted-foreground">
-                    {facility.region ?? "지역 미정"} · 물품 {itemCount}종
-                  </p>
-                </div>
-                <span className="shrink-0 text-sm font-semibold">
-                  {pctOf(raised, goal)}%
-                </span>
-              </div>
-              <Progress value={pctOf(raised, goal)} complete={goal > 0 && raised >= goal} />
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span>{formatKRW(raised)}</span>
-                <span>목표 {formatKRW(goal)}</span>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </Card>
+      <FacilityFundingList rows={perFacility} />
     </div>
   );
 }
