@@ -4,6 +4,7 @@ import { relaunch } from "@tauri-apps/plugin-process";
 import { check, type Update } from "@tauri-apps/plugin-updater";
 import { FormEvent, MouseEvent, useCallback, useEffect, useRef, useState } from "react";
 import {
+  Check,
   BookOpenCheck,
   CheckCircle2,
   CircleAlert,
@@ -11,16 +12,21 @@ import {
   Eye,
   EyeOff,
   GraduationCap,
+  Info,
   Loader2,
   LogIn,
   MessageCircle,
   RefreshCw,
+  ShieldCheck,
   UserPlus,
+  Users,
+  X,
   Zap,
 } from "lucide-react";
 import { WindowControls } from "../../../widgets/app-shell/ui/WindowControls";
 import { Button } from "../../../shared/ui/Button";
 import { Input } from "../../../shared/ui/Input";
+import { cn } from "../../../shared/lib/cn";
 
 type LoginScreenProps = {
   onLogin: (email: string, password: string) => Promise<void>;
@@ -32,6 +38,32 @@ const REMEMBER_EMAIL_KEY = "donation-admin:login-email";
 const REMEMBER_PASSWORD_KEY = "donation-admin:login-password";
 const FALLBACK_APP_VERSION = "0.1.0";
 const LOGIN_UPDATE_CHECK_INTERVAL_MS = 10 * 60 * 1000;
+const TEST_PASSWORD = "password123";
+
+type SeedLoginAccount = {
+  label: string;
+  roleCode: "ROLE_PLATFORM_ADMIN" | "ROLE_FACILITY_ADMIN" | "ROLE_DONOR";
+  email: string;
+};
+
+const seedLoginAccounts: SeedLoginAccount[] = [
+  { label: "배준영", roleCode: "ROLE_PLATFORM_ADMIN", email: "admin@milla.im" },
+  { label: "서민재", roleCode: "ROLE_PLATFORM_ADMIN", email: "ops@milla.im" },
+  { label: "오은주", roleCode: "ROLE_FACILITY_ADMIN", email: "haetsal.admin@milla.im" },
+  { label: "신재훈", roleCode: "ROLE_FACILITY_ADMIN", email: "pureunsup.admin@milla.im" },
+  { label: "문가영", roleCode: "ROLE_FACILITY_ADMIN", email: "onmaeul.admin@milla.im" },
+  { label: "조성민", roleCode: "ROLE_FACILITY_ADMIN", email: "saessak.admin@milla.im" },
+  { label: "김서연", roleCode: "ROLE_DONOR", email: "seoyeon.kim@gmail.com" },
+  { label: "이준호", roleCode: "ROLE_DONOR", email: "junho.lee@naver.com" },
+  { label: "박지우", roleCode: "ROLE_DONOR", email: "jiwoo.park@daum.net" },
+  { label: "최민준", roleCode: "ROLE_DONOR", email: "minjun.choi@gmail.com" },
+  { label: "정하윤", roleCode: "ROLE_DONOR", email: "hayoon.jung@naver.com" },
+  { label: "강도윤", roleCode: "ROLE_DONOR", email: "doyoon.kang@kakao.com" },
+  { label: "윤서준", roleCode: "ROLE_DONOR", email: "seojun.yoon@gmail.com" },
+  { label: "임지호", roleCode: "ROLE_DONOR", email: "jiho.lim@naver.com" },
+  { label: "한예은", roleCode: "ROLE_DONOR", email: "yeeun.han@daum.net" },
+  { label: "오시우", roleCode: "ROLE_DONOR", email: "siwoo.oh@gmail.com" },
+];
 
 export function LoginScreen({ onLogin, onSignup }: LoginScreenProps) {
   const win = getCurrentWindow();
@@ -42,6 +74,7 @@ export function LoginScreen({ onLogin, onSignup }: LoginScreenProps) {
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [remember, setRemember] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+  const [roleGuideOpen, setRoleGuideOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
   const [formMessage, setFormMessage] = useState("");
@@ -57,6 +90,15 @@ export function LoginScreen({ onLogin, onSignup }: LoginScreenProps) {
     setMode(nextMode);
     if (nextMode === "signup") setPassword("");
     setPasswordConfirm("");
+    resetFeedback();
+  };
+
+  const selectSeedAccount = (account: SeedLoginAccount) => {
+    setMode("login");
+    setEmail(account.email);
+    setPassword(TEST_PASSWORD);
+    setPasswordConfirm("");
+    setRemember(true);
     resetFeedback();
   };
 
@@ -139,6 +181,11 @@ export function LoginScreen({ onLogin, onSignup }: LoginScreenProps) {
       </header>
 
       <div className="login-stage">
+        <SeedAccountBar
+          selectedEmail={email}
+          onSelect={selectSeedAccount}
+          onOpenRoleGuide={() => setRoleGuideOpen(true)}
+        />
         <section className="login-shell">
           <div className="login-panel">
             <div className="login-card-header">
@@ -340,8 +387,173 @@ export function LoginScreen({ onLogin, onSignup }: LoginScreenProps) {
           </aside>
         </section>
       </div>
+
+      {roleGuideOpen && <RoleGuideDialog onClose={() => setRoleGuideOpen(false)} />}
     </main>
   );
+}
+
+type SeedAccountBarProps = {
+  selectedEmail: string;
+  onSelect: (account: SeedLoginAccount) => void;
+  onOpenRoleGuide: () => void;
+};
+
+function SeedAccountBar({ selectedEmail, onSelect, onOpenRoleGuide }: SeedAccountBarProps) {
+  return (
+    <section
+      className="flex w-full max-w-[940px] items-start gap-2.5 rounded-xl border border-zinc-200 bg-white/95 p-2.5 shadow-[0_16px_44px_rgba(15,23,42,0.12)] backdrop-blur"
+      aria-label="시드 로그인 계정"
+    >
+      <span className="mt-0.5 hidden size-8 shrink-0 place-items-center rounded-lg border border-emerald-100 bg-emerald-50 text-emerald-700 sm:grid" aria-hidden="true">
+        <Zap size={16} />
+      </span>
+      <div className="grid min-w-0 flex-1 grid-cols-2 gap-1.5 sm:grid-cols-4 xl:grid-cols-8">
+        {seedLoginAccounts.map((account) => {
+          const role = getSeedRoleView(account.roleCode);
+          const selected = selectedEmail === account.email;
+
+          return (
+            <button
+              key={account.email}
+              className={cn(
+                "relative flex min-h-[42px] min-w-0 flex-col items-start justify-center gap-0.5 rounded-lg border bg-white px-2.5 py-1.5 pr-6 text-left shadow-sm transition",
+                "hover:-translate-y-px hover:border-zinc-300 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2",
+                role.cardClassName,
+                selected && "border-emerald-300 bg-emerald-50/80 ring-2 ring-emerald-600/15",
+              )}
+              type="button"
+              onClick={() => onSelect(account)}
+              title={`${account.label} / ${role.label} / ${account.email}`}
+            >
+              <span className="block max-w-full truncate text-[12px] font-extrabold leading-none text-zinc-950">{account.label}</span>
+              <small className={cn("inline-flex rounded-md px-1.5 py-0.5 text-[10px] font-black leading-none", role.badgeClassName)}>
+                {role.label}
+              </small>
+              {selected && <Check className="absolute right-2 top-2 text-emerald-700" size={13} />}
+            </button>
+          );
+        })}
+      </div>
+      <button
+        className="hidden min-h-[42px] shrink-0 items-center justify-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 text-[12px] font-extrabold text-zinc-800 shadow-sm transition hover:border-zinc-300 hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2 xl:inline-flex"
+        type="button"
+        onClick={onOpenRoleGuide}
+      >
+        <Info size={14} />
+        역할 안내
+      </button>
+    </section>
+  );
+}
+
+function RoleGuideDialog({ onClose }: { onClose: () => void }) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/45 px-5"
+      role="presentation"
+      onMouseDown={onClose}
+    >
+      <section
+        className="relative w-full max-w-[620px] rounded-2xl border border-zinc-200 bg-white p-5 shadow-[0_22px_70px_rgba(15,23,42,0.28)]"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="role-guide-title"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <button
+          className="absolute right-4 top-4 inline-flex size-8 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-500 transition hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2"
+          type="button"
+          onClick={onClose}
+          title="닫기"
+        >
+          <X size={18} />
+        </button>
+        <header className="space-y-1 pr-10">
+          <h2 id="role-guide-title" className="text-lg font-extrabold tracking-tight text-zinc-950">역할 구분과 접근 권한</h2>
+          <p className="text-[13px] leading-6 text-zinc-500">테스트 계정은 같은 비밀번호를 사용하지만, 역할에 따라 볼 수 있는 메뉴와 수행 가능한 작업이 다릅니다.</p>
+        </header>
+
+        <div className="mt-4 grid gap-3 md:grid-cols-3">
+          {roleGuides.map((role) => (
+            <article className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm" key={role.code}>
+              <div className="flex items-center gap-3">
+                <span className={cn("inline-flex size-9 items-center justify-center rounded-lg", role.iconClassName)}>{role.icon}</span>
+                <div>
+                  <strong className="block text-sm font-extrabold text-zinc-950">{role.title}</strong>
+                  <small className="block text-[11px] font-bold text-zinc-400">{role.code}</small>
+                </div>
+              </div>
+              <p className="mt-3 min-h-[52px] text-[13px] leading-6 text-zinc-500">{role.description}</p>
+              <ul className="mt-3 space-y-2">
+                {role.permissions.map((permission) => (
+                  <li className="flex gap-2 text-[12px] font-bold leading-5 text-zinc-700" key={permission}>
+                    <Check className="mt-0.5 shrink-0 text-zinc-900" size={14} />
+                    {permission}
+                  </li>
+                ))}
+              </ul>
+            </article>
+          ))}
+        </div>
+
+        <p className="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-[13px] text-zinc-500">
+          모든 테스트 계정의 기본 비밀번호는 <strong>{TEST_PASSWORD}</strong>입니다.
+        </p>
+      </section>
+    </div>
+  );
+}
+
+const roleGuides = [
+  {
+    title: "플랫폼 관리자",
+    code: "ROLE_PLATFORM_ADMIN",
+    iconClassName: "bg-rose-50 text-rose-600",
+    icon: <Zap size={18} />,
+    description: "플랫폼 전체 운영과 관리 메뉴에 접근하는 최상위 역할입니다.",
+    permissions: ["시설·후원·구매 전체 관리", "사용자와 역할 관리", "메뉴와 권한 정책 관리"],
+  },
+  {
+    title: "시설 관리자",
+    code: "ROLE_FACILITY_ADMIN",
+    iconClassName: "bg-sky-50 text-sky-700",
+    icon: <ShieldCheck size={18} />,
+    description: "소속 시설의 후원 준비와 물품 상태를 관리합니다.",
+    permissions: ["담당 시설 물품 관리", "시설별 후원 현황 확인", "배송·수령 흐름 확인"],
+  },
+  {
+    title: "후원자",
+    code: "ROLE_DONOR",
+    iconClassName: "bg-zinc-100 text-zinc-700",
+    icon: <Users size={18} />,
+    description: "후원 화면을 이용하는 일반 사용자 역할입니다.",
+    permissions: ["후원 가능한 시설과 물품 확인", "후원 참여", "내 후원 내역 확인"],
+  },
+] as const;
+
+function getSeedRoleView(roleCode: SeedLoginAccount["roleCode"]) {
+  if (roleCode === "ROLE_PLATFORM_ADMIN") {
+    return {
+      label: "플랫폼",
+      cardClassName: "border-rose-200 bg-rose-50/55 hover:border-rose-300",
+      badgeClassName: "bg-rose-600 text-white",
+    };
+  }
+
+  if (roleCode === "ROLE_FACILITY_ADMIN") {
+    return {
+      label: "시설",
+      cardClassName: "border-sky-200 bg-sky-50/60 hover:border-sky-300",
+      badgeClassName: "bg-sky-900 text-white",
+    };
+  }
+
+  return {
+    label: "후원자",
+    cardClassName: "border-zinc-200 bg-white hover:border-zinc-300",
+    badgeClassName: "bg-zinc-100 text-zinc-700",
+  };
 }
 
 type UpdateCheckStatus = "idle" | "checking" | "uptodate" | "available" | "downloading" | "error";

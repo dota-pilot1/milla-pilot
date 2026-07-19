@@ -12,6 +12,7 @@ import {
   Settings,
   ShieldCheck,
   ShoppingCart,
+  SlidersHorizontal,
   Truck,
   UserCircle,
   Users,
@@ -90,6 +91,9 @@ export const iconByCode: Record<string, LucideIcon> = {
   ADMIN_SCREEN_SETTINGS: MonitorCog,
   ADMIN_NAV_MANAGEMENT: Menu,
   ADMIN_MENU_MANAGEMENT: Menu,
+  ADMIN_APP_MENU_MANAGEMENT: SlidersHorizontal,
+  ADMIN_ACCESS_POLICY: ShieldCheck,
+  ADMIN_EXPERIENCE_SETTINGS: MonitorCog,
 };
 
 const subtitles: Record<string, string> = {
@@ -110,7 +114,20 @@ const subtitles: Record<string, string> = {
   ADMIN_PERMISSIONS: "권한 코드",
   ADMIN_ROLE_PERMISSIONS: "역할별 권한",
   ADMIN_SITE_SETTINGS: "서비스 설정",
-  ADMIN_MENU_MANAGEMENT: "DB 메뉴 구성",
+  ADMIN_MENU_MANAGEMENT: "웹 헤더 메뉴",
+  ADMIN_APP_MENU_MANAGEMENT: "관리자 앱 사이드바",
+  ADMIN_ACCESS_POLICY: "역할과 권한 정책",
+  ADMIN_EXPERIENCE_SETTINGS: "웹·앱 화면 설정",
+};
+
+const TAURI_APP_MENU_MANAGEMENT: AdminMenu = {
+  id: "ADMIN_APP_MENU_MANAGEMENT",
+  code: "ADMIN_APP_MENU_MANAGEMENT",
+  label: "앱 메뉴 관리",
+  subtitle: subtitles.ADMIN_APP_MENU_MANAGEMENT,
+  icon: iconByCode.ADMIN_APP_MENU_MANAGEMENT,
+  path: "/app-menu-management",
+  children: [],
 };
 
 export function buildTree(flat: MenuRecord[], user: UserSummary | null): MenuItem[] {
@@ -159,6 +176,87 @@ export function toAdminMenu(item: MenuItem): AdminMenu {
     path: item.path,
     children: item.children.map(toAdminMenu),
   };
+}
+
+export function toTauriSidebarMenus(menus: AdminMenu[]): AdminMenu[] {
+  const topLevel = menus.flatMap((menu) => (menu.code === "ADMIN" ? menu.children : [menu]));
+  const all = flattenMenus(topLevel);
+  const byCode = new Map(all.map((menu) => [menu.code, menu]));
+
+  const cloneLeaf = (code: string, label?: string): AdminMenu | null => {
+    const menu = byCode.get(code);
+    if (!menu) return null;
+    return {
+      ...menu,
+      label: label ?? menu.label,
+      children: [],
+    };
+  };
+
+  const makeGroup = (
+    code: string,
+    label: string,
+    subtitle: string,
+    icon: LucideIcon,
+    children: Array<AdminMenu | null>,
+  ): AdminMenu | null => {
+    const visibleChildren = children.filter(Boolean) as AdminMenu[];
+    if (!visibleChildren.length) return null;
+    return {
+      id: code,
+      code,
+      label,
+      subtitle,
+      icon,
+      path: null,
+      children: visibleChildren,
+    };
+  };
+
+  const facilities = byCode.get("ADMIN_FACILITY");
+  const donation = byCode.get("ADMIN_DONATION");
+  const purchase = byCode.get("ADMIN_PURCHASE");
+  const users = cloneLeaf("ADMIN_USERS");
+  const hasSystemAccess = Boolean(byCode.get("ADMIN_SYSTEM"));
+
+  const accessPolicy = makeGroup(
+    "ADMIN_ACCESS_POLICY",
+    "권한·정책",
+    subtitles.ADMIN_ACCESS_POLICY,
+    iconByCode.ADMIN_ACCESS_POLICY,
+    [
+      cloneLeaf("ADMIN_ROLES"),
+      cloneLeaf("ADMIN_PERMISSIONS"),
+      cloneLeaf("ADMIN_ROLE_PERMISSIONS"),
+    ],
+  );
+
+  const experienceSettings = makeGroup(
+    "ADMIN_EXPERIENCE_SETTINGS",
+    "화면·메뉴 설정",
+    subtitles.ADMIN_EXPERIENCE_SETTINGS,
+    iconByCode.ADMIN_EXPERIENCE_SETTINGS,
+    [
+      cloneLeaf("ADMIN_SITE_SETTINGS"),
+      cloneLeaf("ADMIN_MENU_MANAGEMENT", "웹 메뉴 관리"),
+      cloneLeaf("ADMIN_APP_MENU_MANAGEMENT") ?? (hasSystemAccess ? TAURI_APP_MENU_MANAGEMENT : null),
+    ],
+  );
+
+  const preferred = [
+    byCode.get("DASHBOARD"),
+    users,
+    facilities,
+    donation,
+    purchase,
+    accessPolicy,
+    experienceSettings,
+  ].filter(Boolean) as AdminMenu[];
+
+  const preferredCodes = new Set(flattenMenus(preferred).map((menu) => menu.code));
+  const leftovers = topLevel.filter((menu) => !preferredCodes.has(menu.code) && menu.code !== "ADMIN_SYSTEM");
+
+  return [...preferred, ...leftovers];
 }
 
 export function flattenMenus(menus: AdminMenu[]): AdminMenu[] {

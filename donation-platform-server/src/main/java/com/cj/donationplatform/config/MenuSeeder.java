@@ -50,7 +50,8 @@ public class MenuSeeder implements ApplicationRunner {
                 new MenuDef("ADMIN_PERMISSIONS",     "ADMIN_SYSTEM", "권한 관리",     "nav.permissions",      "/permissions",      "KeyRound",        RoleSeeder.ROLE_PLATFORM_ADMIN,   2),
                 new MenuDef("ADMIN_ROLE_PERMISSIONS","ADMIN_SYSTEM", "역할-권한 매핑","nav.rolePermissions",  "/role-permissions", "ShieldCheck",     RoleSeeder.ROLE_PLATFORM_ADMIN,   3),
                 new MenuDef("ADMIN_SITE_SETTINGS",   "ADMIN_SYSTEM", "사이트 설정",   "nav.siteSettings",     "/site-settings",    "LayoutDashboard", RoleSeeder.ROLE_PLATFORM_ADMIN,   4),
-                new MenuDef("ADMIN_MENU_MANAGEMENT", "ADMIN_SYSTEM", "헤더 메뉴 관리","nav.menuManagement",   "/menu-management",  "Menu",            RoleSeeder.ROLE_PLATFORM_ADMIN,   5)
+                new MenuDef("ADMIN_MENU_MANAGEMENT", "ADMIN_SYSTEM", "웹 메뉴 관리",  "nav.menuManagement",   "/menu-management",  "Menu",            RoleSeeder.ROLE_PLATFORM_ADMIN,   5),
+                new MenuDef("ADMIN_APP_MENU_MANAGEMENT", "ADMIN_SYSTEM", "앱 메뉴 관리", null,                 "/app-menu-management", "SlidersHorizontal", RoleSeeder.ROLE_PLATFORM_ADMIN, 6)
         );
 
         for (MenuDef def : defs) {

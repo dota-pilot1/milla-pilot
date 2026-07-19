@@ -21,6 +21,7 @@ import {
   canAccessMenu,
   flattenMenus,
   toAdminMenu,
+  toTauriSidebarMenus,
   type AdminMenu,
   type MenuRecord,
 } from "./model/navigation";
@@ -103,9 +104,7 @@ export function App() {
   const adminMenus = useMemo(() => {
     const tree = buildTree(menus, user);
     const mapped = tree.map(toAdminMenu);
-    // "관리"(ADMIN) 래퍼는 벗기고 하위(후원 관리/시스템 관리)를 최상위로 올린다.
-    // Tauri 사이드바 전용 평탄화 — 서버/웹 메뉴 구조는 그대로 둔다.
-    return mapped.flatMap((menu) => (menu.code === "ADMIN" ? menu.children : [menu]));
+    return toTauriSidebarMenus(mapped);
   }, [menus, user]);
 
   const flatAdminMenus = useMemo(

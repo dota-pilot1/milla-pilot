@@ -303,8 +303,8 @@ function MenuNode({
           }
         }}
       >
-        <ChevronDown size={13} className="sidebar-chevron" data-collapsed={collapsed} />
-        <GroupIcon size={13} />
+        <ChevronDown size={14} className="sidebar-chevron" data-collapsed={collapsed} />
+        <GroupIcon size={14} />
         <span>{menu.label}</span>
       </div>
       <div className={`sidebar-group-body${collapsed ? " collapsed" : ""}`}>
