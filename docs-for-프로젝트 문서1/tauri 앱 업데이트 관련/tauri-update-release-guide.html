@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tauri 앱 업데이트와 릴리즈 운영 가이드</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f8fb;
+      --surface: #ffffff;
+      --surface-soft: #f9fafb;
+      --text: #111827;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --line-strong: #d1d5db;
+      --primary: #0f766e;
+      --primary-soft: #ecfdf5;
+      --warn: #b45309;
+      --warn-soft: #fffbeb;
+      --danger: #b91c1c;
+      --danger-soft: #fef2f2;
+      --info: #0369a1;
+      --info-soft: #eff6ff;
+      --shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif;
+      line-height: 1.65;
+    }
+
+    main {
+      width: min(1120px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 48px 0 72px;
+    }
+
+    header {
+      margin-bottom: 24px;
+      padding: 32px;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--primary);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 34px;
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+    }
+
+    .lead {
+      max-width: 760px;
+      margin: 14px 0 0;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 22px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 0 11px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface-soft);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .chip.strong {
+      border-color: rgba(15, 118, 110, 0.24);
+      background: var(--primary-soft);
+      color: var(--primary);
+    }
+
+    section {
+      margin-top: 18px;
+      padding: 28px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: var(--surface);
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.045);
+    }
+
+    h2 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 14px;
+      font-size: 22px;
+      line-height: 1.35;
+      letter-spacing: -0.01em;
+    }
+
+    h3 {
+      margin: 24px 0 10px;
+      font-size: 16px;
+    }
+
+    p {
+      margin: 8px 0;
+    }
+
+    ul,
+    ol {
+      margin: 10px 0 0;
+      padding-left: 22px;
+    }
+
+    li + li {
+      margin-top: 7px;
+    }
+
+    code {
+      padding: 2px 6px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--surface-soft);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.92em;
+    }
+
+    pre {
+      overflow: auto;
+      margin: 14px 0 0;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #0f172a;
+      color: #e5e7eb;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    pre code {
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: inherit;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 14px;
+      border-collapse: separate;
+      border-spacing: 0;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      font-size: 14px;
+    }
+
+    th,
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f3f6f9;
+      color: #374151;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .callout {
+      margin-top: 14px;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--surface-soft);
+    }
+
+    .callout strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .callout.ok {
+      border-color: rgba(15, 118, 110, 0.22);
+      background: var(--primary-soft);
+    }
+
+    .callout.warn {
+      border-color: rgba(180, 83, 9, 0.24);
+      background: var(--warn-soft);
+    }
+
+    .callout.danger {
+      border-color: rgba(185, 28, 28, 0.22);
+      background: var(--danger-soft);
+    }
+
+    .callout.info {
+      border-color: rgba(3, 105, 161, 0.20);
+      background: var(--info-soft);
+    }
+
+    .link-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .link-row {
+      display: grid;
+      grid-template-columns: 190px minmax(0, 1fr);
+      gap: 12px;
+      align-items: center;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--surface-soft);
+    }
+
+    .link-row strong {
+      font-size: 13px;
+    }
+
+    .link-row a {
+      overflow-wrap: anywhere;
+      color: var(--info);
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .link-row a:hover {
+      text-decoration: underline;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .card {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--surface-soft);
+    }
+
+    .card h3 {
+      margin-top: 0;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 0 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .status.ok {
+      background: var(--primary-soft);
+      color: var(--primary);
+    }
+
+    .status.warn {
+      background: var(--warn-soft);
+      color: var(--warn);
+    }
+
+    .status.danger {
+      background: var(--danger-soft);
+      color: var(--danger);
+    }
+
+    .footnote {
+      margin-top: 28px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 760px) {
+      main {
+        width: min(100% - 24px, 1120px);
+        padding-top: 24px;
+      }
+
+      header,
+      section {
+        padding: 22px;
+        border-radius: 18px;
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .link-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">Donation Admin Tauri</p>
+      <h1>Tauri 앱 업데이트와 릴리즈 운영 가이드</h1>
+      <p class="lead">
+        관리자 데스크톱 앱의 업데이트 체크가 어떤 조건에서 동작하는지, 현재 실패 원인이 무엇인지,
+        이후 릴리즈를 어떤 순서로 만들어야 하는지 정리한 문서입니다.
+      </p>
+      <div class="meta">
+        <span class="chip strong">작성일 2026-07-19</span>
+        <span class="chip">대상 앱 donation-admin-tauri</span>
+        <span class="chip">다음 앱 버전 0.1.2</span>
+        <span class="chip">업데이트 저장소 dota-pilot1/donation-admin-tauri</span>
+      </div>
+    </header>
+
+    <section>
+      <h2>1. 결론</h2>
+      <div class="callout danger">
+        <strong>v0.1.1 문제는 두 가지가 겹친 상태입니다.</strong>
+        앱은 <code>/releases/latest/download/latest.json</code>을 조회하지만, <code>v0.1.1</code> 릴리즈가
+        pre-release라서 GitHub의 <code>latest</code> 경로에서 잡히지 않습니다. 또한 macOS job은 Apple Developer ID
+        인증서 secret이 없어 <code>security import</code> 단계에서 실패했고, 그래서 Windows 설치 파일만 업로드되었습니다.
+      </div>
+      <div class="link-list" aria-label="릴리즈 관련 주소">
+        <div class="link-row">
+          <strong>릴리즈 목록</strong>
+          <a href="https://github.com/dota-pilot1/donation-admin-tauri/releases">https://github.com/dota-pilot1/donation-admin-tauri/releases</a>
+        </div>
+        <div class="link-row">
+          <strong>최신 릴리즈</strong>
+          <a href="https://github.com/dota-pilot1/donation-admin-tauri/releases/latest">https://github.com/dota-pilot1/donation-admin-tauri/releases/latest</a>
+        </div>
+        <div class="link-row">
+          <strong>현재 릴리즈 v0.1.1</strong>
+          <a href="https://github.com/dota-pilot1/donation-admin-tauri/releases/tag/v0.1.1">https://github.com/dota-pilot1/donation-admin-tauri/releases/tag/v0.1.1</a>
+        </div>
+        <div class="link-row">
+          <strong>v0.1.1 Windows 설치 파일</strong>
+          <a href="https://github.com/dota-pilot1/donation-admin-tauri/releases/download/v0.1.1/Donation.Admin_0.1.1_x64-setup.exe">https://github.com/dota-pilot1/donation-admin-tauri/releases/download/v0.1.1/Donation.Admin_0.1.1_x64-setup.exe</a>
+        </div>
+        <div class="link-row">
+          <strong>Updater feed</strong>
+          <a href="https://github.com/dota-pilot1/donation-admin-tauri/releases/latest/download/latest.json">https://github.com/dota-pilot1/donation-admin-tauri/releases/latest/download/latest.json</a>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>항목</th>
+            <th>현재 상태</th>
+            <th>판단</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>앱 설정 endpoint</td>
+            <td><code>https://github.com/dota-pilot1/donation-admin-tauri/releases/latest/download/latest.json</code></td>
+            <td><span class="status warn">주의</span> 현재 메인 repo가 아니라 별도 릴리즈 repo를 바라봅니다.</td>
+          </tr>
+          <tr>
+            <td>태그 직접 접근</td>
+            <td><code>/releases/download/v0.1.1/latest.json</code> 접근 가능</td>
+            <td><span class="status ok">정상</span> 에셋 자체는 존재합니다.</td>
+          </tr>
+          <tr>
+            <td>latest 접근</td>
+            <td><code>/releases/latest/download/latest.json</code> 404</td>
+            <td><span class="status danger">실패</span> pre-release는 latest 대상이 아니어서 발생할 수 있습니다.</td>
+          </tr>
+          <tr>
+            <td>macOS 설치 파일</td>
+            <td><code>v0.1.1</code>에는 <code>.dmg</code> 없음</td>
+            <td><span class="status danger">실패</span> macOS job이 Apple 인증서 import 단계에서 중단되었습니다.</td>
+          </tr>
+          <tr>
+            <td>다음 릴리즈 기준</td>
+            <td><code>v0.1.2</code> 정식 release</td>
+            <td><span class="status ok">권장</span> macOS <code>.dmg</code>, Windows <code>.exe</code>, <code>latest.json</code>을 함께 확인합니다.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>2. 업데이트 체크가 동작하는 조건</h2>
+      <p>
+        Tauri updater는 웹 화면의 새로고침과 다릅니다. 앱 내부에서 <code>@tauri-apps/plugin-updater</code>의
+        <code>check()</code>를 호출하고, 설정된 endpoint의 <code>latest.json</code>을 받아 현재 앱 버전과 비교합니다.
+      </p>
+      <div class="grid">
+        <div class="card">
+          <h3>개발 서버에서</h3>
+          <p><code>npm run tauri dev</code>에서도 호출 자체는 가능하지만, 실제 운영 업데이트 검증에는 부적합합니다.</p>
+          <p>업데이트 설치는 서명된 번들, updater artifact, 릴리즈 에셋을 전제로 하기 때문입니다.</p>
+        </div>
+        <div class="card">
+          <h3>빌드된 앱에서</h3>
+          <p>실제 검증 기준입니다. 설치된 앱 버전보다 높은 버전의 <code>latest.json</code>과 서명 파일이 있어야 업데이트가 표시됩니다.</p>
+          <p>같은 버전이면 업데이트 없음으로 처리됩니다.</p>
+        </div>
+      </div>
+      <pre><code>const update = await check();
+if (update) {
+  await update.downloadAndInstall();
+  await relaunch();
+}</code></pre>
+    </section>
+
+    <section>
+      <h2>3. 현재 설정</h2>
+      <p>현재 관리자 앱 설정은 다음과 같습니다.</p>
+      <pre><code>{
+  "productName": "Donation Admin",
+  "version": "0.1.2",
+  "bundle": {
+    "targets": ["app", "dmg", "nsis"],
+    "createUpdaterArtifacts": true
+  },
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://github.com/dota-pilot1/donation-admin-tauri/releases/latest/download/latest.json"
+      ]
+    }
+  }
+}</code></pre>
+      <div class="callout info">
+        <strong>중요한 점</strong>
+        소스 코드는 <code>dota-pilot1/milla-pilot</code>에 있고, 앱 업데이트 endpoint는
+        <code>dota-pilot1/donation-admin-tauri</code>를 바라봅니다. 릴리즈를 어느 저장소에서 운영할지 먼저 고정해야 합니다.
+      </div>
+    </section>
+
+    <section>
+      <h2>4. 정상 릴리즈 절차</h2>
+      <ol>
+        <li>릴리즈할 변경사항을 <code>milla-pilot</code>에 커밋하고 <code>main</code>에 푸시합니다.</li>
+        <li>CI와 서버/프론트 배포가 성공했는지 확인합니다.</li>
+        <li><code>donation-admin-tauri/src-tauri/tauri.conf.json</code>의 <code>version</code>을 올립니다. 예: <code>0.1.2</code></li>
+        <li>서명 환경변수를 준비합니다. updater에는 <code>TAURI_SIGNING_*</code>, macOS 서명/공증에는 <code>APPLE_*</code> secret이 필요합니다.</li>
+        <li><code>donation-admin-tauri</code>에서 Tauri 앱을 빌드합니다.</li>
+        <li>생성된 macOS <code>.dmg</code>, Windows <code>.exe</code>, 서명 파일, <code>latest.json</code>을 업데이트 저장소 릴리즈에 업로드합니다.</li>
+        <li>릴리즈를 pre-release가 아닌 정식 release로 게시합니다.</li>
+        <li>설치된 이전 버전 앱에서 업데이트 체크를 실행해 새 버전이 감지되는지 확인합니다.</li>
+      </ol>
+      <pre><code>cd donation-admin-tauri
+npm run tauri build</code></pre>
+      <div class="callout warn">
+        <strong>주의</strong>
+        현재 <code>v0.1.1</code>을 정식 release로 바꾸는 것만으로는 이번 커밋의 데스크톱 앱이 배포되지 않습니다.
+        앱 버전을 올리고 새 산출물을 만들어야 합니다.
+      </div>
+      <div class="callout info">
+        <strong>Apple secret 기준</strong>
+        macOS job에는 <code>APPLE_CERTIFICATE</code>, <code>APPLE_CERTIFICATE_PASSWORD</code>,
+        <code>APPLE_SIGNING_IDENTITY</code>, <code>APPLE_ID</code>, <code>APPLE_PASSWORD</code>,
+        <code>APPLE_TEAM_ID</code>가 모두 필요합니다. Donation Admin repo에는 2026-07-19에 기존 배포 앱과 같은
+        Developer ID secret 세트를 재등록했습니다.
+      </div>
+    </section>
+
+    <section>
+      <h2>5. 저장소 운영 선택지</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>선택지</th>
+            <th>장점</th>
+            <th>주의점</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>현재처럼 <code>donation-admin-tauri</code> 별도 저장소에 릴리즈</td>
+            <td>업데이트 산출물 저장소가 분리되어 깔끔합니다.</td>
+            <td>소스 커밋과 릴리즈 산출물의 출처가 달라서 어떤 커밋으로 빌드했는지 release note에 반드시 남겨야 합니다.</td>
+          </tr>
+          <tr>
+            <td><code>milla-pilot</code> 저장소 릴리즈로 통합</td>
+            <td>소스, CI, 태그, 릴리즈가 한 저장소에 묶여 추적이 쉽습니다.</td>
+            <td><code>tauri.conf.json</code>의 endpoint를 바꾸고 기존 설치 앱의 업데이트 경로 전환을 고려해야 합니다.</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout ok">
+        <strong>권장</strong>
+        단기적으로는 현재 endpoint를 유지하되, 별도 저장소 릴리즈에 "빌드 기준 커밋 SHA"를 명시합니다.
+        장기적으로 자동 릴리즈 워크플로를 만들 때는 <code>milla-pilot</code> 통합 릴리즈가 추적성이 더 좋습니다.
+      </div>
+    </section>
+
+    <section>
+      <h2>6. 문제 진단 체크리스트</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>증상</th>
+            <th>확인 명령</th>
+            <th>의미</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>업데이트 확인 실패</td>
+            <td><code>curl -I -L https://github.com/dota-pilot1/donation-admin-tauri/releases/latest/download/latest.json</code></td>
+            <td>404면 latest 릴리즈 문제입니다. 서명 검증까지 가지 못한 상태입니다.</td>
+          </tr>
+          <tr>
+            <td>태그 직접 접근은 됨</td>
+            <td><code>curl -I -L https://github.com/dota-pilot1/donation-admin-tauri/releases/download/v0.1.1/latest.json</code></td>
+            <td>에셋은 있지만 latest 경로가 비어 있는 상태일 수 있습니다.</td>
+          </tr>
+          <tr>
+            <td>업데이트 없음</td>
+            <td><code>latest.json</code>의 version과 설치 앱 버전 비교</td>
+            <td>같은 버전이면 정상적으로 업데이트 없음입니다.</td>
+          </tr>
+          <tr>
+            <td>다운로드 후 설치 실패</td>
+            <td>설치 파일 <code>.sig</code>와 <code>pubkey</code> 매칭 확인</td>
+            <td>이 단계부터는 서명 문제일 가능성이 큽니다.</td>
+          </tr>
+          <tr>
+            <td>macOS 산출물 없음</td>
+            <td><code>gh run view &lt;run-id&gt; --repo dota-pilot1/donation-admin-tauri --log-failed</code></td>
+            <td><code>security import</code> 실패면 Apple 인증서 secret 형식, 비밀번호, identity 값을 먼저 확인합니다.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>7. 다음 릴리즈 권장안</h2>
+      <ol>
+        <li><code>tauri.conf.json</code> 버전을 <code>0.1.2</code>로 올립니다.</li>
+        <li>현재 <code>donation-admin-tauri</code> main 기준으로 Tauri 앱을 빌드합니다.</li>
+        <li><code>v0.1.2</code> 릴리즈를 <code>dota-pilot1/donation-admin-tauri</code>에 정식 release로 만듭니다.</li>
+        <li>릴리즈 노트에 macOS/Windows 설치 파일과 updater artifact가 모두 포함되었는지 남깁니다.</li>
+        <li><code>latest.json</code>이 <code>/releases/latest/download/latest.json</code>에서 200으로 내려오는지 확인합니다.</li>
+        <li>기존 <code>0.1.1</code> 설치 앱에서 업데이트 체크를 눌러 <code>0.1.2</code>가 표시되는지 확인합니다.</li>
+      </ol>
+      <div class="callout ok">
+        <strong>자동화 기준</strong>
+        <code>donation-admin-tauri</code> repo는 태그 푸시 시 GitHub Actions가 macOS/Windows를 매트릭스로 빌드합니다.
+        <code>prerelease: false</code> 상태여야 앱의 updater endpoint가 최신 릴리즈를 정상 조회합니다.
+      </div>
+    </section>
+
+    <p class="footnote">
+      참고: 2026-07-19 확인 기준, <code>v0.1.1</code>에는 Windows <code>.exe</code>, <code>.sig</code>,
+      <code>latest.json</code> 에셋만 있고 macOS <code>.dmg</code>는 없습니다. <code>v0.1.2</code>부터 macOS와
+      Windows 산출물을 함께 확인합니다.
+    </p>
+  </main>
+</body>
+</html>
