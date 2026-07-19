@@ -16,6 +16,8 @@ This project adopts only the **AI-readable design-system operating model** inspi
 
 ## Agent operations
 
-- The **backend server is the user's to run and manage.** If you start it in the background for verification, shut it down again as soon as the work/verification is done so port 4301 is freed — this avoids colliding with the user's manual `./gradlew bootRun`. Never leave the server running.
+- **Restarting and testing the backend server is the user's job.** By default, do NOT start the server. After code changes, hand off with "please restart and verify".
+- **Exception — only when you (the agent) need to verify something yourself** (e.g. concurrency, live endpoint checks), start it temporarily. As soon as that verification is done, **shut it down again so port 4301 is free** — so the user can restart and test their own way.
+- Never leave the server running; never collide with the user's manual `./gradlew bootRun`.
 
 Structure: Spring(DDD) shared backend + `donation-admin-tauri` (admin CRUD) + `donation-platform-front` (web, Next.js). Admin management lives in Tauri; donor-facing output lives in web.
