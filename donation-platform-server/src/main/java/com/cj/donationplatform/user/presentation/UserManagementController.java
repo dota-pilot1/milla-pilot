@@ -18,6 +18,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
@@ -26,15 +28,39 @@ import org.springframework.web.bind.annotation.*;
 public class UserManagementController {
 
     private final UserManagementService userManagementService;
+    private static final Map<String, String> SORT_FIELD_MAP = Map.of(
+            "id", "id",
+            "email", "email",
+            "username", "username",
+            "roleName", "role.name",
+            "roleCode", "role.code",
+            "active", "active",
+            "createdAt", "createdAt"
+    );
 
     @GetMapping
-    @Operation(summary = "유저 목록 조회 (페이지네이션)")
+    @Operation(summary = "유저 목록 조회 (서버 검색/필터/정렬/페이지네이션)")
     public UserPageResponse list(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) Long roleId,
+            @RequestParam(required = false) Boolean active,
+            @RequestParam(defaultValue = "createdAt") String sort,
+            @RequestParam(defaultValue = "desc") String direction
     ) {
+        int safePage = Math.max(page, 0);
+        int safeSize = Math.max(1, Math.min(size, 100));
+        String sortProperty = SORT_FIELD_MAP.getOrDefault(sort, "createdAt");
+        Sort.Direction sortDirection = "asc".equalsIgnoreCase(direction)
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
+
         Page<UserListItemResponse> p = userManagementService.getUsers(
-                PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "id"))
+                q,
+                roleId,
+                active,
+                PageRequest.of(safePage, safeSize, Sort.by(sortDirection, sortProperty))
         );
         return UserPageResponse.from(p);
     }

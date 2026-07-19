@@ -12,11 +12,16 @@ import com.cj.donationplatform.user.presentation.dto.CreateUserRequest;
 import com.cj.donationplatform.user.presentation.dto.UpdateUserRequest;
 import com.cj.donationplatform.user.presentation.dto.UserListItemResponse;
 import lombok.RequiredArgsConstructor;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -28,8 +33,36 @@ public class UserManagementService {
     private final RefreshTokenRepository refreshTokenRepository;
 
     @Transactional(readOnly = true)
-    public Page<UserListItemResponse> getUsers(Pageable pageable) {
-        return userRepository.findAll(pageable).map(UserListItemResponse::from);
+    public Page<UserListItemResponse> getUsers(String q, Long roleId, Boolean active, Pageable pageable) {
+        return userRepository.findAll(matches(q, roleId, active), pageable).map(UserListItemResponse::from);
+    }
+
+    private Specification<User> matches(String q, Long roleId, Boolean active) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            String keyword = q == null ? "" : q.trim().toLowerCase();
+            if (!keyword.isBlank()) {
+                var role = root.join("role");
+                String like = "%" + keyword + "%";
+                predicates.add(cb.or(
+                        cb.like(cb.lower(root.get("email")), like),
+                        cb.like(cb.lower(root.get("username")), like),
+                        cb.like(cb.lower(role.get("name")), like),
+                        cb.like(cb.lower(role.get("code")), like)
+                ));
+            }
+
+            if (roleId != null) {
+                predicates.add(cb.equal(root.get("role").get("id"), roleId));
+            }
+
+            if (active != null) {
+                predicates.add(cb.equal(root.get("active"), active));
+            }
+
+            return cb.and(predicates.toArray(Predicate[]::new));
+        };
     }
 
     @Transactional(readOnly = true)

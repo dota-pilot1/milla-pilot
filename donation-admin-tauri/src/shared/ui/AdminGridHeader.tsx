@@ -13,6 +13,9 @@ type AdminGridHeaderProps<TData, TField extends string> = IHeaderParams<TData> &
   rangeValue?: { start: string; end: string };
   filterPlaceholder?: string;
   popoverAlign?: "left" | "right";
+  serverSortable?: boolean;
+  serverSort?: "asc" | "desc" | null;
+  onServerSortChange?: (field: TField, direction: "asc" | "desc") => void;
   onFilterChange?: (field: TField, value: string) => void;
   onRangeFilterChange?: (field: TField, value: { start: string; end: string }) => void;
 };
@@ -78,6 +81,9 @@ export function AdminGridHeader<TData, TField extends string>({
   rangeValue = { start: "", end: "" },
   filterPlaceholder = "필터 입력",
   popoverAlign = "left",
+  serverSortable = false,
+  serverSort,
+  onServerSortChange,
   onFilterChange,
   onRangeFilterChange,
 }: AdminGridHeaderProps<TData, TField>) {
@@ -93,6 +99,8 @@ export function AdminGridHeader<TData, TField extends string>({
   const [isComposing, setIsComposing] = useState(false);
   const debouncedInputValue = useDebouncedValue(inputValue, 250);
   const isRangeFilter = filterVariant === "date-range" || filterVariant === "number-range";
+  const displaySort = serverSort !== undefined ? serverSort : currentSort;
+  const canSort = enableSorting || serverSortable;
   const hasFilter =
     isRangeFilter
       ? Boolean(dateRange.start || dateRange.end)
@@ -201,9 +209,14 @@ export function AdminGridHeader<TData, TField extends string>({
   const handleSort = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
-    if (!enableSorting) return;
+    if (!canSort) return;
 
-    const nextSort = column.getSort() === "asc" ? "desc" : "asc";
+    const nextSort = displaySort === "asc" ? "desc" : "asc";
+    if (serverSortable && onServerSortChange) {
+      onServerSortChange(fieldKey, nextSort);
+      return;
+    }
+
     applySort(nextSort, false);
     setCurrentSort(nextSort);
   };
@@ -215,24 +228,24 @@ export function AdminGridHeader<TData, TField extends string>({
           {displayName}
         </span>
 
-        {enableSorting ? (
+        {canSort ? (
           <button
             type="button"
             className={cn(
               "grid size-6 shrink-0 place-items-center rounded-md border border-transparent bg-transparent text-zinc-400 outline-none transition-colors",
               "hover:border-zinc-200 hover:bg-white/80 hover:text-zinc-700 focus-visible:ring-2 focus-visible:ring-zinc-900/15",
-              currentSort && "border-zinc-200 bg-white text-zinc-900 shadow-[0_1px_0_rgba(15,23,42,0.03)]",
+              displaySort && "border-zinc-200 bg-white text-zinc-900 shadow-[0_1px_0_rgba(15,23,42,0.03)]",
             )}
             aria-label={`${displayName} 정렬 전환`}
             onClick={handleSort}
           >
-            {currentSort ? (
+            {displaySort ? (
               <ChevronUp
                 size={14}
                 strokeWidth={2.3}
                 className={cn(
                   "transition-transform duration-200 ease-out",
-                  currentSort === "desc" && "rotate-180",
+                  displaySort === "desc" && "rotate-180",
                 )}
               />
             ) : (

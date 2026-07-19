@@ -11,6 +11,7 @@ import { fetchMenus } from "../features/menu/api/menuApi";
 import { FacilityManagementScreen } from "../features/facility-management/ui/FacilityManagementScreen";
 import { ContributionsScreen } from "../features/contribution-ledger/ui/ContributionsScreen";
 import { PurchaseOrdersScreen } from "../features/purchase-management/ui/PurchaseOrdersScreen";
+import { UserManagementScreen } from "../features/user-management/ui/UserManagementScreen";
 import { API_BASE_URL, SERVER_ROOT_PATH } from "../shared/config/server";
 import { AppSidebar } from "../widgets/app-shell/ui/AppSidebar";
 import { AppTopbar } from "../widgets/app-shell/ui/AppTopbar";
@@ -247,6 +248,10 @@ function AdminWorkspace({
 
   if (activeMenu === "ADMIN_PURCHASE_ORDERS") {
     return <PurchaseOrdersScreen token={token} />;
+  }
+
+  if (activeMenu === "ADMIN_USERS") {
+    return <UserManagementScreen token={token} />;
   }
 
   const Icon = activeWebMenu.icon;
