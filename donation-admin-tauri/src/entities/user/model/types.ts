@@ -13,6 +13,7 @@ export type UserSummary = {
   id: number;
   email: string;
   username: string;
+  phoneNumber?: string | null;
   role: RoleSummary;
   permissions: string[];
   createdAt?: string;

@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d).{8,100}$/;
+const PHONE_REGEX = /^[0-9-]{9,20}$/;
 
 // Messages are i18n keys in the "form" namespace. Translate at display time
 // via `t(error.message, { ns: "form" })`.
@@ -23,6 +24,11 @@ export const signupSchema = z
       .string()
       .min(2, "usernameTooShort")
       .max(50, "usernameTooLong"),
+
+    phoneNumber: z
+      .string()
+      .min(1, "phoneRequired")
+      .regex(PHONE_REGEX, "phoneInvalid"),
   })
   .refine((data) => data.password === data.passwordConfirm, {
     path: ["passwordConfirm"],

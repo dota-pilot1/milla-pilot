@@ -21,6 +21,7 @@ export type User = {
   id: number;
   email: string;
   username: string;
+  phoneNumber?: string | null;
   role: RoleSummary;
   permissions: string[];
   createdAt?: string;
@@ -30,6 +31,7 @@ export type SignupRequest = {
   email: string;
   password: string;
   username: string;
+  phoneNumber: string;
 };
 
 export type SignupResponse = User;

@@ -30,10 +30,11 @@ import { cn } from "../../../shared/lib/cn";
 
 type LoginScreenProps = {
   onLogin: (email: string, password: string) => Promise<void>;
-  onSignup: (email: string, username: string, password: string) => Promise<void>;
+  onSignup: (email: string, username: string, phoneNumber: string, password: string) => Promise<void>;
 };
 
 const PASSWORD_PATTERN = /^(?=.*[A-Za-z])(?=.*\d).{8,100}$/;
+const PHONE_PATTERN = /^[0-9-]{9,20}$/;
 const REMEMBER_EMAIL_KEY = "donation-admin:login-email";
 const REMEMBER_PASSWORD_KEY = "donation-admin:login-password";
 const FALLBACK_APP_VERSION = "0.1.0";
@@ -70,6 +71,7 @@ export function LoginScreen({ onLogin, onSignup }: LoginScreenProps) {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [remember, setRemember] = useState(true);
@@ -116,6 +118,8 @@ export function LoginScreen({ onLogin, onSignup }: LoginScreenProps) {
     if (!email.trim()) return "이메일을 입력해주세요.";
     if (!username.trim()) return "사용자명을 입력해주세요.";
     if (username.trim().length < 2 || username.trim().length > 50) return "사용자명은 2~50자여야 합니다.";
+    if (!phoneNumber.trim()) return "전화번호를 입력해주세요.";
+    if (!PHONE_PATTERN.test(phoneNumber.trim())) return "전화번호는 숫자와 하이픈만 9~20자로 입력해주세요.";
     if (!PASSWORD_PATTERN.test(password)) return "비밀번호는 영문과 숫자를 포함한 8자 이상이어야 합니다.";
     if (password !== passwordConfirm) return "비밀번호 확인이 일치하지 않습니다.";
     return "";
@@ -137,7 +141,7 @@ export function LoginScreen({ onLogin, onSignup }: LoginScreenProps) {
     resetFeedback();
     try {
       if (isSignup) {
-        await onSignup(email.trim(), username.trim(), password);
+        await onSignup(email.trim(), username.trim(), phoneNumber.trim(), password);
         saveRememberedLogin(email.trim(), password);
         setFormMessage("회원가입이 완료되었습니다. 같은 계정으로 로그인하세요.");
         setMode("login");
@@ -298,6 +302,18 @@ export function LoginScreen({ onLogin, onSignup }: LoginScreenProps) {
                 </label>
 
                 <label>
+                  전화번호
+                  <Input
+                    value={phoneNumber}
+                    onChange={(event) => setPhoneNumber(event.target.value)}
+                    placeholder="010-1234-5678"
+                    type="tel"
+                    inputMode="tel"
+                    autoComplete="tel"
+                  />
+                </label>
+
+                <label>
                   비밀번호
                   <span className="password-field">
                     <Input
@@ -328,7 +344,7 @@ export function LoginScreen({ onLogin, onSignup }: LoginScreenProps) {
 
                 <Button
                   className="login-primary-action h-12 w-full text-base"
-                  disabled={submitting || !email.trim() || !password || !username.trim() || !passwordConfirm}
+                  disabled={submitting || !email.trim() || !password || !username.trim() || !phoneNumber.trim() || !passwordConfirm}
                   type="submit"
                 >
                   {submitting && isSignup ? <Loader2 className="spin" size={18} /> : <UserPlus size={18} />}

@@ -9,10 +9,11 @@ public record SignupResponse(
         Long id,
         String email,
         String username,
+        String phoneNumber,
         RoleSummary role,
         Instant createdAt
 ) {
     public static SignupResponse from(User u) {
-        return new SignupResponse(u.getId(), u.getEmail(), u.getUsername(), RoleSummary.from(u.getRole()), u.getCreatedAt());
+        return new SignupResponse(u.getId(), u.getEmail(), u.getUsername(), u.getPhoneNumber(), RoleSummary.from(u.getRole()), u.getCreatedAt());
     }
 }

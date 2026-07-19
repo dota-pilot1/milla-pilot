@@ -9,4 +9,6 @@ export const form = {
   passwordMismatch: "两次输入的密码不一致。",
   usernameTooShort: "用户名至少需要 2 个字符。",
   usernameTooLong: "用户名不能超过 50 个字符。",
+  phoneRequired: "请输入电话号码。",
+  phoneInvalid: "电话号码只能使用数字和连字符，长度为9到20个字符。",
 };

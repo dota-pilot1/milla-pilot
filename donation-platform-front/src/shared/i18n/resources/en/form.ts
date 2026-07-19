@@ -9,4 +9,6 @@ export const form = {
   passwordMismatch: "Passwords do not match.",
   usernameTooShort: "Username must be at least 2 characters.",
   usernameTooLong: "Username must be 50 characters or fewer.",
+  phoneRequired: "Please enter your phone number.",
+  phoneInvalid: "Phone number must be 9-20 characters using digits and hyphens only.",
 };

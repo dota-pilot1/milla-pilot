@@ -21,5 +21,10 @@ public record SignupRequest(
         @Schema(example = "홍길동")
         @NotBlank(message = "사용자명을 입력해주세요.")
         @Size(min = 2, max = 50, message = "사용자명은 2~50자여야 합니다.")
-        String username
+        String username,
+
+        @Schema(example = "010-1234-5678")
+        @NotBlank(message = "전화번호를 입력해주세요.")
+        @Pattern(regexp = "^[0-9-]{9,20}$", message = "전화번호는 숫자와 하이픈만 입력해주세요.")
+        String phoneNumber
 ) {}

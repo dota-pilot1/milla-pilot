@@ -9,4 +9,6 @@ export const form = {
   passwordMismatch: "비밀번호가 일치하지 않습니다.",
   usernameTooShort: "사용자명은 2자 이상이어야 합니다.",
   usernameTooLong: "사용자명은 50자 이하여야 합니다.",
+  phoneRequired: "전화번호를 입력해주세요.",
+  phoneInvalid: "전화번호는 숫자와 하이픈만 9~20자로 입력해주세요.",
 };

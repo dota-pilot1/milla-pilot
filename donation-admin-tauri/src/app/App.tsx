@@ -124,8 +124,8 @@ export function App() {
     applyTokens(result);
   };
 
-  const handleSignup = async (email: string, username: string, password: string) => {
-    await signup(email.trim(), username.trim(), password);
+  const handleSignup = async (email: string, username: string, phoneNumber: string, password: string) => {
+    await signup(email.trim(), username.trim(), phoneNumber.trim(), password);
   };
 
   const handleLogout = async () => {

@@ -51,7 +51,7 @@ public class AuthService {
         Role defaultRole = roleRepository.findByCode(signupRoleCode)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ROLE_NOT_FOUND));
         String hash = passwordEncoder.encode(req.password());
-        User saved = userRepository.save(User.createNewUser(req.email(), hash, req.username(), defaultRole));
+        User saved = userRepository.save(User.createNewUser(req.email(), hash, req.username(), req.phoneNumber(), defaultRole));
         return SignupResponse.from(saved);
     }
 

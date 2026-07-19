@@ -8,10 +8,10 @@ export function login(email: string, password: string) {
   });
 }
 
-export function signup(email: string, username: string, password: string) {
+export function signup(email: string, username: string, phoneNumber: string, password: string) {
   return apiRequest<UserSummary>("/api/auth/signup", {
     method: "POST",
-    body: { email, username, password },
+    body: { email, username, phoneNumber, password },
   });
 }
 

@@ -41,6 +41,7 @@ export function SignupForm({ showModeLink = true }: SignupFormProps) {
       const payload = {
         email: values.email,
         username: values.username,
+        phoneNumber: values.phoneNumber,
         password: values.password,
       };
       await authApi.signup(payload);
@@ -99,6 +100,19 @@ export function SignupForm({ showModeLink = true }: SignupFormProps) {
           invalid={!!errors.username}
           aria-invalid={!!errors.username}
           {...register("username")}
+        />
+      </FormField>
+
+      <FormField label={t("phoneNumber")} htmlFor="signup-phone" error={errors.phoneNumber?.message}>
+        <TextInput
+          id="signup-phone"
+          type="tel"
+          inputMode="tel"
+          autoComplete="tel"
+          placeholder={t("phonePlaceholder")}
+          invalid={!!errors.phoneNumber}
+          aria-invalid={!!errors.phoneNumber}
+          {...register("phoneNumber")}
         />
       </FormField>
 
