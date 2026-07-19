@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Database, HandCoins, LockKeyhole, Server, ShieldCheck, ShoppingCart } from "lucide-react";
+import { Database, Server, ShieldCheck } from "lucide-react";
 import { AppUpdatePanel } from "../shared/ui/AppUpdatePanel";
 import { LoginScreen } from "../features/auth/login/LoginScreen";
 import { useAppUpdate } from "../shared/lib/useAppUpdate";
@@ -12,6 +12,7 @@ import { FacilityManagementScreen } from "../features/facility-management/ui/Fac
 import { ContributionsScreen } from "../features/contribution-ledger/ui/ContributionsScreen";
 import { PurchaseOrdersScreen } from "../features/purchase-management/ui/PurchaseOrdersScreen";
 import { UserManagementScreen } from "../features/user-management/ui/UserManagementScreen";
+import { DashboardScreen } from "../features/dashboard/ui/DashboardScreen";
 import { API_BASE_URL, SERVER_ROOT_PATH } from "../shared/config/server";
 import { AppSidebar } from "../widgets/app-shell/ui/AppSidebar";
 import { AppTopbar } from "../widgets/app-shell/ui/AppTopbar";
@@ -182,6 +183,7 @@ export function App() {
           menuError={menuError}
           appUpdate={appUpdate}
           refreshKey={workspaceRefreshKey}
+          onNavigate={openMenu}
         />
       </div>
     </div>
@@ -196,6 +198,7 @@ function AdminWorkspace({
   menuError,
   appUpdate,
   refreshKey,
+  onNavigate,
 }: {
   activeMenu: string;
   activeWebMenu: AdminMenu;
@@ -204,6 +207,7 @@ function AdminWorkspace({
   menuError: string;
   appUpdate: ReturnType<typeof useAppUpdate>;
   refreshKey: number;
+  onNavigate: (menu: string) => void;
 }) {
   if (activeMenu === "settings") {
     return (
@@ -255,6 +259,17 @@ function AdminWorkspace({
     return <UserManagementScreen token={token} />;
   }
 
+  if (activeMenu === "DASHBOARD") {
+    return (
+      <DashboardScreen
+        token={token}
+        user={user}
+        menuError={menuError}
+        onNavigate={onNavigate}
+      />
+    );
+  }
+
   const Icon = activeWebMenu.icon;
 
   return (
@@ -285,46 +300,6 @@ function AdminWorkspace({
           <strong>서버 연결</strong>
           <span>{API_BASE_URL}</span>
           <small>{SERVER_ROOT_PATH}</small>
-        </article>
-      </section>
-
-      <section className="admin-detail-panel">
-        <h2>MVP 운영 범위</h2>
-        <div className="admin-detail-grid">
-          <div>
-            <span>후원 모델</span>
-            <strong>품목별 공동충당</strong>
-          </div>
-          <div>
-            <span>목표 잠금</span>
-            <strong>목표 달성 후 추가 참여 차단</strong>
-          </div>
-          <div>
-            <span>통합구매</span>
-            <strong>대기·완료·배송 흐름 관리</strong>
-          </div>
-          <div>
-            <span>운영 권한</span>
-            <strong>{user.role.name}</strong>
-          </div>
-        </div>
-      </section>
-
-      <section className="starter-grid">
-        <article className="starter-panel">
-          <HandCoins size={20} />
-          <strong>후원 투명성</strong>
-          <span>후원자는 결제 없이 참여 기록을 남기고, 내 후원·배송 화면에서 물품 진행 단계를 확인합니다.</span>
-        </article>
-        <article className="starter-panel">
-          <LockKeyhole size={20} />
-          <strong>목표 달성 기준</strong>
-          <span>시설 물품 목표액이 충족되면 모집을 잠그고 통합구매 대기 대상으로 전환합니다.</span>
-        </article>
-        <article className="starter-panel">
-          <ShoppingCart size={20} />
-          <strong>구매·배송 추적</strong>
-          <span>관리자는 실구매액, 판매처, 송장, 수령 확인을 기록하고 후원자 웹에는 관리 기능 없이 공개합니다.</span>
         </article>
       </section>
     </main>
