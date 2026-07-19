@@ -32,6 +32,7 @@ public class UserManagementController {
             "id", "id",
             "email", "email",
             "username", "username",
+            "phoneNumber", "phoneNumber",
             "roleName", "role.name",
             "roleCode", "role.code",
             "active", "active",
@@ -79,7 +80,7 @@ public class UserManagementController {
     }
 
     @PatchMapping("/{userId}")
-    @Operation(summary = "유저 프로필 수정 (email, username)")
+    @Operation(summary = "유저 프로필 수정 (email, username, phoneNumber)")
     public UserListItemResponse update(
             @PathVariable Long userId,
             @Valid @RequestBody UpdateUserRequest request

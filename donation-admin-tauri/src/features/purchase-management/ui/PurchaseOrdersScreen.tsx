@@ -1,13 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import type { ColDef } from "ag-grid-community";
 import { CheckCircle2, Plus, ShoppingCart, Truck } from "lucide-react";
 import { Panel } from "../../../shared/ui/Panel";
-import {
-  DataTable,
-  DataTableCell,
-  DataTableHead,
-  DataTableHeaderCell,
-  DataTableRow,
-} from "../../../shared/ui/DataTable";
+import { AdminDataGrid } from "../../../shared/ui/AdminDataGrid";
+import { AdminGridHeader } from "../../../shared/ui/AdminGridHeader";
 import { EmptyState } from "../../../shared/ui/EmptyState";
 import { Button } from "../../../shared/ui/Button";
 import { Drawer } from "../../../shared/ui/Drawer";
@@ -16,6 +12,7 @@ import { Input } from "../../../shared/ui/Input";
 import { Select } from "../../../shared/ui/Select";
 import { DatePicker } from "../../../shared/ui/DatePicker";
 import { Textarea } from "../../../shared/ui/Textarea";
+import { StatusBadge } from "../../../shared/ui/StatusBadge";
 import { ApiError } from "../../../shared/api/client";
 import {
   confirmReceived,
@@ -34,6 +31,111 @@ import type {
 const won = (n: number) => n.toLocaleString("ko-KR") + "원";
 const todayStr = () => new Date().toISOString().slice(0, 10);
 const dateOnly = (iso: string | null) => (iso ? iso.slice(0, 10) : "");
+
+type PurchaseOrdersMode = "pending" | "completed";
+
+type PendingPurchaseGridRow = {
+  itemId: number;
+  itemLabel: string;
+  facilityName: string;
+  goalAmount: number;
+  source: PendingPurchaseItem;
+};
+
+type PurchaseOrderGridRow = {
+  id: number;
+  itemLabel: string;
+  facilityName: string;
+  vendor: string;
+  purchasedAmount: number;
+  shippingLabel: string;
+  orderedAt: string | null;
+  status: AdminPurchaseOrder["item"]["status"];
+  source: AdminPurchaseOrder;
+};
+
+type PendingFilterKey = "itemLabel" | "facilityName" | "goalAmount";
+type CompletedFilterKey =
+  | "itemLabel"
+  | "vendor"
+  | "purchasedAmount"
+  | "shippingLabel"
+  | "status"
+  | "orderedAt";
+type RangeFilter = { start: string; end: string };
+
+const itemStatusLabel: Record<AdminPurchaseOrder["item"]["status"], string> = {
+  RECRUITING: "모집중",
+  LOCKED: "목표달성",
+  BUYING: "구매완료",
+  SHIPPING: "배송중",
+  RECEIVED: "수령완료",
+  RECEIPTED: "증빙완료",
+};
+
+const itemStatusTone: Record<AdminPurchaseOrder["item"]["status"], "neutral" | "success" | "info" | "warning"> = {
+  RECRUITING: "neutral",
+  LOCKED: "warning",
+  BUYING: "warning",
+  SHIPPING: "info",
+  RECEIVED: "success",
+  RECEIPTED: "success",
+};
+
+function toPurchaseOrderGridRow(order: AdminPurchaseOrder): PurchaseOrderGridRow {
+  const shippingLabel =
+    order.courier && order.trackingNo
+      ? `${courierLabel(order.courier)} ${order.trackingNo}`
+      : "송장 미등록";
+
+  return {
+    id: order.id,
+    itemLabel: `${order.item.emoji ? `${order.item.emoji} ` : ""}${order.item.name}`,
+    facilityName: order.facility.name,
+    vendor: order.vendor,
+    purchasedAmount: order.purchasedAmount,
+    shippingLabel,
+    orderedAt: order.orderedAt,
+    status: order.item.status,
+    source: order,
+  };
+}
+
+function toPendingPurchaseGridRow(item: PendingPurchaseItem): PendingPurchaseGridRow {
+  return {
+    itemId: item.itemId,
+    itemLabel: `${item.emoji ? `${item.emoji} ` : ""}${item.name}`,
+    facilityName: item.facility.name,
+    goalAmount: item.goalAmount,
+    source: item,
+  };
+}
+
+function includes(value: string | number | null | undefined, query?: string) {
+  const normalized = query?.trim().toLowerCase();
+  if (!normalized) return true;
+  return String(value ?? "").toLowerCase().includes(normalized);
+}
+
+function isWithinAmountRange(amount: number, range: RangeFilter) {
+  if (!range.start && !range.end) return true;
+
+  const min = range.start ? Number(range.start) : Number.NEGATIVE_INFINITY;
+  const max = range.end ? Number(range.end) : Number.POSITIVE_INFINITY;
+
+  return amount >= min && amount <= max;
+}
+
+function isWithinDateRange(iso: string | null, range: RangeFilter) {
+  if (!range.start && !range.end) return true;
+  if (!iso) return false;
+
+  const time = new Date(iso).getTime();
+  const start = range.start ? new Date(`${range.start}T00:00:00`).getTime() : Number.NEGATIVE_INFINITY;
+  const end = range.end ? new Date(`${range.end}T23:59:59.999`).getTime() : Number.POSITIVE_INFINITY;
+
+  return time >= start && time <= end;
+}
 
 type Form = {
   vendor: string;
@@ -65,7 +167,7 @@ const emptyForm = (goalAmount: number): Form => ({
   note: "",
 });
 
-export function PurchaseOrdersScreen({ token }: { token: string }) {
+export function PurchaseOrdersScreen({ token, mode = "pending" }: { token: string; mode?: PurchaseOrdersMode }) {
   const [pending, setPending] = useState<PendingPurchaseItem[]>([]);
   const [orders, setOrders] = useState<AdminPurchaseOrder[]>([]);
   const [loading, setLoading] = useState(true);
@@ -83,6 +185,11 @@ export function PurchaseOrdersScreen({ token }: { token: string }) {
   });
   const [shipUploading, setShipUploading] = useState(false);
   const [busyItemId, setBusyItemId] = useState<number | null>(null);
+  const [pendingFilters, setPendingFilters] = useState<Partial<Record<Exclude<PendingFilterKey, "goalAmount">, string>>>({});
+  const [pendingGoalRange, setPendingGoalRange] = useState<RangeFilter>({ start: "", end: "" });
+  const [completedFilters, setCompletedFilters] = useState<Partial<Record<Exclude<CompletedFilterKey, "purchasedAmount" | "orderedAt">, string>>>({});
+  const [completedAmountRange, setCompletedAmountRange] = useState<RangeFilter>({ start: "", end: "" });
+  const [completedOrderedRange, setCompletedOrderedRange] = useState<RangeFilter>({ start: "", end: "" });
 
   const load = () => {
     setLoading(true);
@@ -198,6 +305,306 @@ export function PurchaseOrdersScreen({ token }: { token: string }) {
     }
   };
 
+  const pendingRows = useMemo(() => pending.map(toPendingPurchaseGridRow), [pending]);
+  const orderRows = useMemo(() => orders.map(toPurchaseOrderGridRow), [orders]);
+  const filteredPendingRows = useMemo(
+    () =>
+      pendingRows.filter(
+        (row) =>
+          includes(row.itemLabel, pendingFilters.itemLabel) &&
+          includes(row.facilityName, pendingFilters.facilityName) &&
+          isWithinAmountRange(row.goalAmount, pendingGoalRange),
+      ),
+    [pendingFilters.facilityName, pendingFilters.itemLabel, pendingGoalRange, pendingRows],
+  );
+  const filteredOrderRows = useMemo(
+    () =>
+      orderRows.filter(
+        (row) =>
+          includes(row.itemLabel, completedFilters.itemLabel) &&
+          includes(row.vendor, completedFilters.vendor) &&
+          includes(row.shippingLabel, completedFilters.shippingLabel) &&
+          includes(itemStatusLabel[row.status], completedFilters.status) &&
+          isWithinAmountRange(row.purchasedAmount, completedAmountRange) &&
+          isWithinDateRange(row.orderedAt, completedOrderedRange),
+      ),
+    [
+      completedAmountRange,
+      completedFilters.itemLabel,
+      completedFilters.shippingLabel,
+      completedFilters.status,
+      completedFilters.vendor,
+      completedOrderedRange,
+      orderRows,
+    ],
+  );
+
+  const setPendingTextFilter = (field: PendingFilterKey, value: string) => {
+    if (field === "goalAmount") return;
+    setPendingFilters((current) => ({ ...current, [field]: value }));
+  };
+
+  const setPendingRangeFilter = (field: PendingFilterKey, value: RangeFilter) => {
+    if (field === "goalAmount") setPendingGoalRange(value);
+  };
+
+  const setCompletedTextFilter = (field: CompletedFilterKey, value: string) => {
+    if (field === "purchasedAmount" || field === "orderedAt") return;
+    setCompletedFilters((current) => ({ ...current, [field]: value }));
+  };
+
+  const setCompletedRangeFilter = (field: CompletedFilterKey, value: RangeFilter) => {
+    if (field === "purchasedAmount") setCompletedAmountRange(value);
+    if (field === "orderedAt") setCompletedOrderedRange(value);
+  };
+
+  const pendingColumnDefs = useMemo<ColDef<PendingPurchaseGridRow>[]>(
+    () => [
+      {
+        field: "itemLabel",
+        headerName: "물품",
+        flex: 1.25,
+        minWidth: 260,
+        headerComponent: AdminGridHeader<PendingPurchaseGridRow, PendingFilterKey>,
+        headerComponentParams: {
+          fieldKey: "itemLabel",
+          filterValue: pendingFilters.itemLabel ?? "",
+          filterPlaceholder: "물품명 입력",
+          onFilterChange: setPendingTextFilter,
+        },
+        cellClass: "items-center",
+        cellRenderer: ({ data }: { data?: PendingPurchaseGridRow }) =>
+          data ? (
+            <div className="flex h-full min-w-0 items-center">
+              <span className="truncate font-bold text-zinc-900">{data.itemLabel}</span>
+            </div>
+          ) : null,
+      },
+      {
+        field: "facilityName",
+        headerName: "시설",
+        flex: 1,
+        minWidth: 190,
+        headerComponent: AdminGridHeader<PendingPurchaseGridRow, PendingFilterKey>,
+        headerComponentParams: {
+          fieldKey: "facilityName",
+          filterValue: pendingFilters.facilityName ?? "",
+          filterPlaceholder: "시설명 입력",
+          onFilterChange: setPendingTextFilter,
+        },
+        cellClass: "items-center text-[13px] font-semibold text-zinc-800",
+      },
+      {
+        field: "goalAmount",
+        headerName: "목표액",
+        width: 160,
+        headerComponent: AdminGridHeader<PendingPurchaseGridRow, PendingFilterKey>,
+        headerComponentParams: {
+          fieldKey: "goalAmount",
+          filterVariant: "number-range",
+          rangeValue: pendingGoalRange,
+          align: "center",
+          popoverAlign: "right",
+          onRangeFilterChange: setPendingRangeFilter,
+        },
+        valueFormatter: ({ value }) => won(Number(value || 0)),
+        cellClass: "items-center justify-center text-center font-extrabold text-zinc-950",
+      },
+      {
+        headerName: "실행",
+        width: 170,
+        headerClass: "ag-center-header",
+        sortable: false,
+        filter: false,
+        cellClass: "items-center justify-center",
+        cellRenderer: ({ data }: { data?: PendingPurchaseGridRow }) =>
+          data ? (
+            <div className="flex h-full w-full items-center justify-center">
+              <Button size="sm" onClick={() => openPurchase(data.source)}>
+                <Plus size={14} /> 통합구매
+              </Button>
+            </div>
+          ) : null,
+      },
+    ],
+    [pendingFilters.facilityName, pendingFilters.itemLabel, pendingGoalRange],
+  );
+
+  const orderColumnDefs = useMemo<ColDef<PurchaseOrderGridRow>[]>(
+    () => [
+      {
+        field: "itemLabel",
+        headerName: "물품",
+        flex: 1.3,
+        minWidth: 240,
+        headerComponent: AdminGridHeader<PurchaseOrderGridRow, CompletedFilterKey>,
+        headerComponentParams: {
+          fieldKey: "itemLabel",
+          filterValue: completedFilters.itemLabel ?? "",
+          filterPlaceholder: "물품명 입력",
+          onFilterChange: setCompletedTextFilter,
+        },
+        cellRenderer: ({ data }: { data?: PurchaseOrderGridRow }) => {
+          if (!data) return null;
+          return (
+            <div className="flex h-full min-w-0 flex-col justify-center">
+              <div className="truncate font-bold text-zinc-900">{data.itemLabel}</div>
+              <div className="truncate text-[11px] text-zinc-400">{data.facilityName}</div>
+            </div>
+          );
+        },
+      },
+      {
+        field: "vendor",
+        headerName: "판매처",
+        flex: 0.8,
+        minWidth: 150,
+        headerComponent: AdminGridHeader<PurchaseOrderGridRow, CompletedFilterKey>,
+        headerComponentParams: {
+          fieldKey: "vendor",
+          filterValue: completedFilters.vendor ?? "",
+          filterPlaceholder: "판매처 입력",
+          onFilterChange: setCompletedTextFilter,
+        },
+        cellClass: "items-center text-[13px] font-semibold text-zinc-800",
+      },
+      {
+        field: "purchasedAmount",
+        headerName: "실구매액",
+        width: 150,
+        headerComponent: AdminGridHeader<PurchaseOrderGridRow, CompletedFilterKey>,
+        headerComponentParams: {
+          fieldKey: "purchasedAmount",
+          filterVariant: "number-range",
+          rangeValue: completedAmountRange,
+          align: "center",
+          popoverAlign: "right",
+          onRangeFilterChange: setCompletedRangeFilter,
+        },
+        valueFormatter: ({ value }) => won(Number(value || 0)),
+        cellClass: "items-center justify-center text-center font-extrabold text-zinc-950",
+      },
+      {
+        field: "shippingLabel",
+        headerName: "배송",
+        flex: 1,
+        minWidth: 190,
+        headerComponent: AdminGridHeader<PurchaseOrderGridRow, CompletedFilterKey>,
+        headerComponentParams: {
+          fieldKey: "shippingLabel",
+          filterValue: completedFilters.shippingLabel ?? "",
+          filterPlaceholder: "택배사 또는 송장",
+          onFilterChange: setCompletedTextFilter,
+        },
+        cellRenderer: ({ data }: { data?: PurchaseOrderGridRow }) => {
+          if (!data) return null;
+          if (!data.source.courier || !data.source.trackingNo) {
+            return (
+              <div className="flex h-full items-center">
+                <span className="text-[13px] text-zinc-400">송장 미등록</span>
+              </div>
+            );
+          }
+          return (
+            <div className="flex h-full min-w-0 items-center gap-1.5 text-[13px] text-zinc-700">
+              <Truck size={13} className="shrink-0 text-zinc-400" />
+              <span className="shrink-0">{courierLabel(data.source.courier)}</span>
+              <span className="truncate text-zinc-400">{data.source.trackingNo}</span>
+            </div>
+          );
+        },
+      },
+      {
+        field: "status",
+        headerName: "상태",
+        width: 120,
+        headerComponent: AdminGridHeader<PurchaseOrderGridRow, CompletedFilterKey>,
+        headerComponentParams: {
+          fieldKey: "status",
+          filterValue: completedFilters.status ?? "",
+          filterPlaceholder: "상태 입력",
+          align: "center",
+          popoverAlign: "right",
+          onFilterChange: setCompletedTextFilter,
+        },
+        cellClass: "items-center justify-center",
+        cellRenderer: ({ data }: { data?: PurchaseOrderGridRow }) =>
+          data ? (
+            <div className="flex h-full items-center justify-center">
+              <StatusBadge tone={itemStatusTone[data.status]}>{itemStatusLabel[data.status]}</StatusBadge>
+            </div>
+          ) : null,
+      },
+      {
+        field: "orderedAt",
+        headerName: "구매일",
+        width: 150,
+        headerComponent: AdminGridHeader<PurchaseOrderGridRow, CompletedFilterKey>,
+        headerComponentParams: {
+          fieldKey: "orderedAt",
+          filterVariant: "date-range",
+          rangeValue: completedOrderedRange,
+          align: "center",
+          popoverAlign: "right",
+          onRangeFilterChange: setCompletedRangeFilter,
+        },
+        valueFormatter: ({ value }) => dateOnly(value ? String(value) : null) || "-",
+        cellClass: "items-center justify-center text-center text-[13px] font-semibold text-zinc-800",
+      },
+      {
+        headerName: "처리",
+        width: 210,
+        headerClass: "ag-center-header",
+        sortable: false,
+        filter: false,
+        cellClass: "items-center justify-center",
+        cellRenderer: ({ data }: { data?: PurchaseOrderGridRow }) => {
+          if (!data) return null;
+          const order = data.source;
+          return (
+            <div className="flex h-full w-full items-center justify-center gap-2">
+              {order.item.status === "BUYING" && (
+                <Button size="sm" variant="outline" onClick={() => openShipment(order)}>
+                  <Truck size={14} /> 송장 등록
+                </Button>
+              )}
+              {order.item.status === "SHIPPING" && (
+                <>
+                  <Button size="sm" variant="outline" onClick={() => openShipment(order)}>
+                    송장 수정
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => receive(order)}
+                    disabled={busyItemId === order.item.id}
+                  >
+                    <CheckCircle2 size={14} /> 수령확인
+                  </Button>
+                </>
+              )}
+              {(order.item.status === "RECEIVED" || order.item.status === "RECEIPTED") && (
+                <span className="inline-flex items-center gap-1 text-[13px] font-semibold text-emerald-600">
+                  <CheckCircle2 size={14} /> 수령완료
+                </span>
+              )}
+            </div>
+          );
+        },
+      },
+    ],
+    [
+      busyItemId,
+      completedAmountRange,
+      completedFilters.itemLabel,
+      completedFilters.shippingLabel,
+      completedFilters.status,
+      completedFilters.vendor,
+      completedOrderedRange,
+    ],
+  );
+
+  const isPendingMode = mode === "pending";
+
   return (
     <main className="workspace-page space-y-4">
       <Panel className="p-4">
@@ -208,13 +615,17 @@ export function PurchaseOrdersScreen({ token }: { token: string }) {
             </div>
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                <h1 className="text-[16px] font-extrabold text-zinc-950">통합 구매</h1>
+                <h1 className="text-[16px] font-extrabold text-zinc-950">
+                  {isPendingMode ? "통합 구매 대기" : "통합 구매 완료"}
+                </h1>
                 <span className="text-[12px] font-semibold text-zinc-400">
                   대기 {pending.length}건 · 완료 {orders.length}건
                 </span>
               </div>
               <p className="mt-1 text-[12px] leading-5 text-zinc-500">
-                목표달성 물품의 외부 구매 결과, 실구매액, 증빙을 한 흐름으로 기록합니다.
+                {isPendingMode
+                  ? "목표달성 물품을 외부 구매 결과 기록으로 전환합니다."
+                  : "완료된 통합구매의 실구매액, 배송, 처리 상태를 관리합니다."}
               </p>
             </div>
           </div>
@@ -223,130 +634,52 @@ export function PurchaseOrdersScreen({ token }: { token: string }) {
 
       {error && <p className="text-[13px] font-semibold text-red-600">{error}</p>}
 
-      <Panel className="p-4">
-        <CompactSectionHeader
-          title={`구매 대기 · ${pending.length}건`}
-          description="목표달성된 물품을 통합구매로 전환합니다."
-        />
-        {loading ? (
-          <p className="text-[13px] text-zinc-500">불러오는 중...</p>
-        ) : pending.length === 0 ? (
-          <EmptyState
-            title="구매 대기 물품이 없습니다."
-            description="목표달성된 물품이 여기에 표시됩니다."
+      {isPendingMode ? (
+        <Panel className="p-4">
+          <CompactSectionHeader
+            title={`구매 대기 · ${pending.length}건`}
+            description="목표달성된 물품을 통합구매로 전환합니다."
           />
-        ) : (
-          <DataTable>
-            <DataTableHead>
-              <tr>
-                <DataTableHeaderCell>물품</DataTableHeaderCell>
-                <DataTableHeaderCell>시설</DataTableHeaderCell>
-                <DataTableHeaderCell className="text-right">목표액</DataTableHeaderCell>
-                <DataTableHeaderCell className="text-right">실행</DataTableHeaderCell>
-              </tr>
-            </DataTableHead>
-            <tbody>
-              {pending.map((it) => (
-                <DataTableRow key={it.itemId}>
-                  <DataTableCell>
-                    <div className="font-bold text-zinc-900">
-                      {it.emoji} {it.name}
-                    </div>
-                  </DataTableCell>
-                  <DataTableCell>{it.facility.name}</DataTableCell>
-                  <DataTableCell className="text-right font-bold text-zinc-900">
-                    {won(it.goalAmount)}
-                  </DataTableCell>
-                  <DataTableCell>
-                    <div className="flex justify-end">
-                      <Button size="sm" onClick={() => openPurchase(it)}>
-                        <Plus size={14} /> 통합구매
-                      </Button>
-                    </div>
-                  </DataTableCell>
-                </DataTableRow>
-              ))}
-            </tbody>
-          </DataTable>
-        )}
-      </Panel>
-
-      <Panel className="p-4">
-        <CompactSectionHeader
-          title={`통합구매 완료 · ${orders.length}건`}
-          description="판매처, 실구매액, 배송 처리 상태를 확인합니다."
-        />
-        {loading ? null : orders.length === 0 ? (
-          <EmptyState title="완료된 통합구매가 없습니다." />
-        ) : (
-          <DataTable>
-            <DataTableHead>
-              <tr>
-                <DataTableHeaderCell>물품</DataTableHeaderCell>
-                <DataTableHeaderCell>판매처</DataTableHeaderCell>
-                <DataTableHeaderCell className="text-right">실구매액</DataTableHeaderCell>
-                <DataTableHeaderCell>배송</DataTableHeaderCell>
-                <DataTableHeaderCell className="text-right">처리</DataTableHeaderCell>
-              </tr>
-            </DataTableHead>
-            <tbody>
-              {orders.map((o) => (
-                <DataTableRow key={o.id}>
-                  <DataTableCell>
-                    <div className="font-medium text-zinc-900">
-                      {o.item.emoji} {o.item.name}
-                    </div>
-                    <div className="text-[11px] text-zinc-400">{o.facility.name}</div>
-                  </DataTableCell>
-                  <DataTableCell>{o.vendor}</DataTableCell>
-                  <DataTableCell className="text-right font-bold text-zinc-900">
-                    {won(o.purchasedAmount)}
-                  </DataTableCell>
-                  <DataTableCell>
-                    {o.courier && o.trackingNo ? (
-                      <div className="flex items-center gap-1.5 text-[13px] text-zinc-700">
-                        <Truck size={13} className="text-zinc-400" />
-                        <span>{courierLabel(o.courier)}</span>
-                        <span className="text-zinc-400">{o.trackingNo}</span>
-                      </div>
-                    ) : (
-                      <span className="text-[13px] text-zinc-400">송장 미등록</span>
-                    )}
-                  </DataTableCell>
-                  <DataTableCell>
-                    <div className="flex justify-end gap-2">
-                      {o.item.status === "BUYING" && (
-                        <Button size="sm" variant="outline" onClick={() => openShipment(o)}>
-                          <Truck size={14} /> 송장 등록
-                        </Button>
-                      )}
-                      {o.item.status === "SHIPPING" && (
-                        <>
-                          <Button size="sm" variant="outline" onClick={() => openShipment(o)}>
-                            송장 수정
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={() => receive(o)}
-                            disabled={busyItemId === o.item.id}
-                          >
-                            <CheckCircle2 size={14} /> 수령확인
-                          </Button>
-                        </>
-                      )}
-                      {(o.item.status === "RECEIVED" || o.item.status === "RECEIPTED") && (
-                        <span className="inline-flex items-center gap-1 text-[13px] font-semibold text-emerald-600">
-                          <CheckCircle2 size={14} /> 수령완료
-                        </span>
-                      )}
-                    </div>
-                  </DataTableCell>
-                </DataTableRow>
-              ))}
-            </tbody>
-          </DataTable>
-        )}
-      </Panel>
+          {loading ? (
+            <p className="text-[13px] text-zinc-500">불러오는 중...</p>
+          ) : pending.length === 0 ? (
+            <EmptyState
+              title="구매 대기 물품이 없습니다."
+              description="목표달성된 물품이 여기에 표시됩니다."
+            />
+          ) : (
+            <AdminDataGrid<PendingPurchaseGridRow>
+              rowData={filteredPendingRows}
+              columnDefs={pendingColumnDefs}
+              height={360}
+              rowHeight={58}
+              defaultColDef={{ filter: false }}
+              getRowId={({ data }) => String(data.itemId)}
+              overlayNoRowsTemplate="표시할 구매 대기 물품이 없습니다."
+            />
+          )}
+        </Panel>
+      ) : (
+        <Panel className="p-4">
+          <CompactSectionHeader
+            title={`통합구매 완료 · ${orders.length}건`}
+            description="판매처, 실구매액, 배송 처리 상태를 확인합니다."
+          />
+          {loading ? null : orders.length === 0 ? (
+            <EmptyState title="완료된 통합구매가 없습니다." />
+          ) : (
+            <AdminDataGrid<PurchaseOrderGridRow>
+              rowData={filteredOrderRows}
+              columnDefs={orderColumnDefs}
+              height={520}
+              rowHeight={64}
+              defaultColDef={{ filter: false }}
+              getRowId={({ data }) => String(data.id)}
+              overlayNoRowsTemplate="표시할 통합구매 내역이 없습니다."
+            />
+          )}
+        </Panel>
+      )}
 
       <Drawer
         open={target != null}

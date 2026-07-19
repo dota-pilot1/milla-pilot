@@ -8,13 +8,16 @@ import com.cj.donationplatform.donation_item.infrastructure.DonationItemReposito
 import com.cj.donationplatform.purchase_order.domain.PurchaseOrder;
 import com.cj.donationplatform.purchase_order.infrastructure.PurchaseOrderRepository;
 import com.cj.donationplatform.purchase_order.presentation.dto.CreatePurchaseOrderRequest;
+import com.cj.donationplatform.purchase_order.presentation.dto.PublicPurchaseMonitoringResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -73,6 +76,27 @@ public class PurchaseOrderService {
     @Transactional(readOnly = true)
     public List<PurchaseOrder> findAll() {
         return purchaseOrderRepository.findAllWithItemAndFacility();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PublicPurchaseMonitoringResponse> findPublicMonitoring() {
+        List<PublicPurchaseMonitoringResponse> pending = donationItemRepository
+                .findByStatusWithFacility(ItemStatus.LOCKED)
+                .stream()
+                .map(PublicPurchaseMonitoringResponse::pending)
+                .toList();
+        List<PublicPurchaseMonitoringResponse> ordered = purchaseOrderRepository
+                .findAllWithItemAndFacility()
+                .stream()
+                .map(PublicPurchaseMonitoringResponse::from)
+                .toList();
+
+        return Stream.concat(pending.stream(), ordered.stream())
+                .sorted(Comparator
+                        .comparing(PublicPurchaseMonitoringResponse::orderedAt,
+                                Comparator.nullsFirst(Comparator.reverseOrder()))
+                        .thenComparing(PublicPurchaseMonitoringResponse::itemId))
+                .toList();
     }
 
     /** 통합구매 대기 물품 — 목표달성(LOCKED). 구매되면 BUYING 으로 빠지므로 자동 제외. */

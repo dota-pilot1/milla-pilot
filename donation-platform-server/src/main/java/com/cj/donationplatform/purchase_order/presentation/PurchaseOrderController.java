@@ -4,6 +4,8 @@ import com.cj.donationplatform.purchase_order.application.PurchaseOrderService;
 import com.cj.donationplatform.purchase_order.presentation.dto.AdminPurchaseOrderResponse;
 import com.cj.donationplatform.purchase_order.presentation.dto.CreatePurchaseOrderRequest;
 import com.cj.donationplatform.purchase_order.presentation.dto.PendingPurchaseItemResponse;
+import com.cj.donationplatform.purchase_order.presentation.dto.PublicPurchaseMonitoringResponse;
+import com.cj.donationplatform.purchase_order.presentation.dto.PublicPurchaseOrderResponse;
 import com.cj.donationplatform.purchase_order.presentation.dto.PurchaseOrderResponse;
 import com.cj.donationplatform.purchase_order.presentation.dto.RegisterShipmentRequest;
 import io.swagger.v3.oas.annotations.Operation;
@@ -59,6 +61,20 @@ public class PurchaseOrderController {
         return purchaseOrderService.findAll().stream()
                 .map(AdminPurchaseOrderResponse::from)
                 .toList();
+    }
+
+    @GetMapping("/public/purchase-orders")
+    @Operation(summary = "공개 통합구매·배송 현황")
+    public List<PublicPurchaseOrderResponse> publicAll() {
+        return purchaseOrderService.findAll().stream()
+                .map(PublicPurchaseOrderResponse::from)
+                .toList();
+    }
+
+    @GetMapping("/public/purchase-monitoring")
+    @Operation(summary = "공개 통합구매·배송 모니터링 — 대기/구매/배송/수령")
+    public List<PublicPurchaseMonitoringResponse> publicMonitoring() {
+        return purchaseOrderService.findPublicMonitoring();
     }
 
     @GetMapping("/purchase-orders/pending")

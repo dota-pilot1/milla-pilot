@@ -48,6 +48,7 @@ public class UserManagementService {
                 predicates.add(cb.or(
                         cb.like(cb.lower(root.get("email")), like),
                         cb.like(cb.lower(root.get("username")), like),
+                        cb.like(cb.lower(root.get("phoneNumber")), like),
                         cb.like(cb.lower(role.get("name")), like),
                         cb.like(cb.lower(role.get("code")), like)
                 ));
@@ -79,7 +80,7 @@ public class UserManagementService {
         }
         Role role = roleService.getById(req.roleId());
         String hash = passwordEncoder.encode(req.password());
-        User saved = userRepository.save(User.createNewUser(req.email(), hash, req.username(), role));
+        User saved = userRepository.save(User.createNewUser(req.email(), hash, req.username(), req.phoneNumber(), role));
         return UserListItemResponse.from(saved);
     }
 
@@ -90,7 +91,7 @@ public class UserManagementService {
         if (!user.getEmail().equals(req.email()) && userRepository.existsByEmail(req.email())) {
             throw new DuplicateEmailException();
         }
-        user.updateProfile(req.email(), req.username());
+        user.updateProfile(req.email(), req.username(), req.phoneNumber());
         return UserListItemResponse.from(user);
     }
 

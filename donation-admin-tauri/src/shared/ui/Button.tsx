@@ -1,15 +1,14 @@
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
-import { Children, isValidElement } from "react";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { cn } from "../lib/cn";
 
 const buttonVariants = cva(
   [
-    "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg border text-[13px] font-extrabold leading-none transition-colors",
+    "inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border text-[13px] font-extrabold leading-normal transition-colors",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2",
     "disabled:pointer-events-none disabled:opacity-50",
-    "[&_svg]:pointer-events-none [&_svg]:shrink-0",
+    "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg]:self-center",
   ],
   {
     variants: {
@@ -21,8 +20,8 @@ const buttonVariants = cva(
         destructive: "border-red-600 bg-red-600 text-white hover:bg-red-700",
       },
       size: {
-        default: "h-10 px-3",
-        sm: "h-8 px-2.5 text-xs",
+        default: "h-10 px-3 py-0",
+        sm: "h-8 px-2.5 py-0 text-xs",
         icon: "h-10 w-10 p-0",
       },
     },
@@ -39,22 +38,6 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &
   asChild?: boolean;
 };
 
-function alignButtonChildren(children: ReactNode) {
-  return Children.map(children, (child) => {
-    if (typeof child === "string" || typeof child === "number") {
-      const text = String(child);
-      if (!text.trim()) return null;
-      return <span className="inline-flex h-full items-center pt-px leading-none">{text}</span>;
-    }
-
-    if (isValidElement(child)) {
-      return child;
-    }
-
-    return child;
-  });
-}
-
 export function Button({ className, variant, size, type = "button", children, asChild = false, ...props }: ButtonProps) {
   const Comp = asChild ? Slot : "button";
   return (
@@ -63,7 +46,7 @@ export function Button({ className, variant, size, type = "button", children, as
       className={cn(buttonVariants({ variant, size }), className)}
       {...props}
     >
-      {asChild ? children : alignButtonChildren(children)}
+      {children}
     </Comp>
   );
 }

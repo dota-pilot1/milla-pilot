@@ -212,13 +212,15 @@ export function FacilityManagementScreen({ token }: { token: string }) {
 
   return (
     <main className="workspace-page space-y-5">
-      <section className="workspace-hero">
+      <section className="workspace-hero dense">
         <div className="workspace-hero-mark">
-          <Building2 size={26} />
+          <Building2 size={22} />
         </div>
-        <p className="eyebrow">DonationPlatform Admin</p>
-        <h1>시설 관리</h1>
-        <p>후원 대상 시설과 시설별 후원 물품을 등록·수정·삭제합니다. 시설을 선택하면 물품을 관리할 수 있어요.</p>
+        <div className="workspace-hero-copy">
+          <p className="eyebrow">DonationPlatform Admin</p>
+          <h1>시설 관리</h1>
+          <p>후원 대상 시설과 시설별 후원 물품을 등록·수정·삭제합니다. 시설을 선택하면 물품을 관리할 수 있어요.</p>
+        </div>
       </section>
 
       <Panel>

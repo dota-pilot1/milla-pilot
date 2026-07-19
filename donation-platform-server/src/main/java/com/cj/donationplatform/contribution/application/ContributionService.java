@@ -7,6 +7,8 @@ import com.cj.donationplatform.contribution.infrastructure.ContributionRepositor
 import com.cj.donationplatform.donation_item.domain.DonationItem;
 import com.cj.donationplatform.donation_item.domain.ItemStatus;
 import com.cj.donationplatform.donation_item.infrastructure.DonationItemRepository;
+import com.cj.donationplatform.purchase_order.domain.PurchaseOrder;
+import com.cj.donationplatform.purchase_order.infrastructure.PurchaseOrderRepository;
 import com.cj.donationplatform.user.domain.User;
 import com.cj.donationplatform.user.infrastructure.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +26,7 @@ public class ContributionService {
     private final ContributionRepository contributionRepository;
     private final DonationItemRepository donationItemRepository;
     private final UserRepository userRepository;
+    private final PurchaseOrderRepository purchaseOrderRepository;
 
     /**
      * 후원 참여 기록 생성 (MVP: 결제 없이 기록).
@@ -65,6 +70,28 @@ public class ContributionService {
     public List<Contribution> findMine(Long donorId) {
         return contributionRepository.findMineWithItemAndFacility(donorId);
     }
+
+    @Transactional(readOnly = true)
+    public List<MineContributionDetails> findMineDetails(Long donorId) {
+        List<Contribution> contributions = contributionRepository.findMineWithItemAndFacility(donorId);
+        List<Long> itemIds = contributions.stream()
+                .map(c -> c.getDonationItem().getId())
+                .distinct()
+                .toList();
+        Map<Long, PurchaseOrder> ordersByItemId = itemIds.isEmpty()
+                ? Map.of()
+                : purchaseOrderRepository.findByDonationItemIds(itemIds).stream()
+                        .collect(Collectors.toMap(po -> po.getDonationItem().getId(), po -> po));
+
+        return contributions.stream()
+                .map(c -> new MineContributionDetails(
+                        c,
+                        ordersByItemId.get(c.getDonationItem().getId())
+                ))
+                .toList();
+    }
+
+    public record MineContributionDetails(Contribution contribution, PurchaseOrder purchaseOrder) {}
 
     /** 물품별 기부 원장 (관리자) */
     @Transactional(readOnly = true)

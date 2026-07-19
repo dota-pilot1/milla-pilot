@@ -8,6 +8,7 @@ import { StatusTimeline } from "@/shared/ui/StatusTimeline";
 import { cn } from "@/shared/lib/utils";
 import { formatKRW, pctOf } from "@/shared/lib/format";
 import type { MyContribution } from "@/entities/contribution/model/types";
+import { PurchaseStatusCard } from "@/entities/purchase-order/ui/PurchaseStatusCard";
 
 type Group = {
   facility: MyContribution["facility"];
@@ -28,6 +29,7 @@ function groupByFacility(list: MyContribution[]): Group[] {
 
 type ItemGroup = {
   item: MyContribution["item"];
+  purchaseOrder: MyContribution["purchaseOrder"];
   myTotal: number;
   contributions: MyContribution[];
 };
@@ -36,7 +38,15 @@ type ItemGroup = {
 function groupByItem(rows: MyContribution[]): ItemGroup[] {
   const map = new Map<number, ItemGroup>();
   for (const c of rows) {
-    const g = map.get(c.item.id) ?? { item: c.item, myTotal: 0, contributions: [] };
+    const g = map.get(c.item.id) ?? {
+      item: c.item,
+      purchaseOrder: c.purchaseOrder,
+      myTotal: 0,
+      contributions: [],
+    };
+    if (!g.purchaseOrder && c.purchaseOrder) {
+      g.purchaseOrder = c.purchaseOrder;
+    }
     g.myTotal += c.myAmount;
     g.contributions.push(c);
     map.set(c.item.id, g);
@@ -87,7 +97,7 @@ function DonationRowsPanel({
       <div
         ref={innerRef}
         className={cn(
-          "space-y-6 border-t bg-muted/20 px-5 py-5 transition-[opacity,transform] duration-150 ease-out motion-reduce:transition-none",
+          "space-y-4 border-t bg-muted/20 px-4 py-4 transition-[opacity,transform] duration-150 ease-out motion-reduce:transition-none",
           expanded ? "translate-y-0 opacity-100" : "-translate-y-1 opacity-0",
         )}
       >
@@ -96,13 +106,13 @@ function DonationRowsPanel({
           const full = ig.item.raisedAmount >= ig.item.goalAmount;
           const count = ig.contributions.length;
           return (
-            <div key={ig.item.id} className="space-y-3">
+            <div key={ig.item.id} className="space-y-3 rounded-lg border bg-background p-4">
               <div className="flex items-start gap-3">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-background text-xl shadow-sm">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-lg shadow-sm">
                   {ig.item.emoji || "📦"}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="font-medium">{ig.item.name}</p>
+                  <p className="font-semibold leading-tight">{ig.item.name}</p>
                   <p className="text-xs text-muted-foreground">
                     나의 후원 <b className="text-foreground">{formatKRW(ig.myTotal)}</b>
                     {count > 1 ? ` · ${count}건` : ""}
@@ -115,11 +125,12 @@ function DonationRowsPanel({
                   {formatKRW(ig.item.raisedAmount)} / {formatKRW(ig.item.goalAmount)}
                 </span>
               </div>
-              <StatusTimeline status={ig.item.status} />
+              <StatusTimeline status={ig.item.status} compact />
+              {ig.purchaseOrder ? <PurchaseStatusCard order={ig.purchaseOrder} compact /> : null}
               {count > 1 ? (
-                <ul className="space-y-1 rounded-lg bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+                <ul className="divide-y rounded-lg bg-muted/35 px-3 py-1 text-xs text-muted-foreground">
                   {ig.contributions.map((c) => (
-                    <li key={c.contributionId} className="flex items-center justify-between">
+                    <li key={c.contributionId} className="flex items-center justify-between py-1.5">
                       <span>{new Date(c.createdAt).toLocaleDateString("ko-KR")}</span>
                       <span className="font-medium text-foreground">{formatKRW(c.myAmount)}</span>
                     </li>
@@ -139,7 +150,7 @@ export function MyDonationsList({ contributions }: { contributions: MyContributi
   const [openId, setOpenId] = useState<number | null>(groups[0]?.facility.id ?? null);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {groups.map((g) => {
         const expanded = openId === g.facility.id;
         return (
@@ -153,13 +164,13 @@ export function MyDonationsList({ contributions }: { contributions: MyContributi
             <button
               type="button"
               className={cn(
-                "flex w-full items-center gap-3 p-5 text-left transition-colors hover:bg-muted/40",
+                "flex w-full items-center gap-3 p-4 text-left transition-colors hover:bg-muted/40",
                 expanded && "bg-muted/35",
               )}
               onClick={() => setOpenId(expanded ? null : g.facility.id)}
               aria-expanded={expanded}
             >
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-base font-bold text-primary">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-sm font-bold text-primary">
                 {g.facility.avatarInitial || g.facility.name.charAt(0)}
               </span>
               <div className="min-w-0 flex-1">

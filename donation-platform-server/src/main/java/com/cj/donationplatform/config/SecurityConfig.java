@@ -95,6 +95,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/contributions/by-item/**").hasAnyRole("PLATFORM_ADMIN", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/contributions").hasAnyRole("PLATFORM_ADMIN", "ADMIN")
                         // 통합구매: 전체 목록·수정은 관리자 (실행 POST 는 /api/donation-items/** 규칙, 물품별 조회 GET 은 공개)
+                        .requestMatchers(HttpMethod.GET, "/api/public/purchase-orders", "/api/public/purchase-monitoring").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/purchase-orders", "/api/purchase-orders/**").hasAnyRole("PLATFORM_ADMIN", "ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/purchase-orders/**").hasAnyRole("PLATFORM_ADMIN", "ADMIN")
                         .requestMatchers(

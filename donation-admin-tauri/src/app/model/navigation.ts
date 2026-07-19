@@ -107,6 +107,8 @@ const subtitles: Record<string, string> = {
   ADMIN_FUNDING_CAMPAIGNS: "공동구매 펀딩",
   ADMIN_CONTRIBUTIONS: "후원 결제 내역",
   ADMIN_PURCHASE_ORDERS: "통합 구매 처리",
+  ADMIN_PURCHASE_PENDING: "구매 실행 대기",
+  ADMIN_PURCHASE_COMPLETED: "구매 이력과 배송 처리",
   ADMIN_DELIVERY_TRACKING: "배송과 수령 상태",
   ADMIN_RECEIPTS: "영수증과 증빙",
   ADMIN_USERS: "회원 계정",
@@ -216,8 +218,43 @@ export function toTauriSidebarMenus(menus: AdminMenu[]): AdminMenu[] {
   const facilities = byCode.get("ADMIN_FACILITY");
   const donation = byCode.get("ADMIN_DONATION");
   const purchase = byCode.get("ADMIN_PURCHASE");
+  const purchaseOrders = byCode.get("ADMIN_PURCHASE_ORDERS");
   const users = cloneLeaf("ADMIN_USERS");
   const hasSystemAccess = Boolean(byCode.get("ADMIN_SYSTEM"));
+
+  const purchasePending: AdminMenu | null = purchaseOrders
+    ? {
+        ...purchaseOrders,
+        id: "ADMIN_PURCHASE_PENDING",
+        code: "ADMIN_PURCHASE_PENDING",
+        label: "통합 구매 대기",
+        subtitle: subtitles.ADMIN_PURCHASE_PENDING,
+        children: [],
+      }
+    : null;
+
+  const purchaseCompleted: AdminMenu | null = purchaseOrders
+    ? {
+        ...purchaseOrders,
+        id: "ADMIN_PURCHASE_COMPLETED",
+        code: "ADMIN_PURCHASE_COMPLETED",
+        label: "통합 구매 완료",
+        subtitle: subtitles.ADMIN_PURCHASE_COMPLETED,
+        children: [],
+      }
+    : null;
+
+  const purchaseGroup = purchase
+    ? {
+        ...purchase,
+        children:
+          purchasePending || purchaseCompleted
+            ? [purchasePending, purchaseCompleted, ...purchase.children.filter((child) => child.code !== "ADMIN_PURCHASE_ORDERS")].filter(
+                Boolean,
+              ) as AdminMenu[]
+            : purchase.children,
+      }
+    : null;
 
   const accessPolicy = makeGroup(
     "ADMIN_ACCESS_POLICY",
@@ -248,7 +285,7 @@ export function toTauriSidebarMenus(menus: AdminMenu[]): AdminMenu[] {
     users,
     facilities,
     donation,
-    purchase,
+    purchaseGroup,
     accessPolicy,
     experienceSettings,
   ].filter(Boolean) as AdminMenu[];

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { ReceiptText } from "lucide-react";
+import { Truck } from "lucide-react";
 import { RequireAuth } from "@/widgets/guards/RequireAuth";
 import { PageHeader } from "@/shared/ui/PageHeader";
 import { PageShell } from "@/shared/ui/PageShell";
@@ -27,12 +27,12 @@ function MyDonationsInner() {
   });
 
   return (
-    <PageShell>
-      <div className="space-y-6">
+    <PageShell width="content" className="py-6">
+      <div className="space-y-5">
         <PageHeader
-          icon={ReceiptText}
-          title="내 후원 내역"
-          description="내가 참여한 후원과 물품의 진행 단계를 시설별로 확인합니다."
+          icon={Truck}
+          title="내 후원·배송"
+          description="내가 참여한 후원 물품의 모금, 통합구매, 배송 진행을 시설별로 확인합니다."
         />
 
         {isLoading ? (
@@ -42,10 +42,10 @@ function MyDonationsInner() {
             ))}
           </div>
         ) : isError ? (
-          <EmptyState icon={ReceiptText} title="후원 내역을 불러오지 못했습니다" />
+          <EmptyState icon={Truck} title="후원 내역을 불러오지 못했습니다" />
         ) : !data?.length ? (
           <EmptyState
-            icon={ReceiptText}
+            icon={Truck}
             title="아직 후원 내역이 없어요"
             description="마음에 드는 시설의 준비물에 참여해 보세요."
             action={

@@ -61,7 +61,7 @@ function DashboardInner() {
       <div className="space-y-6">
         <PageHeader
           icon={LayoutDashboard}
-          title="프로젝트 소개"
+          title="대시보드"
           description="참여 시설과 필요한 물품, 후원 진행 흐름을 한눈에 확인합니다."
           actions={
             <Link href="/donate" className={buttonVariants({ size: "sm" })}>

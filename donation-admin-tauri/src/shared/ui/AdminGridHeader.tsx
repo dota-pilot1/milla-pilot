@@ -12,6 +12,7 @@ type AdminGridHeaderProps<TData, TField extends string> = IHeaderParams<TData> &
   filterValue?: string;
   rangeValue?: { start: string; end: string };
   filterPlaceholder?: string;
+  align?: "left" | "center" | "right";
   popoverAlign?: "left" | "right";
   serverSortable?: boolean;
   serverSort?: "asc" | "desc" | null;
@@ -80,6 +81,7 @@ export function AdminGridHeader<TData, TField extends string>({
   filterValue = "",
   rangeValue = { start: "", end: "" },
   filterPlaceholder = "필터 입력",
+  align = "left",
   popoverAlign = "left",
   serverSortable = false,
   serverSort,
@@ -222,7 +224,14 @@ export function AdminGridHeader<TData, TField extends string>({
   };
 
   return (
-    <div className="relative flex h-full w-full min-w-0 items-center justify-between gap-2">
+    <div
+      className={cn(
+        "relative flex h-full w-full min-w-0 items-center gap-2",
+        align === "center" && "justify-center",
+        align === "right" && "justify-end",
+        align === "left" && "justify-between",
+      )}
+    >
       <div className="flex min-w-0 items-center gap-1.5">
         <span className="min-w-0 truncate text-left font-extrabold text-zinc-800">
           {displayName}

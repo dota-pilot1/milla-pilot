@@ -10,6 +10,7 @@ import {
   ChevronDown,
   FileText,
   HandCoins,
+  Info,
   KeyRound,
   LayoutDashboard,
   LogIn,
@@ -68,15 +69,20 @@ function buildTree(flat: MenuRecord[], userRole: string | null): MenuItem[] {
 }
 
 function isWebMenu(menu: MenuRecord) {
+  if (menu.code === "PROJECT_INTRO") return true;
   if (menu.code === "DASHBOARD") return true;
   if (menu.code === "ADMIN" || menu.code.startsWith("ADMIN_")) return false;
   return true;
 }
 
 const menuIcons: Record<string, LucideIcon> = {
+  PROJECT_INTRO: Info,
   DASHBOARD: LayoutDashboard,
+  WEB_DONATION: HandCoins,
   WEB_DONATE: HandCoins,
-  WEB_MY_DONATIONS: ReceiptText,
+  WEB_PURCHASE: Truck,
+  WEB_PURCHASE_MONITORING: ShoppingCart,
+  WEB_MY_DONATIONS: Truck,
   WEB_FACILITIES: Building2,
   WEB_DONATION_ITEMS: PackagePlus,
   WEB_MY_CONTRIBUTIONS: ReceiptText,
@@ -345,22 +351,41 @@ function SidebarSection({
   const active = items.some((child) =>
     flattenLeaves([child]).some((leaf) => isActivePath(pathname, leaf.path))
   );
+  const [open, setOpen] = useState(active);
+
+  useEffect(() => {
+    if (active) setOpen(true);
+  }, [active]);
 
   return (
     <section className="space-y-1">
-      <div
-        className={`flex h-8 items-center gap-2 px-2.5 text-xs font-semibold uppercase tracking-wide ${
-          active ? "text-foreground" : "text-muted-foreground"
-        }`}
+      <button
+        type="button"
+        className={cn(
+          "flex h-9 w-full items-center gap-2 rounded-md px-2.5 text-sm font-semibold transition-colors",
+          active
+            ? "text-foreground"
+            : "text-muted-foreground hover:bg-accent hover:text-foreground",
+        )}
+        onClick={() => setOpen((value) => !value)}
+        aria-expanded={open}
       >
-        <Icon className="h-3.5 w-3.5" />
-        {label}
-      </div>
-      <div className="space-y-1">
-        {items.flatMap((child) => (child.children.length > 0 ? child.children : [child])).map((child) => (
-          <SidebarLink key={child.id} item={child} depth={1} />
-        ))}
-      </div>
+        <Icon className="size-4 shrink-0" />
+        <span className="min-w-0 flex-1 truncate text-left">{label}</span>
+        <ChevronDown
+          className={cn(
+            "size-3.5 shrink-0 text-muted-foreground transition-transform",
+            open && "rotate-180",
+          )}
+        />
+      </button>
+      {open ? (
+        <div className="ml-3 space-y-1 border-l border-sidebar-border py-1 pl-4">
+          {items.flatMap((child) => (child.children.length > 0 ? child.children : [child])).map((child) => (
+            <SidebarLink key={child.id} item={child} depth={0} />
+          ))}
+        </div>
+      ) : null}
     </section>
   );
 }
@@ -368,8 +393,8 @@ function SidebarSection({
 function Sidebar({ tree }: { tree: MenuItem[] }) {
   const dashboard = tree.find((item) => item.code === "DASHBOARD");
   const admin = tree.find((item) => item.code === "ADMIN");
-  const webLinks = tree.filter(
-    (item) => item.code !== "DASHBOARD" && item.code !== "ADMIN" && item.path
+  const webItems = tree.filter(
+    (item) => item.code !== "DASHBOARD" && item.code !== "ADMIN"
   );
   const sections = normalizeAdminSections(admin);
 
@@ -383,10 +408,21 @@ function Sidebar({ tree }: { tree: MenuItem[] }) {
       <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-4">
         <div className="space-y-1">
           {dashboard && <SidebarLink item={dashboard} />}
-          {webLinks.map((item) => (
-            <SidebarLink key={item.id} item={item} />
-          ))}
         </div>
+        {webItems.map((item) =>
+          item.children.length > 0 ? (
+            <SidebarSection
+              key={item.id}
+              label={item.label}
+              icon={menuIcons[item.code] ?? Menu}
+              items={item.children}
+            />
+          ) : (
+            <div key={item.id} className="space-y-1">
+              <SidebarLink item={item} />
+            </div>
+          ),
+        )}
         {sections.map((section) => (
           <SidebarSection
             key={section.id}
@@ -439,8 +475,8 @@ function MobileNav({ tree }: { tree: MenuItem[] }) {
   const [open, setOpen] = useState(false);
   const dashboard = tree.find((item) => item.code === "DASHBOARD");
   const admin = tree.find((item) => item.code === "ADMIN");
-  const webLinks = tree.filter(
-    (item) => item.code !== "DASHBOARD" && item.code !== "ADMIN" && item.path
+  const webItems = tree.filter(
+    (item) => item.code !== "DASHBOARD" && item.code !== "ADMIN"
   );
   const sections = normalizeAdminSections(admin);
   const close = () => setOpen(false);
@@ -459,31 +495,90 @@ function MobileNav({ tree }: { tree: MenuItem[] }) {
         <nav className="max-h-[calc(100vh-6.5rem)] space-y-5 overflow-y-auto px-3 py-4">
           <div className="space-y-1">
             {dashboard ? <MobileNavLink item={dashboard} onSelect={close} /> : null}
-            {webLinks.map((item) => (
-              <MobileNavLink key={item.id} item={item} onSelect={close} />
-            ))}
           </div>
-          {sections.map((section) => {
-            const SectionIcon = section.icon;
+          {webItems.map((item) => {
+            if (item.children.length === 0) {
+              return <MobileNavLink key={item.id} item={item} onSelect={close} />;
+            }
+
             return (
-              <section key={section.id} className="space-y-1">
-                <div className="flex h-8 items-center gap-2 px-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  <SectionIcon className="size-3.5" />
-                  {section.label}
-                </div>
-                <div className="space-y-1">
-                  {section.children
-                    .flatMap((child) => (child.children.length > 0 ? child.children : [child]))
-                    .map((child) => (
-                      <MobileNavLink key={child.id} item={child} depth={1} onSelect={close} />
-                    ))}
-                </div>
-              </section>
+              <MobileNavSection
+                key={item.id}
+                label={item.label}
+                icon={menuIcons[item.code] ?? Menu}
+                items={item.children}
+                onSelect={close}
+              />
             );
           })}
+          {sections.map((section) => (
+            <MobileNavSection
+              key={section.id}
+              label={section.label}
+              icon={section.icon}
+              items={section.children}
+              onSelect={close}
+            />
+          ))}
         </nav>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function MobileNavSection({
+  label,
+  icon: Icon,
+  items,
+  onSelect,
+}: {
+  label: string;
+  icon: LucideIcon;
+  items: MenuItem[];
+  onSelect: () => void;
+}) {
+  const pathname = usePathname();
+  const active = items.some((child) =>
+    flattenLeaves([child]).some((leaf) => isActivePath(pathname, leaf.path))
+  );
+  const [open, setOpen] = useState(active);
+
+  useEffect(() => {
+    if (active) setOpen(true);
+  }, [active]);
+
+  return (
+    <section className="space-y-1">
+      <button
+        type="button"
+        className={cn(
+          "flex h-10 w-full items-center gap-2 rounded-md px-3 text-sm font-semibold transition-colors",
+          active
+            ? "text-foreground"
+            : "text-muted-foreground hover:bg-accent hover:text-foreground",
+        )}
+        onClick={() => setOpen((value) => !value)}
+        aria-expanded={open}
+      >
+        <Icon className="size-4 shrink-0" />
+        <span className="min-w-0 flex-1 truncate text-left">{label}</span>
+        <ChevronDown
+          className={cn(
+            "size-3.5 shrink-0 text-muted-foreground transition-transform",
+            open && "rotate-180",
+          )}
+        />
+      </button>
+      {open ? (
+        <div className="ml-4 space-y-1 border-l border-border py-1 pl-3">
+          {items
+            .flatMap((child) => (child.children.length > 0 ? child.children : [child]))
+            .map((child) => (
+              <MobileNavLink key={child.id} item={child} depth={0} onSelect={onSelect} />
+            ))}
+        </div>
+      ) : null}
+    </section>
   );
 }
 

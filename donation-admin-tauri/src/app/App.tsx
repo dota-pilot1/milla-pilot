@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Activity, Database, RefreshCw } from "lucide-react";
+import { Database, HandCoins, LockKeyhole, Server, ShieldCheck, ShoppingCart } from "lucide-react";
 import { AppUpdatePanel } from "../shared/ui/AppUpdatePanel";
 import { LoginScreen } from "../features/auth/login/LoginScreen";
 import { useAppUpdate } from "../shared/lib/useAppUpdate";
@@ -33,7 +33,7 @@ const REFRESH_TOKEN_KEY = "donation-admin:refresh-token";
 
 export function App() {
   const [token, setToken] = useState(() => localStorage.getItem(ACCESS_TOKEN_KEY) || "");
-  const [refreshToken, setRefreshToken] = useState(() => localStorage.getItem(REFRESH_TOKEN_KEY) || "");
+  const [, setRefreshToken] = useState(() => localStorage.getItem(REFRESH_TOKEN_KEY) || "");
   const [user, setUser] = useState<UserSummary | null>(null);
   const [menus, setMenus] = useState<MenuRecord[]>([]);
   const [menuError, setMenuError] = useState("");
@@ -179,7 +179,6 @@ export function App() {
           activeWebMenu={activeWebMenu}
           user={user}
           token={token}
-          refreshToken={refreshToken}
           menuError={menuError}
           appUpdate={appUpdate}
           refreshKey={workspaceRefreshKey}
@@ -194,7 +193,6 @@ function AdminWorkspace({
   activeWebMenu,
   user,
   token,
-  refreshToken,
   menuError,
   appUpdate,
   refreshKey,
@@ -203,7 +201,6 @@ function AdminWorkspace({
   activeWebMenu: AdminMenu;
   user: UserSummary;
   token: string;
-  refreshToken: string;
   menuError: string;
   appUpdate: ReturnType<typeof useAppUpdate>;
   refreshKey: number;
@@ -246,8 +243,12 @@ function AdminWorkspace({
     return <ContributionsScreen token={token} refreshKey={refreshKey} />;
   }
 
-  if (activeMenu === "ADMIN_PURCHASE_ORDERS") {
-    return <PurchaseOrdersScreen token={token} />;
+  if (activeMenu === "ADMIN_PURCHASE_ORDERS" || activeMenu === "ADMIN_PURCHASE_PENDING") {
+    return <PurchaseOrdersScreen token={token} mode="pending" />;
+  }
+
+  if (activeMenu === "ADMIN_PURCHASE_COMPLETED") {
+    return <PurchaseOrdersScreen token={token} mode="completed" />;
   }
 
   if (activeMenu === "ADMIN_USERS") {
@@ -269,18 +270,18 @@ function AdminWorkspace({
 
       <section className="starter-grid">
         <article className="starter-panel">
-          <Activity size={20} />
-          <strong>관리자 전용 앱</strong>
-          <span>웹 관리자 화면과 분리해 운영자 반복 업무에 맞춘 데스크톱 콘솔로 확장합니다.</span>
+          <ShieldCheck size={20} />
+          <strong>MVP 운영 콘솔</strong>
+          <span>시설, 물품, 후원 원장, 통합구매, 배송, 계정 권한을 관리자 전용 Tauri 앱에서 처리합니다.</span>
         </article>
         <article className="starter-panel">
           <Database size={20} />
           <strong>DB 메뉴 기반</strong>
-          <span>현재 사이드바 메뉴는 `/api/menus` 응답을 역할 기준으로 필터링해 표시합니다.</span>
+          <span>사이드바와 접근 범위는 `/api/menus` 응답을 역할 기준으로 필터링해 표시합니다.</span>
           {menuError && <small className="error-text">{menuError}</small>}
         </article>
         <article className="starter-panel">
-          <RefreshCw size={20} />
+          <Server size={20} />
           <strong>서버 연결</strong>
           <span>{API_BASE_URL}</span>
           <small>{SERVER_ROOT_PATH}</small>
@@ -288,25 +289,43 @@ function AdminWorkspace({
       </section>
 
       <section className="admin-detail-panel">
-        <h2>다음 연결 대상</h2>
+        <h2>MVP 운영 범위</h2>
         <div className="admin-detail-grid">
           <div>
-            <span>메뉴 코드</span>
-            <strong>{activeWebMenu.code}</strong>
+            <span>후원 모델</span>
+            <strong>품목별 공동충당</strong>
           </div>
           <div>
-            <span>백엔드 경로</span>
-            <strong>{activeWebMenu.path ?? "그룹 메뉴"}</strong>
+            <span>목표 잠금</span>
+            <strong>목표 달성 후 추가 참여 차단</strong>
           </div>
           <div>
-            <span>권한</span>
+            <span>통합구매</span>
+            <strong>대기·완료·배송 흐름 관리</strong>
+          </div>
+          <div>
+            <span>운영 권한</span>
             <strong>{user.role.name}</strong>
           </div>
-          <div>
-            <span>세션</span>
-            <strong>{token && refreshToken ? "활성" : "확인 필요"}</strong>
-          </div>
         </div>
+      </section>
+
+      <section className="starter-grid">
+        <article className="starter-panel">
+          <HandCoins size={20} />
+          <strong>후원 투명성</strong>
+          <span>후원자는 결제 없이 참여 기록을 남기고, 내 후원·배송 화면에서 물품 진행 단계를 확인합니다.</span>
+        </article>
+        <article className="starter-panel">
+          <LockKeyhole size={20} />
+          <strong>목표 달성 기준</strong>
+          <span>시설 물품 목표액이 충족되면 모집을 잠그고 통합구매 대기 대상으로 전환합니다.</span>
+        </article>
+        <article className="starter-panel">
+          <ShoppingCart size={20} />
+          <strong>구매·배송 추적</strong>
+          <span>관리자는 실구매액, 판매처, 송장, 수령 확인을 기록하고 후원자 웹에는 관리 기능 없이 공개합니다.</span>
+        </article>
       </section>
     </main>
   );

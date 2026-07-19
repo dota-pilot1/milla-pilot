@@ -22,6 +22,7 @@ export type ManagedUser = {
   id: number;
   email: string;
   username: string;
+  phoneNumber?: string | null;
   role: RoleSummary;
   active: boolean;
   createdAt: string;
@@ -39,12 +40,14 @@ export type CreateUserInput = {
   email: string;
   password: string;
   username: string;
+  phoneNumber?: string | null;
   roleId: number;
 };
 
 export type UpdateUserInput = {
   email: string;
   username: string;
+  phoneNumber?: string | null;
 };
 
 export type TokenResponse = {

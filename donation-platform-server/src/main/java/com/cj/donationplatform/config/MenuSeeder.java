@@ -30,10 +30,14 @@ public class MenuSeeder implements ApplicationRunner {
     @Transactional
     public void run(ApplicationArguments args) {
         List<MenuDef> defs = List.of(
-                new MenuDef("DASHBOARD",             null,    "프로젝트 소개", "nav.dashboard",        "/dashboard",        "LayoutDashboard", null,                    0),
-                new MenuDef("WEB_DONATE",            null,    "후원하기",      "nav.donate",           "/donate",           "HandCoins",       null,                    1),
-                new MenuDef("WEB_MY_DONATIONS",      null,    "내 후원 내역",  "nav.myDonations",      "/my-donations",     "ReceiptText",     null,                    2),
-                new MenuDef("ADMIN",                 null,    "관리",          "nav.admin",            null,                "Settings",        RoleSeeder.ROLE_PLATFORM_ADMIN,   1),
+                new MenuDef("PROJECT_INTRO",         null,    "프로젝트 소개", "nav.projectIntro",    "/project-intro",    "Info",            null,                    0),
+                new MenuDef("DASHBOARD",             null,    "대시보드",      "nav.dashboard",       "/dashboard",        "LayoutDashboard", null,                    1),
+                new MenuDef("WEB_DONATION",          null,    "후원",          "nav.donation",         null,                "HandCoins",       null,                    2),
+                new MenuDef("WEB_DONATE",            "WEB_DONATION", "후원하기", "nav.donate",          "/donate",           "HandCoins",       null,                    0),
+                new MenuDef("WEB_PURCHASE",          null,    "구매·배송",     "nav.purchaseDelivery", null,                "Truck",           null,                    3),
+                new MenuDef("WEB_PURCHASE_MONITORING","WEB_PURCHASE", "통합구매 현황", "nav.purchaseMonitoring", "/purchase-monitoring", "ShoppingCart", null,              0),
+                new MenuDef("WEB_MY_DONATIONS",      "WEB_PURCHASE", "내 후원·배송", "nav.myDonations",  "/my-donations",     "Truck",           null,                    1),
+                new MenuDef("ADMIN",                 null,    "관리",          "nav.admin",            null,                "Settings",        RoleSeeder.ROLE_PLATFORM_ADMIN,   4),
                 new MenuDef("ADMIN_FACILITY",        "ADMIN", "시설 관리",     null,                   null,                "Building2",       RoleSeeder.ROLE_PLATFORM_ADMIN,   0),
                 new MenuDef("ADMIN_DONATION",        "ADMIN", "후원 관리",     null,                   null,                "HandCoins",       RoleSeeder.ROLE_PLATFORM_ADMIN,   1),
                 new MenuDef("ADMIN_PURCHASE",        "ADMIN", "구매·배송",     null,                   null,                "ShoppingCart",    RoleSeeder.ROLE_PLATFORM_ADMIN,   2),

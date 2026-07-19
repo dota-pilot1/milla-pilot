@@ -40,8 +40,8 @@ public class ContributionController {
     @GetMapping("/me")
     @Operation(summary = "내 후원 내역 조회")
     public List<MyContributionResponse> mine(@AuthenticationPrincipal UserPrincipal principal) {
-        return contributionService.findMine(principal.getId()).stream()
-                .map(MyContributionResponse::from)
+        return contributionService.findMineDetails(principal.getId()).stream()
+                .map(row -> MyContributionResponse.from(row.contribution(), row.purchaseOrder()))
                 .toList();
     }
 

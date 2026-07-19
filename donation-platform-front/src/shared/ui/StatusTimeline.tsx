@@ -15,9 +15,11 @@ const STAGES: { status: ItemStatus; label: string }[] = [
 export function StatusTimeline({
   status,
   className,
+  compact = false,
 }: {
   status: ItemStatus;
   className?: string;
+  compact?: boolean;
 }) {
   const current = Math.max(
     0,
@@ -31,7 +33,10 @@ export function StatusTimeline({
         const active = i === current;
         const reached = done || active;
         return (
-          <li key={stage.status} className="flex flex-1 flex-col items-center gap-1.5">
+          <li
+            key={stage.status}
+            className={cn("flex flex-1 flex-col items-center", compact ? "gap-1" : "gap-1.5")}
+          >
             <div className="flex w-full items-center">
               <span
                 className={cn(
@@ -41,7 +46,8 @@ export function StatusTimeline({
               />
               <span
                 className={cn(
-                  "flex size-6 shrink-0 items-center justify-center rounded-full border text-[10px] font-bold transition-colors",
+                  "flex shrink-0 items-center justify-center rounded-full border font-bold transition-colors",
+                  compact ? "size-5 text-[9px]" : "size-6 text-[10px]",
                   done
                     ? "border-primary bg-primary text-primary-foreground"
                     : active
@@ -49,7 +55,7 @@ export function StatusTimeline({
                       : "border-border bg-background text-muted-foreground",
                 )}
               >
-                {done ? <Check className="size-3.5" /> : i + 1}
+                {done ? <Check className={compact ? "size-3" : "size-3.5"} /> : i + 1}
               </span>
               <span
                 className={cn(
@@ -60,7 +66,8 @@ export function StatusTimeline({
             </div>
             <span
               className={cn(
-                "text-center text-[11px] leading-tight",
+                "text-center leading-tight",
+                compact ? "text-[10px]" : "text-[11px]",
                 active
                   ? "font-semibold text-foreground"
                   : done

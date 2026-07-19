@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import type { ColDef } from "ag-grid-community";
-import { Pencil, Plus, ShieldCheck, Trash2, UserCheck, UserRoundX, Users } from "lucide-react";
+import type { SelectionChangedEvent } from "ag-grid-community";
+import { Pencil, Plus, Trash2, UserCheck, UserRoundX, Users } from "lucide-react";
 import { ApiError } from "../../../shared/api/client";
 import { AdminDataGrid } from "../../../shared/ui/AdminDataGrid";
 import { AdminGridHeader } from "../../../shared/ui/AdminGridHeader";
+import { AdminPagination } from "../../../shared/ui/AdminPagination";
 import { Button } from "../../../shared/ui/Button";
 import { Drawer } from "../../../shared/ui/Drawer";
 import { EmptyState } from "../../../shared/ui/EmptyState";
@@ -28,6 +30,7 @@ import {
 type UserForm = {
   email: string;
   username: string;
+  phoneNumber: string;
   password: string;
   roleId: string;
 };
@@ -40,15 +43,16 @@ type UserGridRow = ManagedUser & {
 };
 
 type ActiveFilter = "all" | "active" | "inactive";
-type UserSortField = "username" | "email" | "roleName" | "roleCode" | "active" | "createdAt";
+type UserSortField = "username" | "email" | "phoneNumber" | "roleName" | "roleCode" | "active" | "createdAt";
 type SortDirection = "asc" | "desc";
-type UserHeaderFieldKey = "username" | "roleName" | "active" | "createdAt";
+type UserHeaderFieldKey = "username" | "phoneNumber" | "roleName" | "active" | "createdAt";
 
 const pageSize = 20;
 
 const emptyForm: UserForm = {
   email: "",
   username: "",
+  phoneNumber: "",
   password: "",
   roleId: "",
 };
@@ -85,6 +89,7 @@ export function UserManagementScreen({ token }: { token: string }) {
   const [form, setForm] = useState<UserForm>(emptyForm);
   const [saving, setSaving] = useState(false);
   const [busyUserId, setBusyUserId] = useState<number | null>(null);
+  const [selectedCount, setSelectedCount] = useState(0);
 
   const load = () => {
     setLoading(true);
@@ -101,6 +106,7 @@ export function UserManagementScreen({ token }: { token: string }) {
       .then(([nextUsersPage, nextRoles]) => {
         setUsersPage(nextUsersPage);
         setRoles(nextRoles);
+        setSelectedCount(0);
         setError("");
       })
       .catch((e) => setError(e instanceof Error ? e.message : "유저 정보를 불러오지 못했습니다."))
@@ -136,6 +142,7 @@ export function UserManagementScreen({ token }: { token: string }) {
     setForm({
       email: user.email,
       username: user.username,
+      phoneNumber: user.phoneNumber ?? "",
       password: "",
       roleId: String(user.role.id),
     });
@@ -155,6 +162,7 @@ export function UserManagementScreen({ token }: { token: string }) {
         await updateUser(token, editingUser.id, {
           email: form.email.trim(),
           username: form.username.trim(),
+          phoneNumber: form.phoneNumber.trim() || null,
         });
         if (editingUser.role.id !== roleId) {
           await changeUserRole(token, editingUser.id, roleId);
@@ -163,6 +171,7 @@ export function UserManagementScreen({ token }: { token: string }) {
         await createUser(token, {
           email: form.email.trim(),
           username: form.username.trim(),
+          phoneNumber: form.phoneNumber.trim() || null,
           password: form.password,
           roleId,
         });
@@ -228,6 +237,7 @@ export function UserManagementScreen({ token }: { token: string }) {
   const updateServerSort = (field: UserHeaderFieldKey, direction: SortDirection) => {
     const sortFieldByColumn: Record<UserHeaderFieldKey, UserSortField | undefined> = {
       username: "username",
+      phoneNumber: "phoneNumber",
       roleName: "roleName",
       active: "active",
       createdAt: "createdAt",
@@ -245,8 +255,8 @@ export function UserManagementScreen({ token }: { token: string }) {
       {
         field: "username",
         headerName: "계정",
-        flex: 1.4,
-        minWidth: 260,
+        flex: 1.3,
+        minWidth: 240,
         pinned: null,
         sortable: false,
         headerComponent: AdminGridHeader<UserGridRow, UserHeaderFieldKey>,
@@ -271,6 +281,26 @@ export function UserManagementScreen({ token }: { token: string }) {
           );
         },
         valueGetter: ({ data }) => data ? `${data.username} ${data.email}` : "",
+      },
+      {
+        field: "phoneNumber",
+        headerName: "전화번호",
+        width: 150,
+        pinned: null,
+        sortable: false,
+        headerComponent: AdminGridHeader<UserGridRow, UserHeaderFieldKey>,
+        headerComponentParams: {
+          fieldKey: "phoneNumber",
+          serverSortable: true,
+          serverSort: sortField === "phoneNumber" ? sortDirection : null,
+          onServerSortChange: updateServerSort,
+        },
+        cellRenderer: ({ data }: { data?: UserGridRow }) => {
+          if (!data) return null;
+          if (!data.phoneNumber) return <span className="text-[12px] font-semibold text-zinc-400">미등록</span>;
+          return <span className="font-bold text-zinc-800">{data.phoneNumber}</span>;
+        },
+        valueGetter: ({ data }) => data?.phoneNumber ?? "",
       },
       {
         field: "roleName",
@@ -365,19 +395,21 @@ export function UserManagementScreen({ token }: { token: string }) {
 
   return (
     <main className="workspace-page space-y-5">
-      <section className="workspace-hero">
+      <section className="workspace-hero dense">
         <div className="workspace-hero-mark">
-          <Users size={26} />
+          <Users size={22} />
         </div>
-        <p className="eyebrow">DonationPlatform Admin</p>
-        <h1>유저 관리</h1>
-        <p>운영자와 후원자 계정을 조회하고 역할, 활성 상태, 기본 프로필을 관리합니다.</p>
+        <div className="workspace-hero-copy">
+          <p className="eyebrow">DonationPlatform Admin</p>
+          <h1>유저 관리</h1>
+          <p>운영자와 후원자 계정을 조회하고 역할, 활성 상태, 기본 프로필을 관리합니다.</p>
+        </div>
       </section>
 
-      <Panel>
+      <Panel className="p-4">
         <PanelHeader
-          title={`유저 목록 · ${usersPage.totalElements.toLocaleString("ko-KR")}명`}
-          description="검색, 역할, 상태, 정렬은 서버 기준으로 적용됩니다."
+          title={`유저 목록 · ${usersPage.totalElements.toLocaleString("ko-KR")}명 · 역할 ${roles.length}개`}
+          className="mb-3"
           action={
             <Button size="sm" onClick={openCreate} disabled={roles.length === 0}>
               <Plus size={15} /> 유저 추가
@@ -385,20 +417,12 @@ export function UserManagementScreen({ token }: { token: string }) {
           }
         />
 
-        <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div className="flex min-w-0 flex-1 flex-wrap gap-2">
-            <SearchInput
-              className="min-w-[260px] flex-1 md:max-w-sm"
-              value={query}
-              placeholder="이메일, 이름, 역할 검색"
-              onChange={(e) => updateQuery(e.target.value)}
-              onClear={() => updateQuery("")}
-            />
+        <div className="mb-3">
+          <div className="grid min-w-0 flex-1 grid-cols-1 gap-2 sm:grid-cols-[11rem_9rem_minmax(18rem,1fr)]">
             <Select
               value={roleFilter}
               onChange={(e) => updateRoleFilter(e.target.value)}
               className="h-10 rounded-xl border-zinc-200 bg-white text-[13px] font-bold"
-              wrapperClassName="w-44 shrink-0"
               aria-label="역할 필터"
             >
               <option value="all">전체 역할</option>
@@ -412,17 +436,19 @@ export function UserManagementScreen({ token }: { token: string }) {
               value={activeFilter}
               onChange={(e) => updateActiveFilter(e.target.value as ActiveFilter)}
               className="h-10 rounded-xl border-zinc-200 bg-white text-[13px] font-bold"
-              wrapperClassName="w-32 shrink-0"
               aria-label="상태 필터"
             >
               <option value="all">전체 상태</option>
               <option value="active">활성</option>
               <option value="inactive">비활성</option>
             </Select>
-          </div>
-          <div className="flex items-center gap-2 text-[12px] font-semibold text-zinc-500">
-            <ShieldCheck size={14} />
-            역할 {roles.length}개 연결
+            <SearchInput
+              className="min-w-0"
+              value={query}
+              placeholder="이메일, 이름, 전화번호, 역할 검색"
+              onChange={(e) => updateQuery(e.target.value)}
+              onClear={() => updateQuery("")}
+            />
           </div>
         </div>
 
@@ -463,31 +489,39 @@ export function UserManagementScreen({ token }: { token: string }) {
             rowData={gridRows}
             columnDefs={columnDefs}
             height={620}
-            rowHeight={62}
+            rowHeight={58}
             defaultColDef={{ filter: false }}
+            rowSelection={{
+              mode: "multiRow",
+              checkboxes: true,
+              headerCheckbox: true,
+              enableClickSelection: false,
+            }}
+            selectionColumnDef={{
+              width: 48,
+              minWidth: 48,
+              maxWidth: 48,
+              resizable: false,
+              pinned: null,
+            }}
+            onSelectionChanged={(event: SelectionChangedEvent<UserGridRow>) => {
+              setSelectedCount(event.api.getSelectedRows().length);
+            }}
             getRowId={({ data }) => String(data.id)}
             overlayNoRowsTemplate="표시할 유저가 없습니다."
           />
         )}
 
-        <div className="mt-4 flex items-center justify-between gap-3">
-          <span className="text-[12px] font-semibold text-zinc-500">
-            {usersPage.totalPages === 0 ? "0 / 0" : `${usersPage.page + 1} / ${usersPage.totalPages}`} 페이지
-          </span>
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline" onClick={() => setPage((current) => Math.max(0, current - 1))} disabled={loading || page === 0}>
-              이전
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setPage((current) => current + 1)}
-              disabled={loading || usersPage.totalPages === 0 || page >= usersPage.totalPages - 1}
-            >
-              다음
-            </Button>
-          </div>
-        </div>
+        <AdminPagination
+          page={usersPage.page}
+          totalPages={usersPage.totalPages}
+          totalElements={usersPage.totalElements}
+          pageSize={usersPage.size}
+          currentCount={usersPage.content.length}
+          loading={loading}
+          selectedCount={selectedCount}
+          onPageChange={setPage}
+        />
       </Panel>
 
       <Drawer
@@ -517,6 +551,13 @@ export function UserManagementScreen({ token }: { token: string }) {
           </FormField>
           <FormField label="사용자명">
             <Input value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} />
+          </FormField>
+          <FormField label="전화번호">
+            <Input
+              value={form.phoneNumber}
+              placeholder="010-0000-0000"
+              onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })}
+            />
           </FormField>
           {!editingUser && (
             <FormField label="초기 비밀번호">

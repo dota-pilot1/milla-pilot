@@ -1,4 +1,5 @@
 import { CheckCircle2, ExternalLink, ReceiptText, Store, Truck } from "lucide-react";
+import { cn } from "@/shared/lib/utils";
 import { formatKRW } from "@/shared/lib/format";
 import type { PurchaseOrder } from "../model/types";
 import { courierLabel, trackingUrl } from "../model/courier";
@@ -10,10 +11,16 @@ const dateFmt = (iso: string | null) =>
  * 후원자에게 보여주는 통합구매 현황.
  * 목표달성 후 운영자가 통합구매를 실행하면 판매처·실구매액·증빙이 채워진다.
  */
-export function PurchaseStatusCard({ order }: { order: PurchaseOrder }) {
+export function PurchaseStatusCard({
+  order,
+  compact = false,
+}: {
+  order: PurchaseOrder;
+  compact?: boolean;
+}) {
   return (
-    <div className="rounded-xl border bg-card p-5 shadow-sm">
-      <div className="mb-4 flex items-center gap-2">
+    <div className={cn("rounded-xl border bg-card shadow-sm", compact ? "p-4" : "p-5")}>
+      <div className={cn("flex items-center gap-2", compact ? "mb-3" : "mb-4")}>
         <CheckCircle2 className="size-4 text-primary" />
         <p className="text-sm font-medium">통합구매 현황</p>
       </div>
@@ -97,9 +104,11 @@ export function PurchaseStatusCard({ order }: { order: PurchaseOrder }) {
         </div>
       ) : null}
 
-      <p className="mt-4 border-t pt-3 text-xs text-muted-foreground">
-        구매 증빙은 실제 물품 구매 내역이며, 세액공제용 기부금영수증이 아닙니다.
-      </p>
+      {!compact ? (
+        <p className="mt-4 border-t pt-3 text-xs text-muted-foreground">
+          구매 증빙은 실제 물품 구매 내역이며, 세액공제용 기부금영수증이 아닙니다.
+        </p>
+      ) : null}
     </div>
   );
 }

@@ -3,7 +3,9 @@ package com.cj.donationplatform.purchase_order.infrastructure;
 import com.cj.donationplatform.purchase_order.domain.PurchaseOrder;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,6 +14,13 @@ public interface PurchaseOrderRepository extends JpaRepository<PurchaseOrder, Lo
     Optional<PurchaseOrder> findByDonationItem_Id(Long itemId);
 
     boolean existsByDonationItem_Id(Long itemId);
+
+    @Query("""
+            select po from PurchaseOrder po
+            join fetch po.donationItem di
+            where di.id in :itemIds
+            """)
+    List<PurchaseOrder> findByDonationItemIds(@Param("itemIds") Collection<Long> itemIds);
 
     /** 전체 통합구매 — 물품·시설 포함, 최신순 (관리자) */
     @Query("""

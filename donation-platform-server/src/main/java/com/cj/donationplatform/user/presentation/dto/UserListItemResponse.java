@@ -9,6 +9,7 @@ public record UserListItemResponse(
         Long id,
         String email,
         String username,
+        String phoneNumber,
         RoleSummary role,
         boolean active,
         Instant createdAt
@@ -18,6 +19,7 @@ public record UserListItemResponse(
                 u.getId(),
                 u.getEmail(),
                 u.getUsername(),
+                u.getPhoneNumber(),
                 RoleSummary.from(u.getRole()),
                 u.isActive(),
                 u.getCreatedAt()

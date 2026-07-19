@@ -1,4 +1,5 @@
 import type { ItemCategory, ItemStatus } from "@/entities/donation-item/model/types";
+import type { PurchaseOrder } from "@/entities/purchase-order/model/types";
 
 export interface MyContribution {
   contributionId: number;
@@ -21,4 +22,5 @@ export interface MyContribution {
     avatarInitial: string | null;
     region: string | null;
   };
+  purchaseOrder: PurchaseOrder | null;
 }
