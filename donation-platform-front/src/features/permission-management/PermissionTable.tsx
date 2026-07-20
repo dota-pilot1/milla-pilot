@@ -83,7 +83,7 @@ export function PermissionTable() {
                 + 권한 등록
               </button>
             </div>
-            <div className="overflow-x-auto rounded-lg border border-border">
+            <div className="overflow-x-auto rounded-2xl border border-border bg-card shadow-sm">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border bg-muted/40">

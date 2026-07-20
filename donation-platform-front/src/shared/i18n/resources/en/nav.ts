@@ -9,7 +9,7 @@ export const nav = {
   fundingCampaigns: "Funding Campaigns",
   contributions: "Contributions",
   donate: "Donate",
-  myDonations: "My Donations & Delivery",
+  myDonations: "My Donations",
   purchaseOrders: "Purchase Orders",
   deliveryTracking: "Delivery Tracking",
   receipts: "Receipts",

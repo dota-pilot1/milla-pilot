@@ -9,7 +9,7 @@ export const nav = {
   fundingCampaigns: "众筹项目",
   contributions: "捐赠记录",
   donate: "捐赠",
-  myDonations: "我的捐赠与配送",
+  myDonations: "我的捐赠记录",
   purchaseOrders: "集中采购",
   deliveryTracking: "配送追踪",
   receipts: "凭证管理",

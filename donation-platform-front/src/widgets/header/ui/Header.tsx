@@ -598,7 +598,7 @@ function AppShell({
   const title = useMemo(() => getCurrentPageTitle(pathname, tree), [pathname, tree]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-page">
       <Sidebar tree={tree} />
       <div className="min-h-screen lg:pl-64">
         <header className="fixed left-0 right-0 top-0 z-30 box-border flex h-14 items-center justify-between border-b border-border bg-sidebar px-4 text-sidebar-foreground lg:left-64">

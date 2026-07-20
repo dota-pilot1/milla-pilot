@@ -29,6 +29,7 @@ import type {
 import type { UserSummary } from "../../../entities/user/model/types";
 
 type DashboardTab = "status" | "policy" | "scenario" | "system";
+type StatTone = "emerald" | "sky" | "violet" | "orange" | "indigo";
 
 const TABS: readonly TabItem<DashboardTab>[] = [
   { value: "status", label: "운영 현황", icon: Activity },
@@ -107,6 +108,56 @@ const ANALYSIS_POINTS = [
 ];
 
 const won = (value: number) => `${value.toLocaleString("ko-KR")}원`;
+const clampedPercent = (value: number) => Math.max(0, Math.min(100, Math.round(value)));
+const formatTime = (date: Date) =>
+  new Intl.DateTimeFormat("ko-KR", { hour: "2-digit", minute: "2-digit", hour12: false }).format(date);
+
+const STAT_TONE_STYLES: Record<
+  StatTone,
+  {
+    iconWrap: string;
+    badge: string;
+    progressTrack: string;
+    progressFill: string;
+    hoverRing: string;
+  }
+> = {
+  emerald: {
+    iconWrap: "bg-gradient-to-br from-emerald-100 via-emerald-50 to-white text-emerald-700 ring-1 ring-emerald-200/80",
+    badge: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    progressTrack: "bg-emerald-100",
+    progressFill: "bg-emerald-500",
+    hoverRing: "hover:ring-emerald-200/80",
+  },
+  sky: {
+    iconWrap: "bg-gradient-to-br from-sky-100 via-sky-50 to-white text-sky-700 ring-1 ring-sky-200/80",
+    badge: "border-sky-200 bg-sky-50 text-sky-700",
+    progressTrack: "bg-sky-100",
+    progressFill: "bg-sky-500",
+    hoverRing: "hover:ring-sky-200/80",
+  },
+  violet: {
+    iconWrap: "bg-gradient-to-br from-violet-100 via-violet-50 to-white text-violet-700 ring-1 ring-violet-200/80",
+    badge: "border-violet-200 bg-violet-50 text-violet-700",
+    progressTrack: "bg-violet-100",
+    progressFill: "bg-violet-500",
+    hoverRing: "hover:ring-violet-200/80",
+  },
+  orange: {
+    iconWrap: "bg-gradient-to-br from-orange-100 via-orange-50 to-white text-orange-700 ring-1 ring-orange-200/80",
+    badge: "border-orange-200 bg-orange-50 text-orange-700",
+    progressTrack: "bg-orange-100",
+    progressFill: "bg-orange-500",
+    hoverRing: "hover:ring-orange-200/80",
+  },
+  indigo: {
+    iconWrap: "bg-gradient-to-br from-indigo-100 via-indigo-50 to-white text-indigo-700 ring-1 ring-indigo-200/80",
+    badge: "border-indigo-200 bg-indigo-50 text-indigo-700",
+    progressTrack: "bg-indigo-100",
+    progressFill: "bg-indigo-500",
+    hoverRing: "hover:ring-indigo-200/80",
+  },
+};
 
 export function DashboardScreen({
   token,
@@ -125,6 +176,7 @@ export function DashboardScreen({
   const [ledger, setLedger] = useState<AdminLedgerRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [updatedAtLabel, setUpdatedAtLabel] = useState("");
 
   useEffect(() => {
     if (!token) return;
@@ -142,6 +194,7 @@ export function DashboardScreen({
         setPending(pendingRes);
         setOrders(ordersRes);
         setLedger(ledgerRes);
+        setUpdatedAtLabel(`${formatTime(new Date())} 업데이트`);
       })
       .catch((err: unknown) => {
         if (!alive) return;
@@ -169,8 +222,11 @@ export function DashboardScreen({
     return { shipping, awaitingShipment, done, total, donors };
   }, [orders, ledger]);
 
+  const flowTotal = Math.max(1, pending.length + stats.awaitingShipment + stats.shipping + stats.done);
+  const activeItems = new Set([...pending.map((item) => item.itemId), ...orders.map((order) => order.item.id)]).size;
+
   return (
-    <main className="workspace-page">
+    <main className="workspace-page space-y-6 bg-[#f7f8fa]">
       <section className="workspace-hero dense">
         <div className="workspace-hero-mark">
           <LayoutGrid size={26} />
@@ -182,57 +238,110 @@ export function DashboardScreen({
         </div>
       </section>
 
-      <Tabs items={TABS} value={tab} onValueChange={setTab} className="mt-2 mb-1" />
+      <Tabs items={TABS} value={tab} onValueChange={setTab} />
 
       {tab === "status" && (
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-6">
           {error && (
             <p className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-[13px] text-rose-700">
               {error}
             </p>
           )}
 
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+            <StatCard
+              icon={HandCoins}
+              label="누적 후원금"
+              category="후원"
+              status="운영중"
+              tone="violet"
+              value={won(stats.total)}
+              hint="전체 누적 후원액"
+              loading={loading}
+              updatedAt={updatedAtLabel}
+            />
+            <StatCard
+              icon={Activity}
+              label="진행 물품"
+              category="구매·배송"
+              status="진행중"
+              tone="indigo"
+              value={activeItems}
+              unit="건"
+              hint="진행 흐름에 포함된 물품 수"
+              loading={loading}
+              progress={(activeItems / flowTotal) * 100}
+              updatedAt={updatedAtLabel}
+            />
+            <StatCard
+              icon={HandCoins}
+              label="참여 후원자"
+              category="후원"
+              status="활성"
+              tone="indigo"
+              value={stats.donors}
+              unit="명"
+              hint="중복 제외 참여자 수"
+              loading={loading}
+              updatedAt={updatedAtLabel}
+            />
+            <StatCard
+              icon={PackageCheck}
+              label="수령 완료"
+              category="시설"
+              status="완료"
+              tone="orange"
+              value={stats.done}
+              unit="건"
+              hint="수령확인·영수증 단계"
+              loading={loading}
+              progress={(stats.done / flowTotal) * 100}
+              updatedAt={updatedAtLabel}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
             <StatCard
               icon={ShoppingCart}
               label="구매 대기"
+              category="구매"
+              status="대기"
+              tone="emerald"
               value={pending.length}
               unit="건"
               hint="목표 달성 후 통합구매 미실행"
               loading={loading}
+              progress={(pending.length / flowTotal) * 100}
+              updatedAt={updatedAtLabel}
               onClick={onNavigate ? () => onNavigate("ADMIN_PURCHASE_PENDING") : undefined}
             />
             <StatCard
               icon={Truck}
               label="배송 등록 대기"
+              category="배송"
+              status="대기"
+              tone="sky"
               value={stats.awaitingShipment}
               unit="건"
               hint="구매 완료·송장 미등록"
               loading={loading}
+              progress={(stats.awaitingShipment / flowTotal) * 100}
+              updatedAt={updatedAtLabel}
               onClick={onNavigate ? () => onNavigate("ADMIN_PURCHASE_COMPLETED") : undefined}
             />
             <StatCard
               icon={Truck}
               label="배송중"
+              category="배송"
+              status="진행중"
+              tone="sky"
               value={stats.shipping}
               unit="건"
               hint="시설 수령 확인 대기"
               loading={loading}
+              progress={(stats.shipping / flowTotal) * 100}
+              updatedAt={updatedAtLabel}
             />
-            <StatCard
-              icon={PackageCheck}
-              label="수령 완료"
-              value={stats.done}
-              unit="건"
-              hint="수령확인·영수증 단계"
-              loading={loading}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-            <StatCard icon={HandCoins} label="누적 후원액" value={won(stats.total)} loading={loading} />
-            <StatCard icon={HandCoins} label="후원 건수" value={ledger.length} unit="건" loading={loading} />
-            <StatCard icon={HandCoins} label="참여 후원자" value={stats.donors} unit="명" loading={loading} />
           </div>
 
           <Panel>
@@ -245,22 +354,38 @@ export function DashboardScreen({
             ) : pending.length === 0 ? (
               <p className="text-[13px] text-zinc-500">구매 대기 중인 물품이 없습니다.</p>
             ) : (
-              <ul className="flex flex-col gap-2">
+              <ul className="flex flex-col gap-3">
                 {pending.slice(0, 6).map((item) => (
                   <li
                     key={item.itemId}
-                    className="flex items-center justify-between gap-3 rounded-xl border border-zinc-200 px-4 py-3"
+                    className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm"
                   >
-                    <div className="flex min-w-0 items-center gap-2">
-                      <span className="text-[16px]">{item.emoji ?? "📦"}</span>
-                      <div className="min-w-0">
-                        <p className="truncate text-[13px] font-bold text-zinc-900">{item.name}</p>
-                        <p className="truncate text-[12px] text-zinc-500">{item.facility.name}</p>
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex min-w-0 items-center gap-3">
+                        <span className="flex size-10 items-center justify-center rounded-xl bg-zinc-100 text-[18px]">
+                          {item.emoji ?? "📦"}
+                        </span>
+                        <div className="min-w-0">
+                          <p className="truncate text-[14px] font-extrabold text-zinc-900">{item.name}</p>
+                          <p className="truncate text-[12px] text-zinc-500">{item.facility.name}</p>
+                        </div>
+                      </div>
+                      <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-700">
+                        구매 대기
+                      </span>
+                    </div>
+                    <div className="mt-3">
+                      <div className="h-1.5 w-full rounded-full bg-zinc-100">
+                        <div
+                          className="h-full rounded-full bg-emerald-500"
+                          style={{ width: `${clampedPercent((item.raisedAmount / item.goalAmount) * 100)}%` }}
+                        />
+                      </div>
+                      <div className="mt-2 flex items-center justify-between text-[12px]">
+                        <span className="font-bold text-emerald-700">{won(item.raisedAmount)}</span>
+                        <span className="text-zinc-500">목표 {won(item.goalAmount)}</span>
                       </div>
                     </div>
-                    <span className="shrink-0 text-[13px] font-bold text-emerald-700">
-                      {won(item.raisedAmount)}
-                    </span>
                   </li>
                 ))}
               </ul>
@@ -408,41 +533,77 @@ export function DashboardScreen({
 
 function StatCard({
   icon: Icon,
+  category,
   label,
+  status,
+  tone = "emerald",
   value,
   unit,
   hint,
+  progress,
+  updatedAt,
   loading,
   onClick,
 }: {
   icon: typeof Activity;
+  category?: string;
   label: string;
+  status?: string;
+  tone?: StatTone;
   value: number | string;
   unit?: string;
   hint?: string;
+  progress?: number;
+  updatedAt?: string;
   loading?: boolean;
   onClick?: () => void;
 }) {
+  const toneStyle = STAT_TONE_STYLES[tone];
   const body = (
     <>
-      <div className="flex items-center gap-2 text-zinc-500">
-        <Icon size={16} />
-        <span className="text-[12px] font-semibold">{label}</span>
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <span className={`flex size-10 items-center justify-center rounded-xl ${toneStyle.iconWrap}`}>
+            <Icon size={22} />
+          </span>
+          <div className="space-y-0.5">
+            {category && <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">{category}</p>}
+            <p className="text-[14px] font-extrabold text-zinc-900">{label}</p>
+          </div>
+        </div>
+        {status && (
+          <span className={`shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-bold ${toneStyle.badge}`}>{status}</span>
+        )}
       </div>
-      <p className="mt-3 text-[22px] font-extrabold leading-none text-zinc-900">
-        {loading ? "—" : value}
-        {!loading && unit && <span className="ml-1 text-[13px] font-bold text-zinc-500">{unit}</span>}
-      </p>
-      {hint && <p className="mt-2 text-[11px] leading-4 text-zinc-500">{hint}</p>}
+      <div className="mt-5">
+        <p className="text-[42px] font-extrabold leading-[0.95] tracking-tight text-zinc-900">{loading ? "—" : value}</p>
+        {!loading && unit && <p className="mt-1 text-[14px] font-bold text-zinc-500">{unit}</p>}
+      </div>
+      {typeof progress === "number" && (
+        <div className="mt-4">
+          <div className={`h-1.5 w-full rounded-full ${toneStyle.progressTrack}`}>
+            <div
+              className={`h-full rounded-full ${toneStyle.progressFill}`}
+              style={{ width: `${clampedPercent(progress)}%` }}
+            />
+          </div>
+        </div>
+      )}
+      {(hint || updatedAt) && (
+        <div className="mt-4 space-y-1">
+          {hint && <p className="text-[13px] leading-5 text-zinc-600">{hint}</p>}
+          {updatedAt && <p className="text-[11px] text-zinc-400">{updatedAt}</p>}
+        </div>
+      )}
     </>
   );
 
-  const className = "rounded-2xl border border-zinc-200 bg-white p-4 text-left";
+  const className = `min-h-[168px] rounded-3xl border border-zinc-200 bg-white p-6 text-left shadow-sm ring-1 ring-transparent transition-all duration-200 hover:-translate-y-1 hover:border-zinc-200 hover:shadow-xl ${toneStyle.hoverRing}`;
 
   if (!onClick) return <div className={className}>{body}</div>;
 
   return (
-    <button type="button" onClick={onClick} className={`${className} transition-colors hover:border-emerald-400`}>
+    <button type="button" onClick={onClick} className={className}>
       {body}
     </button>
   );

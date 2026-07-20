@@ -27,11 +27,11 @@ function MyDonationsInner() {
   });
 
   return (
-    <PageShell width="content" className="py-6">
-      <div className="space-y-5">
+    <PageShell className="py-8">
+      <div className="space-y-6">
         <PageHeader
           icon={Truck}
-          title="내 후원·배송"
+          title="내 후원 내역"
           description="내가 참여한 후원 물품의 모금, 통합구매, 배송 진행을 시설별로 확인합니다."
         />
 

@@ -97,7 +97,7 @@ function DonationRowsPanel({
       <div
         ref={innerRef}
         className={cn(
-          "space-y-4 border-t bg-muted/20 px-4 py-4 transition-[opacity,transform] duration-150 ease-out motion-reduce:transition-none",
+          "space-y-5 border-t bg-muted/20 px-5 py-5 transition-[opacity,transform] duration-150 ease-out motion-reduce:transition-none",
           expanded ? "translate-y-0 opacity-100" : "-translate-y-1 opacity-0",
         )}
       >
@@ -106,7 +106,7 @@ function DonationRowsPanel({
           const full = ig.item.raisedAmount >= ig.item.goalAmount;
           const count = ig.contributions.length;
           return (
-            <div key={ig.item.id} className="space-y-3 rounded-lg border bg-background p-4">
+            <div key={ig.item.id} className="space-y-4 rounded-xl border bg-muted/40 p-5">
               <div className="flex items-start gap-3">
                 <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-lg shadow-sm">
                   {ig.item.emoji || "📦"}

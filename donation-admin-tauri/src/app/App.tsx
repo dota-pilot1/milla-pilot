@@ -14,6 +14,8 @@ import { PurchaseOrdersScreen } from "../features/purchase-management/ui/Purchas
 import { UserManagementScreen } from "../features/user-management/ui/UserManagementScreen";
 import { DashboardScreen } from "../features/dashboard/ui/DashboardScreen";
 import { AppMenuManagementScreen } from "../features/app-menu-management/ui/AppMenuManagementScreen";
+import { RoleManagementScreen } from "../features/role-management/ui/RoleManagementScreen";
+import { SiteSettingsScreen } from "../features/site-settings/ui/SiteSettingsScreen";
 import { API_BASE_URL, SERVER_ROOT_PATH } from "../shared/config/server";
 import { AppSidebar } from "../widgets/app-shell/ui/AppSidebar";
 import { AppTopbar } from "../widgets/app-shell/ui/AppTopbar";
@@ -263,12 +265,20 @@ function AdminWorkspace({
     return <UserManagementScreen token={token} />;
   }
 
+  if (activeMenu === "ADMIN_ROLES") {
+    return <RoleManagementScreen token={token} />;
+  }
+
   if (activeMenu === "ADMIN_MENU_MANAGEMENT") {
     return <AppMenuManagementScreen token={token} scope="web" onSaved={onMenusChanged} />;
   }
 
   if (activeMenu === "ADMIN_APP_MENU_MANAGEMENT") {
     return <AppMenuManagementScreen token={token} scope="admin-app" onSaved={onMenusChanged} />;
+  }
+
+  if (activeMenu === "ADMIN_SITE_SETTINGS") {
+    return <SiteSettingsScreen />;
   }
 
   if (activeMenu === "DASHBOARD") {

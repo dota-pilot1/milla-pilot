@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ColDef } from "ag-grid-community";
 import type { AgGridReact } from "ag-grid-react";
-import { Download, X } from "lucide-react";
+import { Building2, Download, HandCoins, SearchCheck, Users, X, type LucideIcon } from "lucide-react";
 import { Panel } from "../../../shared/ui/Panel";
 import { Button } from "../../../shared/ui/Button";
 import { AdminDataGrid } from "../../../shared/ui/AdminDataGrid";
@@ -366,16 +366,14 @@ export function ContributionsScreen({ token, refreshKey = 0 }: { token: string; 
   };
 
   return (
-    <main className="workspace-page space-y-4">
-      <Panel className="p-3.5">
-        <div className="mb-2.5 flex items-center justify-between gap-4">
+    <main className="workspace-page space-y-6 bg-[#f7f8fa]">
+      <Panel className="p-5 md:p-6">
+        <div className="mb-4 flex items-center justify-between gap-4">
           <div className="min-w-0">
-            <div className="flex min-w-0 items-center gap-2">
-              <h2 className="text-[15px] font-extrabold text-zinc-900">후원 내역</h2>
-              <span className="text-[12px] font-semibold text-zinc-400">
-                {rows.length ? `${rows.length}건 · ${won(total)} · 최신순` : "플랫폼 전체 후원 기록"}
-              </span>
-            </div>
+            <h2 className="text-[18px] font-extrabold tracking-tight text-zinc-900">후원 내역</h2>
+            <p className="mt-1 text-[12px] font-semibold text-zinc-400">
+              {rows.length ? `${rows.length}건 · ${won(total)} · 최신순` : "플랫폼 전체 후원 기록"}
+            </p>
           </div>
           <div className="shrink-0">
             <Button
@@ -398,20 +396,32 @@ export function ContributionsScreen({ token, refreshKey = 0 }: { token: string; 
             description="후원자가 참여하면 여기에 표시됩니다."
           />
         ) : (
-          <div className="space-y-2.5">
-            <div className="grid gap-2.5 md:grid-cols-4">
-              <LedgerMetric label="누적 후원금" value={won(total)} />
-              <LedgerMetric label="검색 결과" value={`${gridRows.length}건`} sub={won(filteredTotal)} />
-              <LedgerMetric label="후원자" value={`${donorCount}명`} />
-              <LedgerMetric label="참여 시설" value={`${facilityCount}곳`} />
+          <div className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              <LedgerMetric
+                icon={HandCoins}
+                tone="violet"
+                label="누적 후원금"
+                value={won(total)}
+                sub="전체 누적 후원액"
+              />
+              <LedgerMetric
+                icon={SearchCheck}
+                tone="indigo"
+                label="검색 결과"
+                value={`${gridRows.length}건`}
+                sub={won(filteredTotal)}
+              />
+              <LedgerMetric icon={Users} tone="emerald" label="후원자" value={`${donorCount}명`} sub="중복 제외" />
+              <LedgerMetric icon={Building2} tone="sky" label="참여 시설" value={`${facilityCount}곳`} sub="참여 기관 수" />
             </div>
 
-            <div className="space-y-2 rounded-xl bg-zinc-50/70 p-2">
+            <div className="space-y-3 rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm">
               <div className="flex w-full min-w-0 gap-2 md:max-w-xl">
                 <Select
                   value={searchField}
                   onChange={(event) => setSearchField(event.target.value as SearchField)}
-                  className="h-10 rounded-xl border-zinc-200 bg-white text-[13px] font-bold"
+                  className="h-10 rounded-xl border-zinc-200 bg-zinc-50 text-[13px] font-bold"
                   wrapperClassName="w-32 shrink-0"
                   aria-label="검색 대상"
                 >
@@ -428,7 +438,7 @@ export function ContributionsScreen({ token, refreshKey = 0 }: { token: string; 
                   placeholder="검색어 입력"
                 />
               </div>
-              <div className="flex min-w-0 items-start justify-between gap-3 border-t border-zinc-100 pt-2">
+              <div className="flex min-w-0 items-start justify-between gap-3 border-t border-zinc-100 pt-3">
                 <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
                   <p className="shrink-0 text-[12px] font-semibold text-zinc-500">
                     {activeFilterChips.length ? `${gridRows.length}건 필터링됨` : "최신 후원순으로 표시"}
@@ -449,15 +459,18 @@ export function ContributionsScreen({ token, refreshKey = 0 }: { token: string; 
               </div>
             </div>
 
-            <AdminDataGrid<LedgerGridRow>
-              gridRef={gridRef}
-              rowData={gridRows}
-              columnDefs={columnDefs}
-              height={520}
-              defaultColDef={{ filter: false }}
-              getRowId={({ data }) => String(data.id)}
-              overlayNoRowsTemplate="표시할 후원 내역이 없습니다."
-            />
+            <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
+              <AdminDataGrid<LedgerGridRow>
+                gridRef={gridRef}
+                rowData={gridRows}
+                columnDefs={columnDefs}
+                className="border-0"
+                height={520}
+                defaultColDef={{ filter: false }}
+                getRowId={({ data }) => String(data.id)}
+                overlayNoRowsTemplate="표시할 후원 내역이 없습니다."
+              />
+            </div>
           </div>
         )}
       </Panel>
@@ -465,12 +478,51 @@ export function ContributionsScreen({ token, refreshKey = 0 }: { token: string; 
   );
 }
 
-function LedgerMetric({ label, value, sub }: { label: string; value: string; sub?: string }) {
+type MetricTone = "violet" | "indigo" | "emerald" | "sky";
+
+const metricToneStyle: Record<MetricTone, { iconWrap: string; sub: string }> = {
+  violet: {
+    iconWrap: "bg-gradient-to-br from-violet-100 via-violet-50 to-white text-violet-700 ring-1 ring-violet-200/80",
+    sub: "text-violet-500",
+  },
+  indigo: {
+    iconWrap: "bg-gradient-to-br from-indigo-100 via-indigo-50 to-white text-indigo-700 ring-1 ring-indigo-200/80",
+    sub: "text-indigo-500",
+  },
+  emerald: {
+    iconWrap: "bg-gradient-to-br from-emerald-100 via-emerald-50 to-white text-emerald-700 ring-1 ring-emerald-200/80",
+    sub: "text-emerald-500",
+  },
+  sky: {
+    iconWrap: "bg-gradient-to-br from-sky-100 via-sky-50 to-white text-sky-700 ring-1 ring-sky-200/80",
+    sub: "text-sky-500",
+  },
+};
+
+function LedgerMetric({
+  icon: Icon,
+  tone,
+  label,
+  value,
+  sub,
+}: {
+  icon: LucideIcon;
+  tone: MetricTone;
+  label: string;
+  value: string;
+  sub?: string;
+}) {
+  const style = metricToneStyle[tone];
   return (
-    <div className="rounded-xl border border-zinc-200/80 bg-white px-4 py-2.5 shadow-[0_1px_0_rgba(15,23,42,0.03)]">
-      <p className="text-[11px] font-extrabold text-zinc-500">{label}</p>
-      <p className="mt-0.5 truncate text-[17px] font-extrabold text-zinc-950">{value}</p>
-      {sub && <p className="mt-0.5 truncate text-[11px] font-semibold text-zinc-400">{sub}</p>}
+    <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+      <div className="flex items-center gap-2.5">
+        <span className={`flex size-8 items-center justify-center rounded-lg ${style.iconWrap}`}>
+          <Icon size={17} />
+        </span>
+        <p className="text-[12px] font-bold text-zinc-500">{label}</p>
+      </div>
+      <p className="mt-2.5 truncate text-[38px] font-extrabold leading-[0.95] tracking-tight text-zinc-950">{value}</p>
+      {sub && <p className={`mt-2 truncate text-[12px] font-semibold ${style.sub}`}>{sub}</p>}
     </div>
   );
 }

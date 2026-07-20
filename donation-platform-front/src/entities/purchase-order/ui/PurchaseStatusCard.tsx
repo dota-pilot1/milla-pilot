@@ -19,7 +19,7 @@ export function PurchaseStatusCard({
   compact?: boolean;
 }) {
   return (
-    <div className={cn("rounded-xl border bg-card shadow-sm", compact ? "p-4" : "p-5")}>
+    <div className={cn("rounded-2xl border bg-card shadow-sm", compact ? "p-4" : "p-5")}>
       <div className={cn("flex items-center gap-2", compact ? "mb-3" : "mb-4")}>
         <CheckCircle2 className="size-4 text-primary" />
         <p className="text-sm font-medium">통합구매 현황</p>

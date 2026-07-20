@@ -9,7 +9,7 @@ export const nav = {
   fundingCampaigns: "ファンディング",
   contributions: "寄付履歴",
   donate: "寄付する",
-  myDonations: "寄付・配送",
+  myDonations: "私の寄付履歴",
   purchaseOrders: "一括購入",
   deliveryTracking: "配送追跡",
   receipts: "証憑管理",

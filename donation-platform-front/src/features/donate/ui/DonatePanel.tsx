@@ -63,7 +63,7 @@ export function DonatePanel({ item }: { item: DonationItem }) {
   };
 
   return (
-    <div className="rounded-xl border bg-card p-5 shadow-sm">
+    <div className="rounded-2xl border bg-card p-5 shadow-sm">
       <div className="flex items-baseline justify-between">
         <span className="text-sm text-muted-foreground">모인 금액</span>
         <span className="text-lg font-bold text-primary">{formatKRW(item.raisedAmount)}</span>

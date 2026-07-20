@@ -68,7 +68,7 @@ export function AuthModeShell({ initialMode, nextPath }: AuthModeShellProps) {
   };
 
   return (
-    <main className="min-h-[calc(100vh-3.5rem)] bg-background px-4 py-3 sm:py-4 lg:block">
+    <main className="min-h-[calc(100vh-3.5rem)] bg-page px-4 py-3 sm:py-4 lg:block">
       <div className="lg:hidden">
         <MobileAuthShell
           initialMode={mode}

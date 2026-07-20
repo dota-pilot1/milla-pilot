@@ -9,7 +9,7 @@ export const nav = {
   fundingCampaigns: "펀딩 캠페인",
   contributions: "후원 내역",
   donate: "후원하기",
-  myDonations: "내 후원·배송",
+  myDonations: "내 후원 내역",
   purchaseOrders: "통합 구매",
   deliveryTracking: "배송 추적",
   receipts: "증빙 관리",

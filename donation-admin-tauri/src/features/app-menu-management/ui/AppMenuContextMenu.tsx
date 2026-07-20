@@ -1,10 +1,11 @@
-import { Eye, EyeOff, Pencil, Plus, Trash2 } from "lucide-react";
+import { Eye, EyeOff, FolderTree, Pencil, Plus, Trash2 } from "lucide-react";
 import { Button } from "../../../shared/ui/Button";
 
 type Props = {
   visible: boolean;
   disabled?: boolean;
   onCreateChild: () => void;
+  onMoveFolder: () => void;
   onEdit: () => void;
   onToggleVisible: () => void;
   onDelete: () => void;
@@ -14,6 +15,7 @@ export function AppMenuContextMenu({
   visible,
   disabled = false,
   onCreateChild,
+  onMoveFolder,
   onEdit,
   onToggleVisible,
   onDelete,
@@ -23,6 +25,10 @@ export function AppMenuContextMenu({
       <Button size="sm" variant="outline" onClick={onCreateChild} disabled={disabled}>
         <Plus size={13} />
         하위
+      </Button>
+      <Button size="sm" variant="outline" onClick={onMoveFolder} disabled={disabled}>
+        <FolderTree size={13} />
+        폴더 이동
       </Button>
       <Button size="sm" variant="outline" onClick={onEdit} disabled={disabled}>
         <Pencil size={13} />

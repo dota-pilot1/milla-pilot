@@ -89,7 +89,7 @@ export function RolePermissionManager() {
 
   return (
     <>
-      <div className="flex gap-0 rounded-lg border border-border overflow-hidden min-h-[640px]">
+      <div className="flex gap-0 rounded-2xl border border-border bg-card shadow-sm overflow-hidden min-h-[640px]">
         {/* Left: Role list */}
         <aside className="w-56 shrink-0 border-r border-border bg-muted/30 flex flex-col">
           <div className="flex h-12 items-center justify-between px-4 border-b border-border shrink-0">

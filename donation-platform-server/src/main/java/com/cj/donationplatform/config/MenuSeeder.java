@@ -34,9 +34,9 @@ public class MenuSeeder implements ApplicationRunner {
                 new MenuDef("DASHBOARD",             null,    "대시보드",      "nav.dashboard",       "/dashboard",        "LayoutDashboard", null,                    1),
                 new MenuDef("WEB_DONATION",          null,    "후원",          "nav.donation",         null,                "HandCoins",       null,                    2),
                 new MenuDef("WEB_DONATE",            "WEB_DONATION", "후원하기", "nav.donate",          "/donate",           "HandCoins",       null,                    0),
-                new MenuDef("WEB_PURCHASE",          null,    "구매·배송",     "nav.purchaseDelivery", null,                "Truck",           null,                    3),
-                new MenuDef("WEB_PURCHASE_MONITORING","WEB_PURCHASE", "통합구매 현황", "nav.purchaseMonitoring", "/purchase-monitoring", "ShoppingCart", null,              0),
-                new MenuDef("WEB_MY_DONATIONS",      "WEB_PURCHASE", "내 후원·배송", "nav.myDonations",  "/my-donations",     "Truck",           null,                    1),
+                // 후원 여정 = 후원하기(행동) → 내 후원 내역(내 진행) → 통합구매 현황(전체 투명성) 순서로 한 그룹에 묶는다
+                new MenuDef("WEB_MY_DONATIONS",      "WEB_DONATION", "내 후원 내역", "nav.myDonations",  "/my-donations",     "Truck",           null,                    1),
+                new MenuDef("WEB_PURCHASE_MONITORING","WEB_DONATION", "통합구매 현황", "nav.purchaseMonitoring", "/purchase-monitoring", "ShoppingCart", null,             2),
                 new MenuDef("ADMIN",                 null,    "관리",          "nav.admin",            null,                "Settings",        RoleSeeder.ROLE_PLATFORM_ADMIN,   4),
                 new MenuDef("ADMIN_FACILITY",        "ADMIN", "시설 관리",     null,                   null,                "Building2",       RoleSeeder.ROLE_PLATFORM_ADMIN,   0),
                 new MenuDef("ADMIN_DONATION",        "ADMIN", "후원 관리",     null,                   null,                "HandCoins",       RoleSeeder.ROLE_PLATFORM_ADMIN,   1),
@@ -82,6 +82,8 @@ public class MenuSeeder implements ApplicationRunner {
                 "WEB_DONATION_ITEMS",
                 "WEB_MY_CONTRIBUTIONS",
                 "ADMIN_DONATION_ITEMS",
+                // 구매·배송 그룹 = 자식이 모두 후원 그룹으로 이동해 빈 그룹. 숨김(제거 아님)
+                "WEB_PURCHASE",
                 // 펀딩 캠페인 = 기획 밖(§10 캠페인/확산은 파일럿 이후 후보). 숨김(제거 아님, 되살리기 쉽게)
                 "ADMIN_FUNDING_CAMPAIGNS"
         );
