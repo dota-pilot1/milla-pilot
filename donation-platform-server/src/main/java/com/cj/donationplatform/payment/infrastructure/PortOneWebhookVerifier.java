@@ -18,6 +18,9 @@ import java.util.Base64;
  * <p><b>왜 필요한가</b> — 웹훅 URL 은 외부에 열려 있다. 검증 없이 받으면
  * 누구나 "결제됐다"고 위조해 무료로 후원을 만들 수 있다.
  *
+ * <p>테스트·실연동 시크릿이 다르므로 설정에 <b>쉼표로 여러 개</b>를 넣을 수 있다.
+ * 하나라도 맞으면 통과한다.
+ *
  * <p>서명 대상은 {@code {webhook-id}.{webhook-timestamp}.{본문}} 이고,
  * 시크릿({@code whsec_} 접두사 제거 후 base64 디코드)으로 HMAC-SHA256 한 값을 base64 로 비교한다.
  * {@code webhook-signature} 헤더에는 {@code v1,<서명>} 이 공백으로 여러 개 올 수 있다.
@@ -55,18 +58,23 @@ public class PortOneWebhookVerifier {
             return false;
         }
 
-        String expected = sign(webhookId + "." + webhookTimestamp + "." + rawBody);
-        if (expected == null) return false;
+        String payload = webhookId + "." + webhookTimestamp + "." + rawBody;
 
-        // "v1,<sig> v1,<sig2>" 형태 — 하나라도 맞으면 통과
-        for (String part : webhookSignature.split("\\s+")) {
-            int comma = part.indexOf(',');
-            String candidate = comma >= 0 ? part.substring(comma + 1) : part;
-            if (constantTimeEquals(expected, candidate)) {
-                return true;
+        // 테스트·실연동 시크릿이 서로 다르다. 어느 모드에서 온 통보든 받아야 하므로 모두 시도한다.
+        for (String secret : props.webhookSecret().split(",")) {
+            String expected = sign(payload, secret.trim());
+            if (expected == null) continue;
+            // "v1,<sig> v1,<sig2>" 형태 — 하나라도 맞으면 통과
+            for (String part : webhookSignature.split("\\s+")) {
+                int comma = part.indexOf(',');
+                String candidate = comma >= 0 ? part.substring(comma + 1) : part;
+                if (constantTimeEquals(expected, candidate)) {
+                    return true;
+                }
             }
         }
-        log.warn("[webhook] 서명 불일치 id={}", webhookId);
+        log.warn("[webhook] 서명 불일치 id={} — 등록된 시크릿 {}개 모두 불일치",
+                webhookId, props.webhookSecret().split(",").length);
         return false;
     }
 
@@ -79,9 +87,10 @@ public class PortOneWebhookVerifier {
         }
     }
 
-    private String sign(String payload) {
+    private String sign(String payload, String rawSecret) {
         try {
-            String secret = props.webhookSecret().trim();
+            String secret = rawSecret;
+            if (secret.isBlank()) return null;
             if (secret.startsWith("whsec_")) {
                 secret = secret.substring("whsec_".length());
             }

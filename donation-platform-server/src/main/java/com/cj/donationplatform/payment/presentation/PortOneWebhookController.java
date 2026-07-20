@@ -39,12 +39,14 @@ import java.util.regex.Pattern;
 public class PortOneWebhookController {
 
     /**
-     * 본문에서 paymentId 만 뽑는다.
-     * JSON 매퍼를 쓰지 않는 이유 — 서명 검증 때문에 어차피 원문 문자열을 그대로 받아야 하고,
+     * 본문에서 결제 식별자만 뽑는다. 포트원 통보는 {@code payment_id}(snake) 로 오지만
+     * 문서·버전에 따라 {@code paymentId}(camel) 도 있어 둘 다 받는다.
+     *
+     * <p>JSON 매퍼를 쓰지 않는 이유 — 서명 검증 때문에 어차피 원문 문자열을 그대로 받아야 하고,
      * 필요한 값이 문자열 한 개뿐이라 Jackson 메이저 버전에 묶일 이유가 없다.
      */
     private static final Pattern PAYMENT_ID =
-            Pattern.compile("\"paymentId\"\\s*:\\s*\"([^\"]+)\"");
+            Pattern.compile("\"payment_?[Ii]d\"\\s*:\\s*\"([^\"]+)\"");
 
     private final PortOneWebhookVerifier verifier;
     private final ContributionService contributionService;

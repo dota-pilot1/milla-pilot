@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>결제 관련 필수 정보</title>
+<style>
+  :root{
+    --bg:#f6f7f6; --card:#fff; --fg:#16201b; --muted:#5b6862;
+    --line:#dfe4e1; --brand:#2e7d6e; --bad:#c0392b; --warn:#b45309;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:40px 20px;background:var(--bg);color:var(--fg);
+    font:15px/1.7 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard",sans-serif}
+  .wrap{max-width:940px;margin:0 auto}
+  h1{font-size:26px;margin:0 0 6px;letter-spacing:-.02em}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 24px}
+  section{background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:22px 24px;margin-bottom:18px}
+  h2{font-size:17px;margin:0 0 14px;letter-spacing:-.01em}
+  h3{font-size:14px;margin:20px 0 8px;color:var(--muted)}
+  ul,ol{margin:0;padding-left:18px} li{margin:5px 0}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:600;white-space:nowrap}
+  tr:last-child td{border-bottom:0}
+  code{background:#eef1ef;border-radius:5px;padding:1px 6px;font-size:13px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;word-break:break-all}
+  pre{background:#eef1ef;border-radius:10px;padding:14px 16px;overflow-x:auto;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;margin:0;line-height:1.65}
+  .box{border-radius:10px;padding:14px 16px;margin-top:14px;font-size:14px}
+  .box-bad{background:#fdf1f0;border:1px solid #f3c8c3}
+  .box-warn{background:#fff8ed;border:1px solid #fbd9a5}
+  .lock{color:var(--bad);font-weight:700}
+  .muted{color:var(--muted)}
+  footer{color:var(--muted);font-size:13px;text-align:center;margin-top:26px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>결제 관련 필수 정보</h1>
+  <p class="sub">milla-pilot · 포트원 V2 · 카카오페이 · 2026-07-21</p>
+
+  <section>
+    <div class="box box-bad" style="margin-top:0">
+      <span class="lock">🔒 이 문서에는 비밀값을 적지 않는다.</span>
+      API Secret·웹훅 시크릿·DB 비밀번호는 <b>서버 <code>.env</code> 와 로컬 <code>application-local.yaml</code></b> 에만 둔다.
+      두 파일 모두 git 에서 제외돼 있다. 여기에는 <b>어디에 있는지</b>만 적는다.
+    </div>
+  </section>
+
+  <section>
+    <h2>1. 포트원 계정 · 공개 값</h2>
+    <table>
+      <tr><th>콘솔</th><td><code>admin.portone.io</code> · 계정 <code>terecal@daum.net</code> · 상점 "두타 파일럿"</td></tr>
+      <tr><th>API 버전</th><td>V2 · <code>https://api.portone.io</code></td></tr>
+      <tr><th>Store ID</th><td><code>store-8859c392-62e5-4fe5-92d3-11c686e9b2bc</code></td></tr>
+      <tr><th>채널 (테스트)</th><td><code>channel-key-943d5d92-0688-4619-ac6e-7116f665abc0</code><br>
+        카카오페이 일반결제 · CID <code>TC0ONETIME</code> · 수동승인 사용 안함</td></tr>
+      <tr><th>채널 (실연동)</th><td>계약 완료 · 키는 콘솔 <code>채널 관리</code> 상세 화면에서 확인 (<code>channel-key-</code> 접두사 포함 전체 값)</td></tr>
+    </table>
+    <p class="muted" style="margin:12px 0 0">
+      Store ID 와 채널 키는 브라우저에 노출되는 <b>공개 값</b>이라 문서에 적어도 된다.
+      비밀값은 API Secret 과 웹훅 시크릿 둘뿐이다.
+    </p>
+  </section>
+
+  <section>
+    <h2>2. 비밀값 위치 <span class="lock">🔒</span></h2>
+    <table>
+      <tr><th>값</th><th>로컬</th><th>운영(EC2)</th></tr>
+      <tr>
+        <td>API Secret</td>
+        <td><code>donation-platform-server/src/main/resources/application-local.yaml</code><br>키 <code>portone.api-secret</code></td>
+        <td><code>/home/ubuntu/milla/.env</code><br>키 <code>PORTONE_API_SECRET</code></td>
+      </tr>
+      <tr>
+        <td>웹훅 시크릿</td>
+        <td>같은 파일 · <code>portone.webhook-secret</code></td>
+        <td>같은 파일 · <code>PORTONE_WEBHOOK_SECRET</code></td>
+      </tr>
+    </table>
+
+    <h3>발급 위치</h3>
+    <ul>
+      <li><b>API Secret</b> — 콘솔 → <code>결제 연동</code> → <code>식별코드 · API Keys</code> → <b>V2 API</b></li>
+      <li><b>웹훅 시크릿</b> — 콘솔 → <code>결제 연동</code> → <code>결제알림(Webhook) 관리</code> → <code>+ 웹훅 시크릿 발급</code></li>
+    </ul>
+
+    <div class="box box-warn">
+      <b>둘 다 발급 순간에만 보인다.</b> 목록에는 이름만 남고 값은 다시 볼 수 없다.
+      발급하면 <b>바로</b> 두 곳(로컬·EC2)에 넣는다. 다른 프로젝트(hibot)와 계정을 공유하므로
+      기존 키를 <b>삭제하지 말고 추가 발급</b>한다.
+    </div>
+  </section>
+
+  <section>
+    <h2>3. 웹훅</h2>
+    <table>
+      <tr><th>URL</th><td><code>https://dxline-tallent.com/api/webhooks/portone</code></td></tr>
+      <tr><th>설정 모드</th><td>개발 중에는 <b>테스트</b>. 실결제 전환 시 <b>실연동</b>도 등록</td></tr>
+      <tr><th>웹훅 버전</th><td>결제모듈 V2 · 버전 <code>2024-01-01</code> · <code>application/json</code></td></tr>
+      <tr><th>재전송 정책</th><td>200 이 아니면 최대 5회 · <code>0 → 1 → 4 → 16 → 64 → 256분</code></td></tr>
+      <tr><th>서명 헤더</th><td><code>webhook-id</code> · <code>webhook-timestamp</code> · <code>webhook-signature</code> (Standard Webhooks)</td></tr>
+      <tr><th>서명 방식</th><td>HMAC-SHA256(<code>{id}.{timestamp}.{본문}</code>) · 키는 <code>whsec_</code> 제거 후 base64 디코드 · 타임스탬프 5분 허용</td></tr>
+    </table>
+    <div class="box box-bad">
+      <b>시크릿이 비어 있으면 모든 웹훅을 401 로 거절한다(fail-closed).</b>
+      검증할 수 없는 요청을 받아주면 누구나 "결제됐다"고 위조할 수 있기 때문이다.
+      웹훅이 안 들어오면 <b>가장 먼저 시크릿 설정을 의심</b>한다.
+    </div>
+  </section>
+
+  <section>
+    <h2>4. 인프라</h2>
+    <table>
+      <tr><th>도메인</th><td><code>dxline-tallent.com</code> · CloudFront <code>E11NF3HMOB52NI</code> (<code>/api/*</code>→EC2, <code>*</code>→S3)</td></tr>
+      <tr><th>EC2</th><td><code>13.209.195.64</code> (ap-northeast-2) · Nginx <code>:80</code> → <code>127.0.0.1:4301</code></td></tr>
+      <tr><th>SSH 키</th><td><code>/Users/terecal/RestaurantBook/docs-for-배포 가이드/hibot-d-server-key.pem</code></td></tr>
+      <tr><th>앱</th><td><code>/home/ubuntu/milla/app.jar</code> · 직전 버전 <code>app.jar.prev</code> · systemd <code>milla-server.service</code></td></tr>
+      <tr><th>DB</th><td><code>donation_platform</code> @ 컨테이너 <code>english-agent-hub-postgres</code> · 로컬은 <code>localhost:5436</code></td></tr>
+      <tr><th>배포</th><td>main push → CI → Deploy 자동 · 수동은 <code>gh workflow run deploy.yml -f target=all</code></td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>5. 자주 쓰는 명령</h2>
+
+    <h3>운영 서버 접속</h3>
+    <pre>ssh -i "/Users/terecal/RestaurantBook/docs-for-배포 가이드/hibot-d-server-key.pem" ubuntu@13.209.195.64</pre>
+
+    <h3>운영 DB 접속</h3>
+    <pre>docker exec -it english-agent-hub-postgres psql -U postgres -d donation_platform</pre>
+
+    <h3>enum 체크 제약 갱신 — enum 값을 추가할 때마다 필요</h3>
+    <pre>ALTER TABLE contributions DROP CONSTRAINT contributions_status_check;
+ALTER TABLE contributions ADD CONSTRAINT contributions_status_check
+  CHECK (status IN ('RECORDED','PENDING','PAID','FAILED','CANCELED','EXPIRED','REFUNDED'));</pre>
+
+    <h3>API Secret 유효성 확인</h3>
+    <pre>curl -s -X POST https://api.portone.io/login/api-secret \
+  -H 'Content-Type: application/json' \
+  -d '{"apiSecret":"실제값"}' | head -c 60
+
+# accessToken 이 나오면 정상 / UNAUTHORIZED 면 값이 틀림
+# 명령 앞에 공백 한 칸을 넣고 실행하면 셸 히스토리에 남지 않는다</pre>
+
+    <h3>결제 상태 확인</h3>
+    <pre>-- DB
+select id, amount, status, left(payment_id,18), paid_at
+from contributions where payment_id is not null order by id desc limit 5;
+
+-- 포트원 (토큰 발급 후)
+curl -s "https://api.portone.io/payments/{paymentId}" -H "Authorization: Bearer {token}"</pre>
+
+    <h3>서비스 상태 · 롤백</h3>
+    <pre>sudo systemctl status milla-server
+sudo journalctl -u milla-server -n 100 --no-pager
+
+# 롤백 — app.jar.prev 가 직전 버전
+cp /home/ubuntu/milla/app.jar.prev /home/ubuntu/milla/app.jar
+sudo systemctl restart milla-server</pre>
+  </section>
+
+  <section>
+    <h2>6. 증상별 대응</h2>
+    <table>
+      <tr><th>증상</th><th>원인</th><th>조치</th></tr>
+      <tr><td>확정 <code>503</code> <code>PAYMENT_NOT_CONFIGURED</code></td>
+          <td>API Secret 미설정</td><td>로컬/EC2 설정 확인 후 재시작</td></tr>
+      <tr><td>포트원 <code>401 Invalid API secret</code></td>
+          <td>시크릿이 틀림 — 웹훅 시크릿과 혼동이 잦다</td><td>API Keys 탭 V2 값으로 재발급</td></tr>
+      <tr><td>확정 <code>502</code> <code>PAYMENT_VERIFY_FAILED</code></td>
+          <td>포트원 조회 실패 (인증·네트워크·파싱)</td><td>서버 로그 <code>[portone]</code> 줄 확인</td></tr>
+      <tr><td>포트원 상태가 <code>READY</code> 에서 안 바뀜</td>
+          <td>결제 승인 미완료. <b>실패가 아니다</b></td><td>결제창에서 최종 승인까지 진행. 폴링이 계속 재시도한다</td></tr>
+      <tr><td>웹훅이 전부 <code>401</code></td>
+          <td>시크릿 미설정 또는 불일치</td><td>EC2 <code>.env</code> 확인 → 재시작</td></tr>
+      <tr><td><code>..._status_check</code> 위반</td>
+          <td><code>ddl-auto: update</code> 는 체크 제약을 갱신하지 않는다</td><td>위 5절 SQL 실행</td></tr>
+      <tr><td>결제는 됐는데 후원 미반영</td>
+          <td>확정 요청이 서버에 도달하지 못함</td><td>웹훅 설정 확인. 미도입 상태면 알려진 한계</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>7. 실결제 전환 체크리스트</h2>
+    <ol>
+      <li>PG 계약 완료 · <b>계약 명의가 단체/법인인지 확인</b> — 개인 명의는 소득·투명성 문제가 생긴다</li>
+      <li>기부금품 모집 등록 필요 여부 확인 <span class="muted">(법무 — 사업 형태가 바뀔 수 있다)</span></li>
+      <li>기부금영수증 발급 주체·자격 확정 <span class="muted">(세무)</span></li>
+      <li>계약서에서 <b>수수료율 · 정산주기(D+N)</b> 확인 → 목표액 산정식과 운영자금 규모에 반영</li>
+      <li>웹훅을 <b>실연동 모드</b>로도 등록</li>
+      <li>실연동 채널 키로 교체 — 환경변수만 변경</li>
+      <li><b>소액 실결제 1회 검증</b> — 목업과 실제는 앱 전환·복귀 흐름이 다르다</li>
+      <li>정산 대사 배치 도입 검토 <span class="muted">(웹훅 유실 대비 최후 방어선)</span></li>
+      <li>포트원 상점을 프로젝트별로 분리 <span class="muted">(현재 hibot 과 공유 — 기부금 회계는 분리가 중요)</span></li>
+    </ol>
+  </section>
+
+  <footer>
+    관련 문서 · <code>../index.html</code>(진행 현황) ·
+    <code>../웹훅이 필요한 이유/index.html</code> ·
+    <code>../카카오 결제로 물품 후원액 결제 하기.mmd</code> ·
+    <code>docs/donation-model.md</code>
+  </footer>
+
+</div>
+</body>
+</html>
