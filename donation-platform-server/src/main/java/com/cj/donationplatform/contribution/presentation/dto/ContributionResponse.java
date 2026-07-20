@@ -9,6 +9,8 @@ public record ContributionResponse(
         Long donationItemId,
         Long amount,
         String status,
+        String receiptUrl,
+        Instant paidAt,
         Instant createdAt
 ) {
     public static ContributionResponse from(Contribution c) {
@@ -17,6 +19,8 @@ public record ContributionResponse(
                 c.getDonationItem().getId(),
                 c.getAmount(),
                 c.getStatus().name(),
+                c.getReceiptUrl(),
+                c.getPaidAt(),
                 c.getCreatedAt()
         );
     }

@@ -9,7 +9,6 @@ import { buildMenuTree } from "../lib/menuTree";
 import type { AppMenuRecord } from "../model/types";
 import { AppMenuDetailPanel } from "./AppMenuDetailPanel";
 import { AppMenuFormDialog } from "./AppMenuFormDialog";
-import { AppMenuMoveDialog } from "./AppMenuMoveDialog";
 import { AppMenuTreeSidebar } from "./AppMenuTreeSidebar";
 
 type Props = {
@@ -25,7 +24,6 @@ export function AppMenuManagementScreen({ token, scope, onSaved }: Props) {
   const [error, setError] = useState("");
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [moveDialogOpen, setMoveDialogOpen] = useState(false);
   const [editing, setEditing] = useState<AppMenuRecord | null>(null);
   const [parentHintId, setParentHintId] = useState<number | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -36,9 +34,6 @@ export function AppMenuManagementScreen({ token, scope, onSaved }: Props) {
   const scopedMenus = menus;
   const scopedTree = useMemo(() => buildMenuTree(scopedMenus), [scopedMenus]);
   const selected = scopedMenus.find((menu) => menu.id === selectedId) ?? null;
-  const visibleCount = scopedMenus.filter((menu) => menu.visible).length;
-  const hiddenCount = scopedMenus.length - visibleCount;
-  const rootCount = scopedMenus.filter((menu) => menu.parentId == null).length;
 
   const load = async () => {
     setLoading(true);
@@ -81,11 +76,6 @@ export function AppMenuManagementScreen({ token, scope, onSaved }: Props) {
     setEditing(selected);
     setParentHintId(null);
     setDialogOpen(true);
-  };
-
-  const openMoveFolder = () => {
-    if (!selected) return;
-    setMoveDialogOpen(true);
   };
 
   const toggleVisible = async () => {
@@ -170,26 +160,20 @@ export function AppMenuManagementScreen({ token, scope, onSaved }: Props) {
   };
 
   return (
-    <main className="workspace-page space-y-6 bg-[#f7f8fa]">
-      <Panel className="p-5 md:p-6">
-        <div className="mb-5 flex items-center justify-between">
-          <div className="inline-flex items-center gap-3 text-zinc-800">
-            <span className="grid size-9 place-items-center rounded-xl bg-gradient-to-br from-sky-100 via-sky-50 to-white text-sky-700 ring-1 ring-sky-200/80">
-              <ScopeIcon size={16} />
-            </span>
-            <div>
-              <h1 className="text-[20px] font-extrabold tracking-tight">{scopeLabel} 관리</h1>
-              <p className="text-[12px] font-semibold text-zinc-400">메뉴 구조와 노출 상태를 편집합니다.</p>
-            </div>
+    <main className="workspace-page space-y-3">
+      <Panel>
+        <div className="mb-3 flex items-center justify-between">
+          <div className="inline-flex items-center gap-2 text-zinc-800">
+            <ScopeIcon size={15} />
+            <h1 className="text-[18px] font-extrabold tracking-tight">{scopeLabel} 관리</h1>
           </div>
           <Button variant="outline" onClick={() => void load()} disabled={loading || saving}>
             새로고침
           </Button>
         </div>
-        <div className="mb-5 grid gap-3 md:grid-cols-3">
-          <SummaryCard label="전체 메뉴" value={`${scopedMenus.length}개`} tone="indigo" />
-          <SummaryCard label="표시 메뉴" value={`${visibleCount}개`} tone="emerald" />
-          <SummaryCard label="루트 / 숨김" value={`${rootCount} / ${hiddenCount}`} tone="orange" />
+        <div className="mb-4 text-[12px] text-zinc-500">
+          전체 <strong className="text-zinc-900">{scopedMenus.length}</strong>개 · 표시
+          <strong className="ml-1 text-zinc-900">{scopedMenus.filter((menu) => menu.visible).length}</strong>개
         </div>
 
         {loading ? (
@@ -197,7 +181,7 @@ export function AppMenuManagementScreen({ token, scope, onSaved }: Props) {
         ) : error ? (
           <EmptyState title="메뉴를 불러오지 못했습니다." description={error} />
         ) : (
-          <div className="grid min-h-[560px] gap-5 xl:grid-cols-[340px_minmax(0,1fr)]">
+          <div className="grid min-h-[560px] gap-4 xl:grid-cols-[320px_minmax(0,1fr)]">
             <AppMenuTreeSidebar
               items={scopedTree}
               selectedId={selectedId}
@@ -212,7 +196,6 @@ export function AppMenuManagementScreen({ token, scope, onSaved }: Props) {
                 selected={selected}
                 saving={saving}
                 onCreateChild={openCreateChild}
-                onMoveFolder={openMoveFolder}
                 onEdit={openEdit}
                 onToggleVisible={() => void toggleVisible()}
                 onDelete={() => void remove()}
@@ -247,51 +230,11 @@ export function AppMenuManagementScreen({ token, scope, onSaved }: Props) {
           void onSaved();
         }}
       />
-      {selected ? (
-        <AppMenuMoveDialog
-          token={token}
-          open={moveDialogOpen}
-          menu={selected}
-          menus={scopedMenus}
-          scopeLabel={scopeLabel}
-          onOpenChange={setMoveDialogOpen}
-          onMoved={async () => {
-            await load();
-            setNotice("폴더 이동이 완료되었습니다.");
-            void onSaved();
-          }}
-        />
-      ) : null}
       {notice ? (
         <div className="pointer-events-none fixed bottom-6 right-6 z-50 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-[12px] font-semibold text-white shadow-lg">
           {notice}
         </div>
       ) : null}
     </main>
-  );
-}
-
-function SummaryCard({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: string;
-  tone: "indigo" | "emerald" | "orange";
-}) {
-  const toneStyle =
-    tone === "emerald"
-      ? "text-emerald-700 bg-emerald-50 border-emerald-100"
-      : tone === "orange"
-        ? "text-orange-700 bg-orange-50 border-orange-100"
-        : "text-indigo-700 bg-indigo-50 border-indigo-100";
-
-  return (
-    <div className="rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm">
-      <p className="text-[12px] font-bold text-zinc-500">{label}</p>
-      <p className="mt-1 text-[30px] font-extrabold leading-none tracking-tight text-zinc-950">{value}</p>
-      <span className={`mt-2 inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold ${toneStyle}`}>메뉴 지표</span>
-    </div>
   );
 }

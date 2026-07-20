@@ -2,7 +2,7 @@ import type { ComponentPropsWithoutRef } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/shared/lib/utils";
 
-const pageShellVariants = cva("mx-auto w-full px-4 py-8 sm:px-6 lg:px-8", {
+const pageShellVariants = cva("mx-auto w-full px-4 py-5 sm:px-6 lg:px-8", {
   variants: {
     width: {
       content: "max-w-4xl",

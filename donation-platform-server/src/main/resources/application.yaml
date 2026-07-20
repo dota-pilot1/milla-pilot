@@ -52,6 +52,18 @@ jwt:
   refresh-token-expiration-ms: 604800000
   issuer: donation-platform
 
+portone:
+  api-url: ${PORTONE_API_URL:https://api.portone.io}
+  # storeId·channelKey 는 프론트에 노출되는 공개 값
+  store-id: ${PORTONE_STORE_ID:store-8859c392-62e5-4fe5-92d3-11c686e9b2bc}
+  channel-key: ${PORTONE_CHANNEL_KEY:channel-key-943d5d92-0688-4619-ac6e-7116f665abc0}
+  # 서버 전용 비밀값 — .env 로만 주입, 기본값 없음
+  api-secret: ${PORTONE_API_SECRET:}
+  # 웹훅 서명 검증용 — 없으면 웹훅 요청을 전부 거절한다(fail-closed)
+  webhook-secret: ${PORTONE_WEBHOOK_SECRET:}
+  # 결제 대기가 잔여 금액을 선점하는 시간(분)
+  pending-expire-minutes: ${PORTONE_PENDING_EXPIRE_MINUTES:15}
+
 aws:
   s3:
     access-key: ${AWS_ACCESS_KEY_ID:}

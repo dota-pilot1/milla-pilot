@@ -9,6 +9,11 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
+        /**
+         * 최종 전환 버튼 전용 — "후원하기"처럼 사용자가 결제로 넘어가는 한 화면에 하나뿐인 버튼.
+         * 목록·필터·폼 제출 등 일반 액션에는 쓰지 않는다(강조가 흔해지면 전환력이 죽는다).
+         */
+        cta: "bg-cta text-cta-foreground shadow-sm hover:bg-cta/90",
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         outline:
           "border border-border bg-background hover:bg-accent hover:text-accent-foreground",

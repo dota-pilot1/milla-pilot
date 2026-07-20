@@ -8,7 +8,9 @@ import { Header } from "@/widgets/header";
 import { ThemeInitializer } from "@/shared/ui/theme/ThemeInitializer";
 import { I18nProvider } from "@/shared/i18n/I18nProvider";
 
-const themeNoFlashScript = `(function(){try{var t=localStorage.getItem("theme-color");if(t&&t!=="default")document.documentElement.setAttribute("data-theme",t);}catch(e){}})();`;
+// 저장된 테마가 없으면 브랜드 기본(haggyo)을 적용한다. 무채색은 사용자가 직접 고른 경우에만.
+const THEMES = ["haggyo", "coral", "amber", "sky", "rose"];
+const themeNoFlashScript = `(function(){try{var t=localStorage.getItem("theme-color");if(${JSON.stringify(THEMES)}.indexOf(t)<0)t="haggyo";document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","haggyo");}})();`;
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,7 +42,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" data-theme="haggyo" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeNoFlashScript }} />
       </head>

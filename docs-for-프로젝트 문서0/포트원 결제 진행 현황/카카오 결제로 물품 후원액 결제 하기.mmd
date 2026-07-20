@@ -1,0 +1,78 @@
+%% 카카오페이로 물품 후원액을 결제하는 흐름
+%% milla-pilot · 포트원 V2 · 2026-07-21
+%% 핵심: 프론트의 "결제 성공" 통보를 믿지 않고, 서버가 포트원에 직접 조회해 금액을 대조한 뒤에만 확정한다.
+
+sequenceDiagram
+    autonumber
+    actor 후원자
+    participant FE as 웹 프론트
+    participant BE as 서버
+    participant DB as DB
+    participant PO as 포트원
+    participant KP as 카카오페이
+
+    rect rgb(240,246,243)
+    note over 후원자,DB: ① 결제 대기 생성 — 잔여 금액 선점
+    후원자->>FE: 금액 선택 후 "후원하기"
+    FE->>후원자: 확인 다이얼로그
+    후원자->>FE: "결제하기"
+    FE->>BE: POST /payments/initiate
+    BE->>DB: 물품 행 쓰기 락
+    note right of BE: 잔여 = 목표 − 모금액 − 선점액<br/>초과면 거절
+    BE->>DB: Contribution PENDING 저장<br/>paymentId 발급 · 15분 만료
+    BE-->>FE: paymentId · storeId · channelKey · 금액
+    end
+
+    rect rgb(255,247,240)
+    note over 후원자,KP: ② 결제창 — 승인은 포트원·카카오 영역
+    FE->>PO: PortOne.requestPayment
+    PO->>KP: 결제 요청
+    KP-->>후원자: 결제창 · QR
+    후원자->>KP: 결제 승인
+    KP-->>PO: 승인 결과
+    note over PO: 이 시점에 상태가<br/>READY → PAID 로 바뀐다
+    end
+
+    rect rgb(240,246,243)
+    note over FE,DB: ③ 확정 — 서버가 직접 검증
+    alt SDK 가 결과를 돌려줌
+        PO-->>FE: 결제 결과
+    else SDK 응답 없음 · QR 결제 · 팝업 종료
+        FE->>BE: 3초마다 확정 재시도 폴링
+    else 모바일 리다이렉트 복귀
+        PO-->>FE: redirectUrl 로 복귀 · paymentId 파라미터
+    end
+
+    FE->>BE: POST /payments/confirm
+    BE->>PO: GET /payments/{paymentId}
+    PO-->>BE: status · amount.total · receiptUrl
+
+    alt status = PAID 이고 금액 일치
+        BE->>DB: PAID 확정 · 영수증 저장
+        BE->>DB: raisedAmount 증가
+        opt 모금액 >= 목표액
+            BE->>DB: 물품 LOCKED — 결제 잠금
+        end
+        BE-->>FE: 확정 결과
+        FE-->>후원자: 완료 화면<br/>금액 · 진행률 · 영수증
+    else 금액 불일치
+        note right of BE: 위변조 의심 — 확정하지 않음
+        BE-->>FE: 오류
+    else status = READY — 아직 승인 전
+        note right of BE: 실패로 확정하지 않는다<br/>폴링이 계속 재시도
+        BE-->>FE: 아직 미완료
+    end
+    end
+
+    rect rgb(250,242,242)
+    note over 후원자,DB: 결제하지 않은 경우
+    alt 사용자가 취소
+        후원자->>FE: 대기 화면에서 "취소"
+        FE->>BE: POST /payments/cancel
+        BE->>DB: CANCELED — 선점 즉시 해제
+    else 15분 경과
+        BE->>DB: 스케줄러가 EXPIRED 처리 — 선점 해제
+    end
+    end
+
+    note over 후원자,DB: 미해결 — 결제 직후 브라우저를 닫으면<br/>확정 요청이 오지 않아 만료된다. 웹훅으로 막아야 한다.

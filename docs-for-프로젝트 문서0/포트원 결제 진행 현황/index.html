@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>포트원 결제 연동 진행 현황</title>
+<style>
+  :root{
+    --bg:#f6f7f6; --card:#fff; --fg:#16201b; --muted:#5b6862;
+    --line:#dfe4e1; --brand:#2e7d6e; --cta:#ff7043; --warn:#b45309;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:40px 20px;background:var(--bg);color:var(--fg);
+    font:15px/1.7 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard",sans-serif}
+  .wrap{max-width:900px;margin:0 auto}
+  h1{font-size:26px;margin:0 0 6px;letter-spacing:-.02em}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 28px}
+  section{background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:22px 24px;margin-bottom:18px}
+  h2{font-size:17px;margin:0 0 14px;letter-spacing:-.01em}
+  h3{font-size:14px;margin:18px 0 8px;color:var(--muted)}
+  ul{margin:0;padding-left:18px} li{margin:5px 0}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:600;white-space:nowrap}
+  tr:last-child td{border-bottom:0}
+  code{background:#eef1ef;border-radius:5px;padding:1px 6px;font-size:13px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  .badge{display:inline-block;font-size:12px;font-weight:700;border-radius:999px;
+    padding:3px 10px;vertical-align:middle}
+  .ok{background:#e3f2ec;color:var(--brand)}
+  .todo{background:#fdece5;color:#c2410c}
+  .warnbox{background:#fff8ed;border:1px solid #fbd9a5;border-radius:10px;
+    padding:14px 16px;margin-top:14px;font-size:14px}
+  .warnbox b{color:var(--warn)}
+  .flow{background:#eef1ef;border-radius:10px;padding:14px 16px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;
+    white-space:pre;overflow-x:auto;margin:0}
+  .muted{color:var(--muted)}
+  footer{color:var(--muted);font-size:13px;text-align:center;margin-top:26px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>포트원 결제 연동 진행 현황</h1>
+  <p class="sub">milla-pilot · 후원 물품 공동구매 · 최종 업데이트 2026-07-21</p>
+
+  <section>
+    <h2>한 줄 요약 <span class="badge ok">테스트 채널 연동 완료</span></h2>
+    <p style="margin:0">
+      카카오페이 <b>테스트 채널</b>로 결제 → 서버 금액 검증 → 후원 확정 → 목표 달성 잠금까지
+      전 구간이 실제로 동작함을 확인했다. <b>실연동(실제 결제)은 아직 검증하지 않았고, 웹훅이 없다.</b>
+    </p>
+  </section>
+
+  <section>
+    <h2>결제 흐름</h2>
+    <pre class="flow">① POST /api/contributions/payments/initiate
+   → PENDING 생성 + 잔여 금액 선점(15분) + paymentId 발급
+
+② PortOne.requestPayment(...)   ← 브라우저 SDK, 카카오페이 결제창
+
+③ POST /api/contributions/payments/confirm
+   → 서버가 포트원에 직접 조회 → 상태·금액 대조 → PAID 확정 → 모금액 반영
+   → 목표 달성 시 물품 LOCKED</pre>
+    <p class="muted" style="margin:12px 0 0">
+      ③이 핵심. 프론트의 "결제 성공했어요"는 위조 가능하므로 믿지 않는다.
+      서버가 포트원에 물어본 금액이 신청 금액과 같을 때만 확정한다.
+    </p>
+  </section>
+
+  <section>
+    <h2>완료된 것</h2>
+
+    <h3>백엔드</h3>
+    <ul>
+      <li><code>ContributionStatus</code> — RECORDED / PENDING / PAID / FAILED / CANCELED / EXPIRED / REFUNDED</li>
+      <li><code>Contribution</code> — <code>paymentId</code>(UNIQUE·멱등성 키) · <code>paidAt</code> · <code>expiresAt</code> · <code>receiptUrl</code> · <code>pgProvider</code></li>
+      <li><code>PortOneClient</code> — 토큰 교환 인증(<code>POST /login/api-secret</code>), 토큰 25분 캐시</li>
+      <li><code>initiate</code> / <code>confirm</code> / <code>cancelPending</code> / 만료 스케줄러(1분 주기)</li>
+      <li>동시성 — 물품 행 비관적 락 + <b>잔여 = 목표 − 모금액 − 선점액</b> 으로 초과 모금 차단</li>
+      <li>참여 현황 공개 API — 후원자 이름은 서버에서 마스킹(<code>홍*동</code>)</li>
+    </ul>
+
+    <h3>프론트</h3>
+    <ul>
+      <li>3단계 결제 흐름 + <b>확정 폴링</b>(SDK 응답이 안 올 때 대비) + <b>리다이렉트 복귀 처리</b>(모바일)</li>
+      <li>결제 대기 화면 — "결제를 완료했어요" 즉시 확인 / 취소 시 선점 즉시 해제</li>
+      <li>결제 완료 화면 — 금액 · 목표까지 남은 금액 · 진행률 · 영수증 링크</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>검증 결과</h2>
+    <table>
+      <tr><th>실결제 건수</th><td>6건 × 30,000원 = 180,000원 (테스트 채널)</td></tr>
+      <tr><th>물품 상태</th><td>목표 600,000 / 모금 600,000 → <code>LOCKED</code> 전이 확인</td></tr>
+      <tr><th>정합성</th><td>PAID 합계 + 시드(RECORDED) = 물품 <code>raisedAmount</code> 일치</td></tr>
+      <tr><th>영수증</th><td>6건 전부 <code>receiptUrl</code> 저장됨</td></tr>
+      <tr><th>금액 검증</th><td>포트원 조회 금액과 신청 금액 대조 후에만 확정</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>알려진 한계 <span class="badge todo">실결제 전 해결 필요</span></h2>
+    <ul>
+      <li><b>웹훅 없음</b> — 결제 직후 브라우저를 닫으면 확정되지 않고 15분 뒤 만료된다.
+        <span class="muted">돈은 빠져나갔는데 후원은 실패하는 케이스.</span>
+        폴링·리다이렉트 처리로 상당 부분 막았으나 완전하지 않다. 로컬 수신에는 ngrok 등 터널 필요.</li>
+      <li><b>실연동 미검증</b> — 테스트는 목업 환경이라 앱 전환·복귀 흐름이 실제와 다르다.
+        출시 전 실연동 채널로 소액 결제를 반드시 한 번 해봐야 한다.</li>
+      <li><b>영수증 링크가 테스트에서는 열리지 않음</b> — <code>mockup-pg-web.kakao.com</code> 은
+        실재하지 않는 도메인(<code>DNS_PROBE_FINISHED_NXDOMAIN</code>). 실연동에서는 정상 URL이 내려온다. <span class="muted">정상 동작.</span></li>
+      <li><b>확정 시 실패 사유가 저장되지 않음</b> — 예외를 던지면 트랜잭션이 롤백되어
+        <code>failReason</code> 기록도 함께 사라진다. 운영 진단이 필요해지면 별도 트랜잭션으로 분리해야 한다.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>설정</h2>
+    <table>
+      <tr><th>Store ID</th><td><code>store-8859c392-62e5-4fe5-92d3-11c686e9b2bc</code></td></tr>
+      <tr><th>채널 (테스트)</th><td><code>channel-key-943d5d92-0688-4619-ac6e-7116f665abc0</code> · 카카오페이 · CID <code>TC0ONETIME</code></td></tr>
+      <tr><th>API Secret</th><td>🔒 <code>src/main/resources/application-local.yaml</code> (gitignore) — 커밋 금지</td></tr>
+      <tr><th>API 버전</th><td>포트원 V2 (<code>https://api.portone.io</code>)</td></tr>
+    </table>
+    <div class="warnbox">
+      <b>주의</b> — 이 포트원 계정은 다른 프로젝트(hibot)와 공유 중이다.
+      운영에 들어가면 <b>프로젝트별로 상점을 분리</b>해야 한다. 정산 계좌와 거래 내역이 섞이면
+      회계가 곤란해지고, 기부금은 특히 분리가 중요하다.
+    </div>
+  </section>
+
+  <section>
+    <h2>다음 단계</h2>
+    <ol>
+      <li><b>웹훅</b> — 위 구멍 막기. 실결제 전 필수</li>
+      <li><b>주간 라운드 · 마감 배치</b> — <code>ItemStatus.FAILED</code> 추가 시
+        <b>Flyway 도입</b>을 함께 (아래 참고)</li>
+      <li><b>알림 연결</b> — 모금 완료 / 전달 완료 / 환급</li>
+    </ol>
+    <div class="warnbox">
+      <b>DB 주의</b> — <code>ddl-auto: update</code> 는 컬럼은 추가하지만
+      <b>enum 체크 제약은 갱신하지 않는다.</b> enum 값을 추가하면 런타임 INSERT 에서
+      <code>..._status_check</code> 위반으로 터진다. 값 추가 때마다 수동 갱신이 필요하며,
+      근본 해결은 Flyway 도입이다.
+    </div>
+  </section>
+
+  <section>
+    <h2>연동 중 겪은 문제 (재발 방지 기록)</h2>
+    <table>
+      <tr><th>증상</th><th>원인</th><th>해결</th></tr>
+      <tr>
+        <td><code>RestClient$Builder</code> 빈 없음 — 서버 기동 실패</td>
+        <td>Spring Boot 4 에서 해당 자동 구성이 별도 모듈로 분리됨</td>
+        <td><code>RestClient.builder()</code> 정적 팩토리로 직접 생성</td>
+      </tr>
+      <tr>
+        <td><code>contributions_status_check</code> 위반</td>
+        <td>Hibernate 가 만든 enum 체크 제약이 갱신되지 않음</td>
+        <td>제약 DROP 후 새 값들로 재생성</td>
+      </tr>
+      <tr>
+        <td>포트원 401 <code>Invalid API secret</code></td>
+        <td>시크릿 위치 혼동(웹훅 시크릿 ≠ API Secret) + 인증 방식</td>
+        <td>API Keys 탭의 V2 시크릿 사용 + 토큰 교환 방식으로 전환</td>
+      </tr>
+      <tr>
+        <td>결제 조회 응답 역직렬화 실패</td>
+        <td>Boot 4 는 Jackson 3(<code>tools.jackson</code>)인데 Jackson 2 <code>JsonNode</code> 사용</td>
+        <td>응답을 <code>Map&lt;String,Object&gt;</code> 로 읽어 버전 의존 제거</td>
+      </tr>
+      <tr>
+        <td>토큰 만료 경계에서 간헐적 401 (예상)</td>
+        <td>토큰 유효기간(30분)과 캐시 기간을 동일하게 설정</td>
+        <td>캐시를 25분으로 단축</td>
+      </tr>
+      <tr>
+        <td>완료 화면 진행률이 100% 로 잘못 표시</td>
+        <td>캐시 갱신으로 이미 반영된 모금액에 후원액을 또 더함</td>
+        <td>갱신된 값을 그대로 사용</td>
+      </tr>
+    </table>
+  </section>
+
+  <footer>
+    관련 문서 · <code>docs/donation-model.md</code>(모델 정의서) ·
+    <code>docs-for-프로젝트 문서0/포트원 관련 정보 모음/portone_info.md</code>(연동 정보)
+  </footer>
+
+</div>
+</body>
+</html>

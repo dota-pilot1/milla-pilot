@@ -27,6 +27,18 @@ env.local
 # Local deployment/signing secrets
 **/.local-secrets/
 
+# 비밀값 (문서 폴더 포함 전 경로)
+# docs-for-* 는 기획·설계 아카이브라 git에 계속 추적한다(백업·이력).
+# 대신 비밀값이 담긴 파일만 경로와 무관하게 차단한다.
+**/secrets/
+*credentials*
+*-secret.*
+*-secrets.*
+*.pem
+*.key
+*.p12
+*.keystore
+
 # IDE
 .idea/
 .vscode/
@@ -42,3 +54,6 @@ env.local
 *.xlsx
 *.hwp
 *.hwpx
+
+# 별도 저장소 — 이 리포에 포함하지 않는다
+milla-dev-task-tauri/

@@ -81,6 +81,8 @@ public class SecurityConfig {
                                 "/api/auth/password-reset/request",
                                 "/api/auth/password-reset/confirm"
                         ).permitAll()
+                        // 포트원 웹훅 — JWT 없이 들어온다. 인증은 요청 본문 서명으로 한다.
+                        .requestMatchers(HttpMethod.POST, "/api/webhooks/portone").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/site-settings").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/menus").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/facilities/**").permitAll()
@@ -92,6 +94,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/donation-items", "/api/donation-items/**").hasAnyRole("PLATFORM_ADMIN", "ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/donation-items/**").hasAnyRole("PLATFORM_ADMIN", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/donation-items/**").hasAnyRole("PLATFORM_ADMIN", "ADMIN")
+                        // 참여 현황(후원자 수·최근 참여)은 공개 — 이름은 마스킹되어 나간다. 원장(by-item)보다 먼저 매칭돼야 한다.
+                        .requestMatchers(HttpMethod.GET, "/api/contributions/by-item/*/summary").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/contributions/by-item/**").hasAnyRole("PLATFORM_ADMIN", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/contributions").hasAnyRole("PLATFORM_ADMIN", "ADMIN")
                         // 통합구매: 전체 목록·수정은 관리자 (실행 POST 는 /api/donation-items/** 규칙, 물품별 조회 GET 은 공개)

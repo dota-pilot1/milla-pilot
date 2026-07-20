@@ -77,18 +77,13 @@ export function AppMenuTreeSidebar({
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="검색"
-          className="h-10 rounded-xl border-zinc-200 bg-zinc-50"
+          className="h-9"
         />
-        <Button
-          size="icon"
-          className="h-10 w-10 shrink-0 rounded-xl border-zinc-900 shadow-sm"
-          onClick={onCreateRoot}
-          title="루트 메뉴 추가"
-        >
+        <Button size="icon" className="h-9 w-9 shrink-0" onClick={onCreateRoot} title="루트 메뉴 추가">
           <Plus size={14} />
         </Button>
       </div>
-      <div className="min-h-0 flex-1 overflow-auto rounded-2xl border border-zinc-200 bg-white p-2.5 shadow-sm">
+      <div className="min-h-0 flex-1 overflow-auto rounded-xl border border-zinc-200 bg-zinc-50 p-2">
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={filteredItems.map((item) => item.id)} strategy={verticalListSortingStrategy}>
             {filteredItems.map((item) => (
@@ -144,18 +139,18 @@ function TreeNode({
           onSelect(item);
           if (hasChildren) onToggle(item.id);
         }}
-        className={`mb-1 flex w-full items-center gap-2 rounded-xl border px-2.5 py-2.5 text-left transition-all ${
+        className={`mb-1 flex w-full items-center gap-2 rounded-md border px-2 py-2 text-left ${
           selected
-            ? "border-emerald-200 bg-emerald-50 text-emerald-900 shadow-sm"
-            : "border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50"
+            ? "border-zinc-900 bg-zinc-900 text-white"
+            : "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-100"
         }`}
-        style={{ paddingLeft: depth * 16 + 10 }}
+        style={{ paddingLeft: depth * 16 + 8 }}
       >
         <span
           {...attributes}
           {...listeners}
           onClick={(event) => event.stopPropagation()}
-          className={`rounded p-0.5 ${selected ? "cursor-grabbing text-emerald-700" : "cursor-grab text-zinc-400"}`}
+          className={`rounded p-0.5 ${selected ? "cursor-grabbing text-white/80" : "cursor-grab text-zinc-400"}`}
         >
           <GripVertical size={14} />
         </span>
@@ -184,7 +179,7 @@ function TreeNode({
         </span>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[13px] font-bold">{item.label}</span>
-          <span className={`block truncate text-[11px] ${selected ? "text-emerald-700/80" : "text-zinc-400"}`}>
+          <span className={`block truncate text-[11px] ${selected ? "text-white/70" : "text-zinc-400"}`}>
             {item.code}
           </span>
         </span>
