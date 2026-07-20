@@ -1,6 +1,7 @@
 export const nav = {
   projectIntro: "Project Intro",
   dashboard: "Dashboard",
+  devInfo: "Dev Info",
   admin: "Admin",
   donation: "Donation",
   purchaseDelivery: "Purchase & Delivery",

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Gaegu, Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 import { QueryProvider } from "./QueryProvider";
@@ -20,9 +20,18 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+/** 브랜드 디스플레이(손글씨) 폰트 — 헤딩·브랜드 문구 전용. 본문에는 쓰지 않는다(design-system.md). */
+const gaegu = Gaegu({
+  weight: ["400", "700"],
+  variable: "--font-gaegu",
+  subsets: ["latin"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "DonationPlatform",
+  title: "학교 — 마음을 잇는 기부 플랫폼",
   description: "후원 물품 공동구매 펀딩 시스템",
+  icons: { icon: "/haggyo-mark.png" },
 };
 
 export default function RootLayout({
@@ -36,7 +45,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeNoFlashScript }} />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${gaegu.variable} antialiased`}
       >
         <ThemeInitializer />
         <I18nProvider>

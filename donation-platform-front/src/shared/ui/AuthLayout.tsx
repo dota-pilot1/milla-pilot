@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { Sparkles, Image as ImageIcon } from "lucide-react";
+import { Image as ImageIcon } from "lucide-react";
+import { BrandLogo } from "@/shared/ui/BrandLogo";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { siteSettingApi } from "@/entities/site-setting/api/siteSettingApi";
@@ -59,11 +60,8 @@ export function AuthLayout({ title, subtitle, children }: AuthLayoutProps) {
             />
 
             {/* Brand */}
-            <div className="relative flex items-center gap-2 text-sm font-semibold tracking-tight text-foreground">
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
-                <Sparkles className="h-3.5 w-3.5" />
-              </span>
-              DonationPlatform
+            <div className="relative flex items-center">
+              <BrandLogo size="md" priority />
             </div>
 
             {/* Hero image (from site-settings) or placeholder */}
@@ -93,7 +91,7 @@ export function AuthLayout({ title, subtitle, children }: AuthLayoutProps) {
             </div>
 
             <p className="relative text-[10px] text-muted-foreground">
-              © {new Date().getFullYear()} DonationPlatform
+              © {new Date().getFullYear()} 학교 — 마음을 잇는 기부 플랫폼
             </p>
           </section>
 

@@ -1,6 +1,7 @@
 export const nav = {
   projectIntro: "프로젝트 소개",
   dashboard: "대시보드",
+  devInfo: "개발 정보",
   admin: "관리",
   donation: "후원",
   purchaseDelivery: "구매·배송",

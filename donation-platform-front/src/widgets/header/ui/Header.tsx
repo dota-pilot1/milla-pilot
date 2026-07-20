@@ -8,6 +8,7 @@ import {
   BadgeCheck,
   Building2,
   ChevronDown,
+  ClipboardList,
   FileText,
   HandCoins,
   Info,
@@ -33,6 +34,7 @@ import { useAuth, authActions } from "@/entities/user/model/authStore";
 import { menuApi } from "@/entities/menu/api/menuApi";
 import type { MenuItem, MenuRecord } from "@/entities/menu/model/types";
 import { RoleBadge } from "@/features/user-management/RoleBadge";
+import { BrandLogo } from "@/shared/ui/BrandLogo";
 import { Button } from "@/shared/ui/Button";
 import {
   Dialog,
@@ -78,6 +80,7 @@ function isWebMenu(menu: MenuRecord) {
 const menuIcons: Record<string, LucideIcon> = {
   PROJECT_INTRO: Info,
   DASHBOARD: LayoutDashboard,
+  DEV_INFO: ClipboardList,
   WEB_DONATION: HandCoins,
   WEB_DONATE: HandCoins,
   WEB_PURCHASE: Truck,
@@ -287,8 +290,8 @@ function PublicHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-sm">
       <div className="flex h-14 w-full items-center justify-between px-4">
-        <Link href="/" className="text-sm font-semibold tracking-tight transition-opacity hover:opacity-80">
-          DonationPlatform
+        <Link href="/" className="flex items-center transition-opacity hover:opacity-80">
+          <BrandLogo size="sm" priority />
         </Link>
         <div className="flex items-center gap-2">
           <LanguageSelect />
@@ -394,14 +397,16 @@ function SidebarSection({
 
 function Sidebar({ tree }: { tree: MenuItem[] }) {
   const admin = tree.find((item) => item.code === "ADMIN");
-  const webItems = tree.filter((item) => item.code !== "ADMIN");
+  // 개발 정보 = 팀 내부 진행 상황. 본문 메뉴와 섞이지 않게 하단에 고정 배치(스크롤 무관).
+  const devInfo = tree.find((item) => item.code === "DEV_INFO");
+  const webItems = tree.filter((item) => item.code !== "ADMIN" && item.code !== "DEV_INFO");
   const sections = normalizeAdminSections(admin);
 
   return (
     <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-sidebar-border bg-sidebar lg:flex lg:flex-col">
       <div className="flex h-14 items-center border-b border-sidebar-border bg-sidebar px-4">
-        <Link href="/dashboard" className="text-sm font-bold tracking-tight">
-          DonationPlatform
+        <Link href="/dashboard" className="flex items-center transition-opacity hover:opacity-80">
+          <BrandLogo size="sm" priority />
         </Link>
       </div>
       <nav className="flex-1 space-y-3 overflow-y-auto px-3 py-3">
@@ -428,6 +433,11 @@ function Sidebar({ tree }: { tree: MenuItem[] }) {
           />
         ))}
       </nav>
+      {devInfo ? (
+        <div className="border-t border-sidebar-border px-3 py-3">
+          <SidebarLink item={devInfo} />
+        </div>
+      ) : null}
     </aside>
   );
 }

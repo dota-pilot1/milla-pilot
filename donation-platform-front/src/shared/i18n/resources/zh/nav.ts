@@ -1,6 +1,7 @@
 export const nav = {
   projectIntro: "项目介绍",
   dashboard: "仪表板",
+  devInfo: "开发信息",
   admin: "管理",
   donation: "捐赠",
   purchaseDelivery: "采购与配送",

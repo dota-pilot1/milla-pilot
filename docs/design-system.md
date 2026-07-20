@@ -80,3 +80,71 @@
 - **검색/필터 영역:** 본문과 분리된 별도 화이트 카드(보더+라운드+얕은 그림자)로 묶는다.
 - **데이터 그리드:** 테이블/그리드는 라운드 컨테이너(`rounded-2xl border bg-white shadow-sm`)로 감싸 화면 밀도를 정리한다.
 - **토글 탭:** 공통 `shared/ui/Tabs` 사용, active 인디케이터는 위치/너비가 부드럽게 이동하도록 유지한다.
+
+---
+
+## 6. 학교 브랜드 (패밀리룩) — 칠판·분필·손글씨
+
+> 기준: 파일럿 사이트 `donaschool.ai.studio`에서 실측 추출한 값. 컨셉은 **"칠판 + 분필 + 손글씨"**.
+> 토큰 정의는 `donation-platform-front/src/app/globals.css`, 첫 적용 사례는 `src/app/project-intro/page.tsx`의 `ChalkboardHero`.
+
+### 6-1. 두 개의 표면 — 절대 섞지 않는다
+
+| 표면 | 어디 | 규칙 |
+|---|---|---|
+| **마케팅 표면** | 소개 페이지 히어로, 로그인 좌측 패널, (향후) 랜딩·공유 카드 | 칠판·분필·손글씨 허용 |
+| **데이터 표면** | 목록·폼·대시보드·CRUD 전부 | §1~5 그대로. 칠판/분필/`font-display` **금지** |
+
+파일럿도 전 화면이 칠판이 아니라 **히어로만 칠판**이다. 데이터 화면의 패밀리룩은 칠판이 아니라 `data-theme="haggyo"` 토큰(틸그린 primary)으로 낸다.
+
+### 6-2. 브랜드 고정 토큰 (테마·다크 무관 고정값)
+
+| 토큰 | 값 | 용도 |
+|---|---|---|
+| `bg-chalkboard` | `oklch(0.3 0.038 158)` ≈ `#1A2F23` | 칠판 바탕. 마케팅 표면 전용 |
+| `ring-chalkboard-line` | `white 14%` | 칠판 위 괘선·보더 |
+| `text-chalk` | 웜 화이트 | 칠판 위 기본 글자 |
+| `text-chalk-yellow / -pink / -sky` | `#FFF59D / #FFC1E3 / #81D4FA` | 분필 강조 3색. **칠판 위에서만** |
+| `bg-cta` / `text-cta` | `#FF7043` 코랄 | 최상위 행동 유도 1개에만. 남용 금지 |
+
+- 분필색·CTA를 라이트 배경 위에 쓰지 않는다(대비 무너짐). 칠판 밖 강조는 `primary`.
+- 칠판 위에서는 `muted-foreground` 같은 시맨틱 텍스트 토큰 대신 `text-chalk/NN` 투명도로 위계를 만든다.
+
+### 6-3. 손글씨 폰트 (Gaegu)
+
+- `next/font` `Gaegu` → `--font-gaegu` → 유틸 `font-display`.
+- **허용:** 마케팅 표면의 헤드라인·리드·CTA 라벨, 브랜드 문구.
+- **금지:** 본문 단락, 폼 라벨, 테이블, 데이터 화면 전체. (파일럿도 본문은 Inter — 손글씨 본문은 가독성이 무너진다.)
+
+### 6-4. 테마
+
+- `data-theme="haggyo"` — primary/링/사이드바가 로고 틸그린(`oklch(0.56 0.1 172)`), 서피스에 그린 틴트. 라이트·다크 모두 정의됨.
+- 살롱 팔레트 6종(rose~sky)은 BeautyBook 유산. 학교 브랜드 확정 시 default 교체·유산 제거는 별도 결정.
+
+### 6-5. 칠판 섹션 구성 규칙 (ChalkboardHero · MembershipSection 패턴)
+
+1. 컨테이너: `rounded-3xl bg-chalkboard ring-1 ring-chalkboard-line` + 넉넉한 패딩(`py-14` 이상, 히어로는 `py-16~20`).
+2. 비네트: `bg-[radial-gradient(ellipse_at_center,transparent_55%,rgba(0,0,0,0.28))]`를 `absolute inset-0`으로 깔아 가장자리를 눌러준다. 그 위 콘텐츠에는 `relative`를 준다.
+3. 텍스트 위계: 라벨(`font-display text-cta` 또는 `text-chalk-yellow`) → 헤드라인(`font-display text-chalk`) → 본문(`text-chalk/75~85`, **일반 폰트**).
+4. 섹션 구분선: `h-px bg-gradient-to-r from-transparent via-chalk/40 to-transparent` (헤더 아래) 또는 `border-dashed border-chalk/20~25` (블록 사이).
+5. 칠판 위 카드: `border border-dashed border-chalk/25 bg-chalk/[0.03]`, hover 시 `bg-chalk/[0.06]`. 카드마다 분필색 1색을 아이콘·태그·제목에 일관되게 적용한다.
+6. 플로우 다이어그램: 원형 노드 `ring-2` + 분필색 1노드 1색, 화살표는 `text-chalk/50`.
+7. CTA: 코랄 채움 1개 + 분필 아웃라인 1개, 그 이상 두지 않는다.
+
+### 6-6. UI 프로토타입 표시 규칙 (백엔드 없이 화면만 먼저 만들 때)
+
+기획 검증을 위해 UI만 먼저 만드는 경우가 있다. 이때 **사용자가 실제로 동작한다고 오해하게 두면 안 된다.**
+
+- **상태 배지 필수** — 제목 옆에 `UI 프로토타입 · 저장되지 않음` 같은 배지를 붙인다.
+- **API 호출 금지** — 로컬 `useState`만 쓴다. 새로고침하면 초기화된다는 사실을 문구로도 안내한다.
+- **없는 기능은 "준비 중"으로 정직하게** — 실제로 구현되지 않은 항목을 있는 것처럼 꾸미지 않는다. 카드/타일에 `준비 중` 배지를 달고, 상세 화면에서는 왜 아직 없는지와 무엇을 먼저 하고 있는지 적는다.
+- **가짜 실적 수치 금지** — 참여자 수·좋아요 수처럼 신뢰를 만드는 숫자를 임의로 지어내지 않는다.
+- 참고 구현: `widgets/brand-intro/ui/MessageWallPrototype.tsx`
+
+### 6-7. 외부 사이트를 참고할 때
+
+파일럿·경쟁 사이트를 참고할 수 있지만 **레이아웃 패턴과 정보 구조까지만** 가져온다.
+
+- 본문 문구·카피는 **우리 제품 실제 동작 기준으로 새로 쓴다.** 남의 문장을 단어만 바꿔 옮기지 않는다.
+- 사진·일러스트 등 저작물은 가져오지 않는다. 준비 전이면 로고 마크나 플레이스홀더를 둔다.
+- 참고한 출처는 컴포넌트 주석에 남긴다(예: `파일럿(donaschool.ai.studio) 구성을 참고`).

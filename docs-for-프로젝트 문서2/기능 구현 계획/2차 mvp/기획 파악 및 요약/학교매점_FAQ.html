@@ -1,0 +1,757 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>2차 MVP · 학교매점(가칭) FAQ</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f8fb;
+        --paper: #ffffff;
+        --text: #111827;
+        --muted: #667085;
+        --line: #d8e0eb;
+        --soft: #f1f5f9;
+        --green: #047857;
+        --green-soft: #ecfdf5;
+        --blue: #0369a1;
+        --blue-soft: #e0f2fe;
+        --amber: #b45309;
+        --amber-soft: #fffbeb;
+        --red: #b42318;
+        --red-soft: #fef3f2;
+        --violet: #6d28d9;
+        --violet-soft: #f5f3ff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--text);
+        background: var(--bg);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.65;
+      }
+
+      main {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 40px 24px 72px;
+      }
+
+      header,
+      section {
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: var(--paper);
+        box-shadow: 0 16px 42px rgba(15, 23, 42, 0.05);
+      }
+
+      header {
+        padding: 30px;
+      }
+
+      section {
+        margin-top: 18px;
+        padding: 24px;
+      }
+
+      h1 {
+        margin: 0 0 10px;
+        font-size: 26px;
+        letter-spacing: -0.5px;
+      }
+
+      .lead {
+        color: var(--muted);
+        margin: 0;
+        font-size: 15px;
+      }
+
+      .kicker {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: var(--violet-soft);
+        color: var(--violet);
+        font-size: 12px;
+        font-weight: 700;
+        margin-bottom: 12px;
+      }
+
+      .group {
+        margin: 0 0 6px;
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0.4px;
+        color: var(--muted);
+        text-transform: uppercase;
+      }
+
+      .q {
+        margin: 0 0 10px;
+        font-size: 17px;
+        letter-spacing: -0.3px;
+        display: flex;
+        gap: 10px;
+        align-items: baseline;
+      }
+
+      .q .no {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 30px;
+        height: 24px;
+        padding: 0 7px;
+        border-radius: 7px;
+        background: var(--soft);
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+        flex: none;
+        transform: translateY(-1px);
+      }
+
+      p {
+        margin: 0 0 12px;
+      }
+
+      ul,
+      ol {
+        margin: 0 0 12px;
+        padding-left: 20px;
+      }
+
+      li {
+        margin-bottom: 5px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 6px 0 14px;
+        font-size: 14px;
+      }
+
+      th,
+      td {
+        border: 1px solid var(--line);
+        padding: 10px 12px;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background: var(--soft);
+        font-weight: 700;
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 12.5px;
+        background: var(--soft);
+        padding: 1px 5px;
+        border-radius: 5px;
+      }
+
+      pre {
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 15px 17px;
+        border-radius: 12px;
+        overflow-x: auto;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 12.5px;
+        line-height: 1.7;
+        margin: 6px 0 14px;
+      }
+
+      .box {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin: 0 0 12px;
+        font-size: 14px;
+      }
+      .box.yes {
+        background: var(--green-soft);
+        border-color: #a7f3d0;
+      }
+      .box.no {
+        background: var(--red-soft);
+        border-color: #fecdca;
+      }
+      .box.warn {
+        background: var(--amber-soft);
+        border-color: #fde68a;
+      }
+      .box.info {
+        background: var(--blue-soft);
+        border-color: #bae6fd;
+      }
+
+      .tag {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-size: 11.5px;
+        font-weight: 700;
+        white-space: nowrap;
+        vertical-align: middle;
+      }
+      .tag.undecided {
+        background: var(--red-soft);
+        color: var(--red);
+      }
+      .tag.now {
+        background: var(--blue-soft);
+        color: var(--blue);
+      }
+      .tag.later {
+        background: var(--soft);
+        color: var(--muted);
+      }
+
+      hr {
+        border: 0;
+        border-top: 1px dashed var(--line);
+        margin: 24px 0;
+      }
+
+      .toc {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4px 18px;
+        font-size: 13.5px;
+        margin-top: 6px;
+      }
+
+      @media (max-width: 720px) {
+        .toc {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .toc a {
+        color: var(--blue);
+        text-decoration: none;
+      }
+      .toc a:hover {
+        text-decoration: underline;
+      }
+
+      .note {
+        font-size: 13px;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <span class="kicker">2차 MVP · 기획 파악 및 요약</span>
+        <h1>학교매점(가칭) FAQ</h1>
+        <p class="lead">
+          기획서를 읽고 실제로 헷갈렸던 지점, 그리고 개발 착수 전에 반드시 합의해야 하는 지점을
+          질문 형태로 정리했다. 짝 문서:
+          <code>학교매점_기획요약과_할일.html</code>
+        </p>
+        <hr />
+        <div class="toc">
+          <a href="#q1">1. 전체 절차가 이게 맞나?</a>
+          <a href="#q2">2. 장바구니가 두 개라는 게 무슨 말인가?</a>
+          <a href="#q3">3. 기부자는 돈을 내는 건가 물건을 사는 건가?</a>
+          <a href="#q4">4. 그럼 시설 전용계좌는 이제 안 쓰나?</a>
+          <a href="#q5">5. 학교 플랫폼은 돈을 한 푼도 안 만지나?</a>
+          <a href="#q6">6. 협력사는 왜 굳이 따로 만드나?</a>
+          <a href="#q7">7. 카탈로그 상품은 누가 등록하나?</a>
+          <a href="#q8">8. 재고는 누가 갖고 있나?</a>
+          <a href="#q9">9. 시설이 담은 게 바로 후원 목록이 되나?</a>
+          <a href="#q10">10. "프로젝트"는 정확히 무엇인가?</a>
+          <a href="#q11">11. 마진율은 왜 비공개인가?</a>
+          <a href="#q12">12. 기부영수증이 자동으로 나오나?</a>
+          <a href="#q13">13. 영수증 4단계는 왜 필요한가?</a>
+          <a href="#q14">14. 결제 화면이 넘어가면 이탈하지 않나?</a>
+          <a href="#q15">15. 목표 미달이나 품절이면 어떻게 되나?</a>
+          <a href="#q16">16. 기존 통합구매 기능은 버리는 건가?</a>
+          <a href="#q17">17. 기존 DB는 어떻게 되나?</a>
+          <a href="#q18">18. 지금 당장 코딩 시작해도 되나?</a>
+          <a href="#q19">19. 아직 안 정해진 게 뭔가?</a>
+          <a href="#q20">20. 관리앱(Tauri)과 웹은 어떻게 나뉘나?</a>
+        </div>
+      </header>
+
+      <!-- A -->
+      <section>
+        <p class="group">A · 구조 이해</p>
+
+        <h2 class="q" id="q1"><span class="no">Q1</span> 카탈로그에서 담고 → 후원 목록 되고 → 후원자가 결제, 이 절차가 맞나?</h2>
+        <div class="box yes">
+          <b>큰 줄기는 맞다.</b> 다만 중간에 <b>운영팀 검수·프로젝트 발행</b>이라는 관문이 하나 있고,
+          마지막 단계는 "기부금 납부"가 아니라 <b>물품 결제</b>다.
+        </div>
+        <pre>카탈로그(상품정보)
+  → 시설이 장바구니에 담아 제출        [돈 안 움직임]
+  → 운영팀 검수 (승인/보류/반려)        [돈 안 움직임]
+  → "프로젝트"로 묶어 발행 + 공개 예약   [돈 안 움직임]
+  ─────────────────────────────────────
+  → 기부자가 물품 선택 → 학교매점 결제   [협력사로 입금]
+  → 협력사가 소싱사이트에 발주 → 시설 배송
+  → 시설 수령확인 → 구매영수증 전송 → 기부영수증 발급</pre>
+        <p class="note">
+          점선 위쪽이 Phase A(지금 착수 가능), 아래쪽이 Phase C(세무·협력사 관문 통과 후).
+        </p>
+
+        <h2 class="q" id="q2"><span class="no">Q2</span> 장바구니가 두 개라는 게 무슨 말인가?</h2>
+        <p>
+          기획서에 "장바구니"가 두 번 나오는데 <b>서로 다른 것</b>이다. 이름이 같아서 도메인 설계 때
+          가장 많이 꼬이는 지점이다.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 140px">구분</th>
+              <th style="width: 110px">담는 사람</th>
+              <th>의미</th>
+              <th style="width: 90px">결제</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>시설 장바구니</b></td>
+              <td>시설 담당자</td>
+              <td>"이 물품들이 필요합니다" 요청서를 만드는 도구. 제출하면 검수로 넘어감</td>
+              <td>없음</td>
+            </tr>
+            <tr>
+              <td><b>학교매점 장바구니</b></td>
+              <td>기부자</td>
+              <td>발행된 프로젝트에서 후원할 물품을 고르는 것</td>
+              <td><b>있음</b></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="box info">
+          도메인 이름을 처음부터 분리한다 — 예:
+          <code>ItemRequest</code>(시설 제출건) vs <code>StoreCart</code>(기부자 결제용).
+          둘 다 <code>Cart</code>로 부르면 반드시 사고가 난다.
+        </div>
+
+        <h2 class="q" id="q3"><span class="no">Q3</span> 기부자는 돈을 내는 건가, 물건을 사는 건가?</h2>
+        <div class="box no">
+          <b>산다.</b> 기부금 송금 방식은 <b>없어진다</b>. 이게 이 기획의 전체 요점이다.
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 130px"></th>
+              <th>지금 (1차 MVP)</th>
+              <th>학교매점 구조</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>기부자 행위</td>
+              <td>금액을 후원</td>
+              <td><b>물품을 결제</b></td>
+            </tr>
+            <tr>
+              <td>돈이 가는 곳</td>
+              <td>시설 후원금 전용계좌</td>
+              <td><b>협력사 계좌</b></td>
+            </tr>
+            <tr>
+              <td>시설이 받는 것</td>
+              <td>돈 (직접 구매)</td>
+              <td><b>물건</b></td>
+            </tr>
+            <tr>
+              <td>기부자 확인 시점</td>
+              <td>사후 알림장</td>
+              <td><b>결제 시점</b></td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          화면 문구도 "얼마를 후원하시겠습니까"가 아니라
+          <b>"이 아이의 신발을 채워주세요"</b> 형태가 된다.
+        </p>
+
+        <h2 class="q" id="q4"><span class="no">Q4</span> 그럼 시설 후원금 전용계좌는 이제 안 쓰나?</h2>
+        <p>
+          이 구조에서는 <b>거치지 않는다</b>. 기부자 결제가 협력사로 바로 들어가고 시설은 물건만 받는다.
+        </p>
+        <div class="box warn">
+          <b>이게 기획 6-1의 핵심 쟁점이다.</b> 시설이 물품 구매를 협력사에 <b>적법하게 위임</b>한
+          것으로 볼지, 아니면 <b>기부자가 물건을 사서 시설로 보내는 다른 성격의 거래</b>로 볼지가
+          아직 정해지지 않았다. 어느 쪽으로 정하느냐에 따라 주문·결제 도메인의 당사자 모델링이
+          통째로 달라진다. <b>전문가 사전검토 전에는 결제 코드를 쓰지 않는다.</b>
+        </div>
+
+        <h2 class="q" id="q5"><span class="no">Q5</span> 학교 플랫폼은 돈을 한 푼도 안 만지나?</h2>
+        <p>
+          그렇다. 플랫폼 법인은 <b>검수·기록·전달 확인</b>만 한다. 개발상 의미는 분명하다.
+        </p>
+        <div class="box no">
+          플랫폼 서버 도메인에 <b>잔액·예치금·출금·정산 개념을 만들면 안 된다.</b>
+          결제 결과를 <b>참조하고 기록</b>할 뿐이다.
+        </div>
+
+        <h2 class="q" id="q6"><span class="no">Q6</span> 협력사는 왜 굳이 따로 만드나?</h2>
+        <p>
+          학교 플랫폼 법인이 직접 상품을 팔면 <b>커머스 사업자</b>가 되어버린다. 통신판매업 신고,
+          전자상거래법상 판매자 책임(반품·교환·표시광고), 재고 손실 부담이 전부 플랫폼 법인에 붙는다.
+          이걸 분리하려고 별도 사업자를 세우는 것이다.
+        </p>
+        <p class="note">
+          단, 협력사 설립 방식(신규 법인 vs 기존 커머스 사업자와 제휴)은
+          <span class="tag undecided">미확정</span> — 기획 9장 결정 항목.
+        </p>
+      </section>
+
+      <!-- B -->
+      <section>
+        <p class="group">B · 카탈로그와 상품</p>
+
+        <h2 class="q" id="q7"><span class="no">Q7</span> 카탈로그 상품은 누가 등록하나?</h2>
+        <p>
+          <b>운영팀</b>이 B2B 위탁 소싱사이트에서 끌어와 등록한다. 시설이나 기부자가 임의로 상품을
+          추가할 수 없는 <b>폐쇄형</b>이다.
+        </p>
+        <p>취급 범위는 아동·청소년에게 꼭 필요한 것으로 제한한다.</p>
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 120px">대분류</th>
+              <th>예시</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>의류</td>
+              <td>겨울 패딩, 내복, 계절별 상하의</td>
+            </tr>
+            <tr>
+              <td>잡화</td>
+              <td>운동화, 실내화, 책가방</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="box no">
+          <b>절대 올리지 않는 것</b> — 사치품·고가 브랜드, 현금성 상품권, 위험물, 개인정보를 요구하는
+          상품. 검수 단계에서 거르는 게 아니라 <b>카탈로그 등록 단계에서 원천 차단</b>하는 게 1차
+          방어선이다.
+        </div>
+
+        <h2 class="q" id="q8"><span class="no">Q8</span> 재고는 누가 갖고 있나?</h2>
+        <p>
+          <b>아무도 떠안지 않는다.</b> 소싱사이트가 물류·배송을 처리하고, 학교매점은 판매 페이지와
+          결제만 갖는다. 발주 시점에만 원가로 연동된다.
+        </p>
+        <div class="box info">
+          개발상 의미 — 우리 DB에 <b>재고 수량을 소유하지 않는다</b>. 소싱사이트 조회 결과를
+          <b>캐시로만</b> 취급하고, 품절 옵션은 프로젝트 등록 시점에 자동으로 걸러낸다.
+          소싱사이트가 아직 미정이므로 <b>어댑터 인터페이스 + 수동입력 구현체</b>로 먼저 만들고,
+          선정 후 실제 구현체를 갈아끼운다.
+        </div>
+      </section>
+
+      <!-- C -->
+      <section>
+        <p class="group">C · 제출과 검수</p>
+
+        <h2 class="q" id="q9"><span class="no">Q9</span> 시설이 담은 게 바로 후원 목록이 되나?</h2>
+        <div class="box no"><b>아니다.</b> 검수를 통과하고 프로젝트로 묶인 것만 노출된다.</div>
+        <pre>제출 → [검수 대기중] → 운영팀 상세 검수
+                          ├ 승인 → 프로젝트로 묶기 → 공개 예약 → 노출
+                          ├ 보류
+                          └ 반려 → 사유가 시설에 자동 전달</pre>
+        <p>검수에서 보는 것: 품목·수량·가격 적정성, 중복 여부, 금지 품목 여부.</p>
+
+        <h2 class="q" id="q10"><span class="no">Q10</span> "프로젝트"는 정확히 무엇인가?</h2>
+        <p>
+          승인된 품목들을 <b>하나의 이야기로 묶은 단위</b>다. 예: "OO보육원 아이 10명 겨울 패딩
+          프로젝트". 프로젝트에는 노출 시작일·마감일이 붙고, 홈 화면 "이번 프로젝트" 영역에 자동
+          노출된다.
+        </p>
+        <div class="box warn">
+          <b>현재 코드에 없는 개념이다.</b> 지금은 <code>DonationItem</code>이
+          <code>Facility</code> 직속이라
+          <code>Facility → Item</code> 2계층인데, 이걸
+          <code>Facility → Project → Item</code> 3계층으로 바꾸는 <b>마이그레이션</b>이 필요하다.
+          기존 데이터 구조를 건드리는 일이라 <b>뒤로 미룰수록 비싸진다</b>.
+        </div>
+
+        <h2 class="q" id="q11"><span class="no">Q11</span> 마진율은 왜 비공개인가? 그럼 어떻게 안내하나?</h2>
+        <p>
+          학교매점은 소싱 원가에 최소한의 마진만 붙이고, 그 마진을 <b>재기부 재원 + 운영비</b>로 쓴다.
+          정확한 비율·금액은 대외 공개하지 않고, <b>사용 방향</b>과 "합리적인 가격으로 운영한다"는
+          원칙만 안내한다.
+        </p>
+        <div class="box no">
+          개발상 의미 — 원가·마진 필드는 DB에 <b>존재하되</b>, 공개 API 응답 DTO에서
+          <b>원천 배제</b>한다. 학급일지·완결 리포트에도 마진 수치가 새어나가면 안 된다.
+          설계 단계에서 못박아야 나중에 실수로 노출되지 않는다.
+        </div>
+      </section>
+
+      <!-- D -->
+      <section>
+        <p class="group">D · 결제와 영수증</p>
+
+        <h2 class="q" id="q12"><span class="no">Q12</span> 구매하면 기부영수증이 자동으로 나오나?</h2>
+        <div class="box no">
+          <b>아니다. 그리고 그렇게 안내해서도 안 된다.</b> 기획서가 명시적으로 금지한 문구다.
+        </div>
+        <p>
+          자동으로 발행되는 것은 협력사의 <b>구매영수증</b>이다. 그게 시설로 전달되면, 시설이
+          <b>확인 절차를 거쳐</b> 기부영수증을 발급한다. 발급 주체는 끝까지 시설이다.
+        </p>
+        <p>
+          달라지는 건 시설의 업무가 <b>"직접 대조해서 만드는 것" → "전달받은 자료를 확인하고 발급하는
+          것"</b>으로 단순해진다는 점이지, 발급이 없어지는 게 아니다.
+        </p>
+        <div class="box info">
+          시스템은 <b>시설의 발급 행위를 대행하지 않는다.</b> 영수증 상태는 시설의 액션으로만 전진한다.
+          또 시설별로 발급 자격이 다를 수 있으므로 <code>Facility</code>에 발급 자격 플래그가 필요하고,
+          자격 없는 시설은 UI 안내가 달라야 한다.
+        </div>
+
+        <h2 class="q" id="q13"><span class="no">Q13</span> 영수증 4단계는 왜 필요한가?</h2>
+        <p>
+          기부자가 <b>"내 영수증이 어디쯤 갔는지"</b> 불안해하지 않도록, 그리고 Q12의 오해를 구조적으로
+          막기 위해서다. 마이페이지에서 직접 추적 가능해야 한다.
+        </p>
+        <pre>발행됨  →  시설 전송됨  →  시설 확인 중  →  기부영수증 발급됨
+ (협력사)     (협력사→시설)      (시설)          (시설→기부자)</pre>
+        <p class="note">
+          단계가 눈에 보이면 "시설의 확인 절차가 남아 있다"가 말이 아니라 화면으로 전달된다.
+        </p>
+
+        <h2 class="q" id="q14"><span class="no">Q14</span> 결제 화면이 협력사로 넘어가면 이탈하지 않나?</h2>
+        <p>
+          기획서가 직접 지적한 리스크다. "내가 학교를 벗어나 다른 데서 결제하는 건가?"라는 의문이
+          들면 결제 이탈이 생긴다. 완화책 4가지:
+        </p>
+        <ol>
+          <li>학교매점 화면의 <b>디자인 톤(색·서체·레이아웃)을 학교 플랫폼과 통일</b></li>
+          <li>결제 화면 상단에 <b>"학교 플랫폼과 함께하는 협력 매점입니다"</b> 안내 노출</li>
+          <li>결제 완료 후 <b>지체 없이</b> 학교 플랫폼 화면으로 복귀 → "참여 확정" 표시</li>
+          <li>마이페이지에서 영수증 4단계 추적 제공</li>
+        </ol>
+
+        <h2 class="q" id="q15"><span class="no">Q15</span> 목표 미달이거나 결제 후 품절이면 어떻게 되나?</h2>
+        <div class="box warn">
+          <b>기획서에 명시되지 않은 공백이다.</b> <span class="tag undecided">미확정</span>
+        </div>
+        <p>
+          1차 MVP는 "돈이 모이고 목표 달성 후 구매"라 미달 처리가 단순했다. 학교매점은
+          <b>결제가 곧 발주</b>라 성격이 다르다. 최소한 아래는 정해야 한다.
+        </p>
+        <ul>
+          <li>프로젝트 마감일까지 일부 품목만 팔린 경우 — 그대로 발주? 시설과 재협의?</li>
+          <li>결제 직후 소싱사이트 품절이 확인된 경우 — 환불? 대체 상품? 누가 결정?</li>
+          <li>환불이 발생하면 이미 발행된 구매영수증과 기부영수증은 어떻게 되나</li>
+        </ul>
+        <p class="note">
+          품절은 "프로젝트 등록 시점 실시간 재고 연동"으로 <b>예방</b>은 하지만,
+          <b>결제와 발주 사이의 시차</b>는 남는다. 이건 Phase C 설계 때 반드시 답이 있어야 한다.
+        </p>
+      </section>
+
+      <!-- E -->
+      <section>
+        <p class="group">E · 개발 관점</p>
+
+        <h2 class="q" id="q16"><span class="no">Q16</span> 기존 통합구매 기능은 버리는 건가?</h2>
+        <p>
+          기능은 남지만 <b>의미가 뒤집힌다</b>. 현재
+          <code>PurchaseOrder</code>는 이렇게 되어 있다.
+        </p>
+        <ul>
+          <li>목표 달성 후 <b>운영자가 외부에서 한 번에</b> 사고 결과를 기록</li>
+          <li><code>donation_item_id UNIQUE</code> — 물품당 1건으로 중복구매 원천 차단</li>
+        </ul>
+        <p>학교매점 구조에서는 <b>기부자 결제 건별로</b> 소싱사이트에 발주가 나간다.</p>
+        <div class="box warn">
+          따라서 <b>"물품당 1건" UNIQUE 제약이 성립하지 않는다.</b> 스키마 변경이 필요하고,
+          "통합구매"라는 화면·메뉴 이름도 재검토 대상이다.
+        </div>
+
+        <h2 class="q" id="q17"><span class="no">Q17</span> 기존 DB와 1차 MVP 데이터는 어떻게 되나?</h2>
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 170px">현재</th>
+              <th>처리</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>Facility</code></td>
+              <td>유지 + 담당자 계정 매핑·발급자격 플래그 추가</td>
+            </tr>
+            <tr>
+              <td><code>DonationItem</code></td>
+              <td>
+                자유입력 → 카탈로그 SKU 참조로 재정의, 상위에 <code>Project</code> 삽입
+              </td>
+            </tr>
+            <tr>
+              <td><code>Contribution</code></td>
+              <td>
+                <code>status</code>에 <code>PAID·REFUNDED</code> 추가 (관문 통과 후)
+              </td>
+            </tr>
+            <tr>
+              <td><code>PurchaseOrder</code></td>
+              <td>UNIQUE 해제 + 발주 단위 재설계</td>
+            </tr>
+            <tr>
+              <td><code>menu·role·permission</code></td>
+              <td>그대로 재사용. 학교매점 메뉴와 시설담당자 권한만 추가</td>
+            </tr>
+            <tr>
+              <td><code>notification</code></td>
+              <td>그대로 재사용 (제출·반려·검수완료·수령확인 알림)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2 class="q" id="q18"><span class="no">Q18</span> 지금 당장 코딩 시작해도 되나?</h2>
+        <div class="box yes">
+          <b>절반은 된다.</b> 돈과 영수증을 건드리지 않는 부분은 관문과 무관하게 착수 가능하다.
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 130px">구분</th>
+              <th>내용</th>
+              <th style="width: 90px"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>착수 가능</b></td>
+              <td>
+                카탈로그 도메인 · 시설담당자 권한 · 장바구니/제출 · 운영팀 검수 화면 ·
+                <b>Project 마이그레이션</b> · 기부자 프로젝트 상세(장바구니 담기까지)
+              </td>
+              <td><span class="tag now">Phase A</span></td>
+            </tr>
+            <tr>
+              <td><b>착수 금지</b></td>
+              <td>
+                주문·결제 · 구매영수증 4단계 · 인웹 결제 전환 UX · 소싱사이트 실발주 ·
+                PurchaseOrder 재설계
+              </td>
+              <td><span class="tag later">Phase C</span></td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          기획 10장은 "협력사 확정 → 전문가 검토 → 개발" 순서로 적혀 있지만, 실제로는 제출·검수·발행
+          라인이 관문과 독립적이라 <b>병행이 가능하다</b>. 반대로 결제·영수증을 관문 전에 만들면
+          구조가 바뀌면서 전부 버리게 된다.
+        </p>
+        <div class="box info">
+          권장 착수 순서는 <b>Project 마이그레이션(A-5) 먼저</b>. 기존 데이터 구조를 바꾸는 일이라
+          다른 걸 얹은 뒤에 하면 비용이 커진다.
+        </div>
+
+        <h2 class="q" id="q19"><span class="no">Q19</span> 아직 안 정해진 게 뭔가?</h2>
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 240px">미확정 항목</th>
+              <th>막히는 것</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>협력사 설립 방식 (신규 법인 / 제휴)</td>
+              <td>결제 연동 전체, 정산 설계</td>
+            </tr>
+            <tr>
+              <td><b>6-1 거래 성격</b> — 구매위임형인지 아닌지</td>
+              <td>주문·결제 도메인의 당사자 모델링</td>
+            </tr>
+            <tr>
+              <td><b>세무 검토</b> — 현물기부 가액 산정 방식</td>
+              <td>영수증 도메인 전체, 4단계 상태</td>
+            </tr>
+            <tr>
+              <td>B2B 소싱사이트 선정 (재고·품절·반품 책임 주체)</td>
+              <td>재고 어댑터 실제 구현체</td>
+            </tr>
+            <tr>
+              <td>통신판매업 신고 등 협력사 커머스 요건</td>
+              <td>결제 오픈 시점</td>
+            </tr>
+            <tr>
+              <td>마진율·재기부/운영비 배분 비율</td>
+              <td>회계 처리, 정산 리포트</td>
+            </tr>
+            <tr>
+              <td>"학교매점" 최종 명칭 (브랜드팀 검토)</td>
+              <td>메뉴명·화면 문구·도메인 네이밍</td>
+            </tr>
+            <tr>
+              <td><b>목표 미달·품절·환불 정책</b> (Q15, 기획서 공백)</td>
+              <td>발주 트리거 설계</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2 class="q" id="q20"><span class="no">Q20</span> 관리앱(Tauri)과 웹은 어떻게 나뉘나?</h2>
+        <p>기존 원칙 그대로다 — <b>관리·CRUD는 Tauri, 후원자 대면 출력은 웹</b>.</p>
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 150px">화면</th>
+              <th style="width: 110px">위치</th>
+              <th>근거</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>카탈로그 상품 등록·관리</td>
+              <td><b>Tauri</b></td>
+              <td>운영팀 전용 CRUD</td>
+            </tr>
+            <tr>
+              <td>운영팀 검수·프로젝트 발행</td>
+              <td><b>Tauri</b></td>
+              <td>운영팀 전용 관리 업무</td>
+            </tr>
+            <tr>
+              <td>시설 담당자 제출 화면</td>
+              <td>
+                <span class="tag undecided">검토</span>
+              </td>
+              <td>
+                외부 시설 담당자가 쓰는 화면 — 앱 설치를 요구하기 어려우므로 <b>웹이 유력</b>
+              </td>
+            </tr>
+            <tr>
+              <td>기부자 프로젝트·결제·영수증 추적</td>
+              <td><b>웹</b></td>
+              <td>후원자 대면</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="note">
+          시설 제출 화면의 배치는 별도 결정이 필요하다. 기획 8장이 "협력교실 담당자가 UX에 익숙하지
+          않아 제출을 포기"를 리스크로 꼽은 만큼, 진입 장벽이 낮은 쪽을 골라야 한다.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

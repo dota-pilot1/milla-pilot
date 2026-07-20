@@ -1,6 +1,7 @@
 export const nav = {
   projectIntro: "プロジェクト紹介",
   dashboard: "ダッシュボード",
+  devInfo: "開発情報",
   admin: "管理",
   donation: "寄付",
   purchaseDelivery: "購入・配送",

@@ -1,0 +1,789 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>2차 MVP · 학교매점(가칭) 기획 요약과 해야 할 일</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f8fb;
+        --paper: #ffffff;
+        --text: #111827;
+        --muted: #667085;
+        --line: #d8e0eb;
+        --soft: #f1f5f9;
+        --green: #047857;
+        --green-soft: #ecfdf5;
+        --blue: #0369a1;
+        --blue-soft: #e0f2fe;
+        --amber: #b45309;
+        --amber-soft: #fffbeb;
+        --red: #b42318;
+        --red-soft: #fef3f2;
+        --violet: #6d28d9;
+        --violet-soft: #f5f3ff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--text);
+        background: var(--bg);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.65;
+      }
+
+      main {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 40px 24px 72px;
+      }
+
+      header,
+      section {
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: var(--paper);
+        box-shadow: 0 16px 42px rgba(15, 23, 42, 0.05);
+      }
+
+      header {
+        padding: 30px;
+      }
+
+      section {
+        margin-top: 18px;
+        padding: 24px;
+      }
+
+      h1 {
+        margin: 0 0 10px;
+        font-size: 27px;
+        letter-spacing: -0.5px;
+      }
+
+      h2 {
+        margin: 0 0 14px;
+        font-size: 19px;
+        letter-spacing: -0.3px;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+      }
+
+      h2 .no {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 26px;
+        height: 26px;
+        border-radius: 8px;
+        background: var(--soft);
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 700;
+        flex: none;
+      }
+
+      h3 {
+        margin: 22px 0 10px;
+        font-size: 15px;
+        letter-spacing: -0.2px;
+      }
+
+      p {
+        margin: 0 0 12px;
+      }
+
+      .lead {
+        color: var(--muted);
+        margin: 0;
+        font-size: 15px;
+      }
+
+      .kicker {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: var(--violet-soft);
+        color: var(--violet);
+        font-size: 12px;
+        font-weight: 700;
+        margin-bottom: 12px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 6px 0 4px;
+        font-size: 14px;
+      }
+
+      th,
+      td {
+        border: 1px solid var(--line);
+        padding: 10px 12px;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background: var(--soft);
+        font-weight: 700;
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 12.5px;
+        background: var(--soft);
+        padding: 1px 5px;
+        border-radius: 5px;
+      }
+
+      pre {
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 16px 18px;
+        border-radius: 12px;
+        overflow-x: auto;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 12.5px;
+        line-height: 1.7;
+        margin: 6px 0 4px;
+      }
+
+      ul,
+      ol {
+        margin: 0 0 12px;
+        padding-left: 20px;
+      }
+
+      li {
+        margin-bottom: 5px;
+      }
+
+      .grid2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+
+      @media (max-width: 760px) {
+        .grid2 {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .box {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 16px 18px;
+        background: var(--paper);
+      }
+
+      .box h4 {
+        margin: 0 0 8px;
+        font-size: 14px;
+      }
+
+      .box.asis {
+        background: var(--soft);
+      }
+      .box.tobe {
+        background: var(--green-soft);
+        border-color: #a7f3d0;
+      }
+      .box.warn {
+        background: var(--amber-soft);
+        border-color: #fde68a;
+      }
+      .box.stop {
+        background: var(--red-soft);
+        border-color: #fecdca;
+      }
+      .box.info {
+        background: var(--blue-soft);
+        border-color: #bae6fd;
+      }
+
+      .tag {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-size: 11.5px;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+      .tag.new {
+        background: var(--green-soft);
+        color: var(--green);
+      }
+      .tag.mod {
+        background: var(--amber-soft);
+        color: var(--amber);
+      }
+      .tag.keep {
+        background: var(--soft);
+        color: var(--muted);
+      }
+      .tag.block {
+        background: var(--red-soft);
+        color: var(--red);
+      }
+      .tag.go {
+        background: var(--blue-soft);
+        color: var(--blue);
+      }
+
+      .note {
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .flow {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        margin: 4px 0 14px;
+        font-size: 13px;
+      }
+
+      .flow .step {
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        padding: 7px 11px;
+        background: var(--paper);
+        font-weight: 600;
+      }
+
+      .flow .arrow {
+        color: var(--muted);
+      }
+
+      hr {
+        border: 0;
+        border-top: 1px dashed var(--line);
+        margin: 22px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <span class="kicker">2차 MVP · 기획 파악 및 요약</span>
+        <h1>학교매점(가칭) — 협력사 폐쇄형 기부몰 구축</h1>
+        <p class="lead">
+          시설이 <b>돈</b>을 받아 직접 사던 구조를, 기부자가 <b>물품</b>을 직접 결제해 시설이 물건을
+          받는 구조로 바꾼다. 결제는 학교 플랫폼 법인이 아닌 <b>별도 협력사(학교매점 운영 사업자)</b>가
+          받고, 그 <b>구매영수증</b>이 시설의 기부영수증 발급 근거가 된다.
+        </p>
+      </header>
+
+      <!-- 1 -->
+      <section>
+        <h2><span class="no">1</span> 무엇이 달라지는가</h2>
+        <div class="grid2">
+          <div class="box asis">
+            <h4>지금 (1차 MVP)</h4>
+            <ul>
+              <li>기부자가 <b>금액</b>을 후원 → 시설 전용계좌에 귀속</li>
+              <li>목표 달성 후 <b>운영자가 한 번에 통합구매</b></li>
+              <li>기부자는 알림장으로 <b>사후 확인</b></li>
+              <li>시설이 구매 내역을 직접 대조해 기부영수증 발급</li>
+            </ul>
+          </div>
+          <div class="box tobe">
+            <h4>바뀔 모습 (2차 MVP)</h4>
+            <ul>
+              <li>기부자가 <b>물품 자체</b>를 학교매점에서 결제</li>
+              <li>결제 즉시 <b>협력사가 소싱사이트에 발주</b></li>
+              <li>기부자는 <b>결제 시점에</b> 무엇이 전달되는지 확인</li>
+              <li>시설은 <b>전달받은 구매영수증을 확인</b>해 발급만</li>
+            </ul>
+          </div>
+        </div>
+        <p class="note" style="margin-top: 14px">
+          바꾸는 이유 세 가지 — ① 기부자가 결제 시점에 사용처를 즉시 확인 ② 재고를 아무도 떠안지
+          않음(B2B 위탁 소싱) ③ 시설의 기부영수증 발급 업무가 "만드는 일"에서 "확인하는 일"로 단순화.
+        </p>
+      </section>
+
+      <!-- 2 -->
+      <section>
+        <h2><span class="no">2</span> 핵심은 세 갈래 길을 분리하는 것</h2>
+        <p>
+          이 기획의 설계 원리는 <b>물건·돈·영수증이 서로 다른 경로로 흐른다</b>는 것이다. 이 분리를
+          이해하지 못하면 도메인 설계가 어긋난다.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 90px">흐름</th>
+              <th>경로</th>
+              <th style="width: 210px">학교 플랫폼 법인의 역할</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>물건</b></td>
+              <td>B2B 소싱사이트 → (물류) → 협력교실(시설)</td>
+              <td>수령확인 기록만</td>
+            </tr>
+            <tr>
+              <td><b>돈</b></td>
+              <td>기부자 → <b>협력사(학교매점) 계좌</b> → 소싱사이트 발주대금</td>
+              <td>
+                <b>돈을 일절 보관하지 않음</b>
+              </td>
+            </tr>
+            <tr>
+              <td><b>영수증</b></td>
+              <td>학교매점이 구매영수증 발행 → 시설 → 시설이 기부영수증 발급 → 기부자</td>
+              <td>전달·상태 추적만</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>전체 파이프라인</h3>
+        <pre>[협력교실] 카탈로그에서 장바구니 담아 제출
+      ↓
+[운영팀]  품목·수량·가격 검수  →  "프로젝트"로 발행  →  공개 예약
+      ↓
+[기부자]  프로젝트 상세에서 물품 선택 → 학교매점 장바구니 → 결제
+      ↓
+[협력사]  결제 수령(별도 사업자·별도 계좌) + 구매영수증 발행
+      ↓
+[소싱사이트] 발주 → 물류·배송
+      ↓
+[협력교실] 수령확인(검수 사진 업로드)
+      ↓
+[협력사 → 시설] 구매영수증 전송
+      ↓
+[시설]    구매영수증 확인 → 기부영수증 발급
+      ↓
+[플랫폼]  알림장 발행 · 성적표/학년 점수 반영 · 학급일지 기록</pre>
+      </section>
+
+      <!-- 3 -->
+      <section>
+        <h2><span class="no">3</span> 영수증 4단계 — 기부자에게 보여줘야 하는 상태</h2>
+        <p>
+          기획이 가장 강조하는 UX 포인트. <b>"구매하면 자동으로 기부영수증이 나온다"고 오해시키면
+          안 된다.</b> 시설의 확인 절차가 남아 있음을 단계 표시로 드러내야 한다.
+        </p>
+        <div class="flow">
+          <span class="step">발행됨</span><span class="arrow">→</span>
+          <span class="step">시설 전송됨</span><span class="arrow">→</span>
+          <span class="step">시설 확인 중</span><span class="arrow">→</span>
+          <span class="step">기부영수증 발급됨</span>
+        </div>
+        <div class="box warn">
+          <b>주의</b> — 이 4단계는 기부자 마이페이지에서 <b>직접 추적 가능</b>해야 한다. 기획서 8장의
+          리스크 완화 항목이자, 5-3 화면 흐름에 명시된 요구사항이다.
+        </div>
+      </section>
+
+      <!-- 4 -->
+      <section>
+        <h2><span class="no">4</span> 화면 흐름 요약 (3주체)</h2>
+        <div class="grid2">
+          <div class="box">
+            <h4>① 협력교실(시설) — 물품 제출</h4>
+            <p class="note">
+              핵심 요구: <b>"장바구니 담듯 쉽게"</b>. 긴 서술형 입력 금지, 짧은 태그·메모로 간소화.
+            </p>
+            <ol>
+              <li>카탈로그 탐색 (카테고리 → 성별·연령·사이즈 필터)</li>
+              <li>장바구니 담기 (수량 + 필요 이유 짧은 메모)</li>
+              <li>제출 전 요약 화면 (리스트 + 예상 총액, 수정 가능)</li>
+              <li>제출 → "검수 대기 중" 전환 + 담당자 알림</li>
+            </ol>
+          </div>
+          <div class="box">
+            <h4>② 운영팀(교무실) — 검수·발행</h4>
+            <ol>
+              <li>검수 대기 목록 (시설별, 제출일순)</li>
+              <li>상세 검수 (적정성·중복·금지품목)</li>
+              <li>승인 / 보류 / <b>반려(사유 자동 전달)</b></li>
+              <li>승인분을 <b>하나의 프로젝트로 묶어 발행</b></li>
+              <li>공개 예약 (노출 시작일·마감일)</li>
+            </ol>
+          </div>
+        </div>
+        <div class="box" style="margin-top: 14px">
+          <h4>③ 기부자 — 참여부터 결제·추적까지</h4>
+          <ol>
+            <li>홈 "이번 프로젝트" 배너 → 프로젝트 상세(진행률·남은 물품 카드·참여자 수)</li>
+            <li>물품 카드 개별 선택 → <b>학교매점 장바구니</b>(여기서 협력사 화면으로 전환)</li>
+            <li>학교매점 결제 시스템으로 결제 (플랫폼 계좌와 분리)</li>
+            <li>결제 완료 = 참여 확정 + 구매영수증 발행 → <b>즉시 플랫폼 화면 복귀</b></li>
+            <li>성적표·학년 점수 반영, 공유 유도, 마이페이지에서 영수증 4단계 추적</li>
+          </ol>
+          <div class="box info" style="margin-top: 12px">
+            <b>이탈 방지 4원칙</b> (기획 5-3) — ⓐ 학교매점 화면도 디자인 톤 통일 ⓑ 결제 상단에
+            "학교 플랫폼과 함께하는 협력 매점입니다" 안내 ⓒ 결제 후 지체 없이 복귀 ⓓ 영수증 진행
+            상태 추적 제공
+          </div>
+        </div>
+      </section>
+
+      <!-- 5 -->
+      <section>
+        <h2><span class="no">5</span> 현재 코드베이스와의 격차</h2>
+        <p>
+          <code>donation-platform-server</code>의 실제 도메인을 기준으로 대조했다. 결론부터 말하면
+          <b>1차 MVP 도메인 대부분이 재정의 대상</b>이며, 특히 <code>PurchaseOrder</code>는 의미가
+          뒤집힌다.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 150px">현재 도메인</th>
+              <th style="width: 300px">지금 하는 일</th>
+              <th>2차 MVP에서</th>
+              <th style="width: 76px">판정</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>Facility</code></td>
+              <td>시설 마스터 CRUD (관리자 전용)</td>
+              <td>
+                시설 <b>담당자 계정</b>이 직접 로그인해 제출하는 주체가 됨 → 계정↔시설 소유권 매핑 및
+                <code>FACILITY_MANAGER</code> 역할 필요
+              </td>
+              <td><span class="tag mod">확장</span></td>
+            </tr>
+            <tr>
+              <td><code>DonationItem</code></td>
+              <td>
+                시설 직속 자유입력 물품<br /><code>name·category·goalAmount·raisedAmount·targetQuantity</code>
+              </td>
+              <td>
+                <b>카탈로그 SKU 참조</b>로 전환. 이름·가격을 시설이 쓰는 게 아니라 상품에서 끌어옴.
+                사이즈·색상 옵션 개념 추가. 상위에 <b>Project</b>가 생김
+              </td>
+              <td><span class="tag mod">재정의</span></td>
+            </tr>
+            <tr>
+              <td><code>Contribution</code></td>
+              <td>
+                <code>status = RECORDED</code> 단일값.<br />
+                주석 그대로 <b>"실제 결제 없이 참여를 기록만"</b>
+              </td>
+              <td>
+                협력사 <b>실결제</b>와 연결. <code>PAID·REFUNDED</code> 확장은 코드 주석에서도
+                <b>"전문가 검토 관문 통과 후"</b>로 이미 유보돼 있음
+              </td>
+              <td><span class="tag block">관문</span></td>
+            </tr>
+            <tr>
+              <td><code>PurchaseOrder</code></td>
+              <td>
+                <b>목표 달성 후</b> 운영자가 외부에서 한 번에 사고 결과를 기록.
+                <code>donation_item_id UNIQUE</code>로 중복구매 차단
+              </td>
+              <td>
+                <b>의미 반전</b> — 기부자 결제 시점마다 소싱사이트로 발주. "물품당 1건" UNIQUE 제약이
+                성립하지 않음
+              </td>
+              <td><span class="tag mod">반전</span></td>
+            </tr>
+            <tr>
+              <td><code>ItemStatus</code></td>
+              <td>
+                <code>RECRUITING→LOCKED→BUYING→SHIPPING→RECEIVED→RECEIPTED</code>
+              </td>
+              <td>
+                제출·검수 단계(<code>DRAFT·SUBMITTED·REVIEWING·REJECTED</code>)가 앞에 붙고, 영수증
+                단계는 4단계로 쪼개짐
+              </td>
+              <td><span class="tag mod">확장</span></td>
+            </tr>
+            <tr>
+              <td>
+                <code>PurchaseOrder.evidenceNo</code>
+              </td>
+              <td>구매증빙 번호. 주석에 <b>"세액공제 영수증 아님"</b> 명시</td>
+              <td>
+                협력사가 발행하는 <b>정식 구매영수증</b>으로 승격 + 시설 전송·확인 상태 추적
+              </td>
+              <td><span class="tag new">신규</span></td>
+            </tr>
+            <tr>
+              <td>— 없음</td>
+              <td>—</td>
+              <td>
+                <b>카탈로그</b>(상품·옵션·재고), <b>장바구니</b>, <b>제출건/검수</b>,
+                <b>프로젝트</b>, <b>주문/결제</b>, <b>구매영수증</b>, <b>소싱사이트 연동</b>,
+                <b>원가/판매가(마진)</b>
+              </td>
+              <td><span class="tag new">신규</span></td>
+            </tr>
+            <tr>
+              <td><code>menu·role·permission</code></td>
+              <td>메뉴·권한 체계 (관리앱 메뉴 관리까지 완료)</td>
+              <td>그대로 활용. 학교매점 메뉴·시설담당자 권한만 추가</td>
+              <td><span class="tag keep">유지</span></td>
+            </tr>
+            <tr>
+              <td><code>notification</code></td>
+              <td>알림 기반</td>
+              <td>제출·반려·검수완료·수령확인 알림에 재사용</td>
+              <td><span class="tag keep">유지</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- 6 -->
+      <section>
+        <h2><span class="no">6</span> 해야 할 일 — 관문과 무관하게 지금 시작할 수 있는 것</h2>
+        <div class="box stop">
+          <b>먼저 짚을 것</b> — 기획 10장은 "① 협력사 설립 확정 → ② 전문가 검토 → ③ 소싱사이트 선정 →
+          ④ 개발" 순서로 적혀 있다. 하지만 실제로는
+          <b>④의 앞부분(제출·검수·프로젝트 발행)은 돈과 영수증을 건드리지 않으므로 관문과 무관하게
+          병행 착수할 수 있다.</b> 반대로 <b>결제·영수증은 관문 통과 전 착수하면 안 된다</b> —
+          구조가 확정되기 전에 만들면 전부 버리게 된다.
+        </div>
+
+        <h3>Phase A — 지금 바로 착수 가능 <span class="tag go">관문 무관</span></h3>
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 46px">#</th>
+              <th style="width: 220px">할 일</th>
+              <th>내용</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>A-1</td>
+              <td>카탈로그 도메인 설계</td>
+              <td>
+                상품(SKU)·옵션(사이즈/색상)·재고·카테고리(의류/잡화). <b>원가와 판매가를 필드로
+                분리</b>하되 원가·마진은 외부 응답 DTO에 절대 노출하지 않는 것을 설계 단계에서 못박음.
+                소싱사이트 미정이므로 <b>어댑터 인터페이스 + 수동입력 구현체</b>로 먼저 만든다
+              </td>
+            </tr>
+            <tr>
+              <td>A-2</td>
+              <td>시설 담당자 계정·권한</td>
+              <td>
+                <code>FACILITY_MANAGER</code> 역할 추가, 계정↔시설 소유권 매핑,
+                <b>자기 시설 데이터만 접근</b>하는 인가 규칙. 기존 <code>role·permission</code> 체계
+                재사용
+              </td>
+            </tr>
+            <tr>
+              <td>A-3</td>
+              <td>장바구니 → 제출 흐름</td>
+              <td>
+                <code>Cart</code> / <code>ItemRequest(제출건)</code> 도메인. 제출 시 스냅샷 저장(가격
+                변동 대비). 시설용 제출 화면 3단계(탐색 → 담기 → 요약)
+              </td>
+            </tr>
+            <tr>
+              <td>A-4</td>
+              <td>운영팀 검수 화면</td>
+              <td>
+                검수 대기 목록 · 상세 검수 · 승인/보류/반려(사유 자동 전달). 금지 품목 룰(사치품·상품권·
+                위험물)을 <b>카탈로그 등록 단계에서 차단</b>하는 게 1차 방어선
+              </td>
+            </tr>
+            <tr>
+              <td>A-5</td>
+              <td>Project 도메인 신설</td>
+              <td>
+                승인 품목 묶음 + 프로젝트명 + 공개 시작일/마감일 + 진행률 집계. 현재
+                <code>DonationItem</code>이 <code>Facility</code> 직속인 구조를
+                <code>Facility → Project → Item</code>으로 한 단계 넣는 <b>마이그레이션</b> 포함
+              </td>
+            </tr>
+            <tr>
+              <td>A-6</td>
+              <td>기부자 프로젝트 상세 화면</td>
+              <td>
+                진행률 게이지·남은 물품 카드·참여자 수. <b>장바구니 담기까지만</b> 만들고 결제 직전에서
+                멈춘다 (Phase C와 접합)
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Phase B — 관문(선행 결정) <span class="tag block">개발 아님</span></h3>
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 46px">#</th>
+              <th style="width: 220px">확인 항목</th>
+              <th>막히는 개발</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>B-1</td>
+              <td>협력사 설립 방식 (신규 법인 / 기존 커머스 제휴)</td>
+              <td>결제 연동 전체, 정산 설계</td>
+            </tr>
+            <tr>
+              <td>B-2</td>
+              <td>
+                6-1 구조 성격 확정 — <b>구매위임형</b>인지 다른 거래인지
+              </td>
+              <td>주문·결제 도메인의 당사자 모델링</td>
+            </tr>
+            <tr>
+              <td>B-3</td>
+              <td>세무 검토 — 구매영수증 → 기부영수증, <b>현물기부 가액 산정</b></td>
+              <td>영수증 도메인 전체, 4단계 상태</td>
+            </tr>
+            <tr>
+              <td>B-4</td>
+              <td>B2B 소싱사이트 선정 (재고 책임·품절·반품 주체)</td>
+              <td>A-1 어댑터의 실제 구현체, 실시간 재고 연동</td>
+            </tr>
+            <tr>
+              <td>B-5</td>
+              <td>통신판매업 신고 등 협력사 커머스 요건</td>
+              <td>결제 오픈 시점</td>
+            </tr>
+            <tr>
+              <td>B-6</td>
+              <td>마진율·재기부/운영비 배분 (비공개 원칙 유지)</td>
+              <td>회계 처리, 정산 리포트</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Phase C — 관문 통과 후 <span class="tag block">착수 금지</span></h3>
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 46px">#</th>
+              <th style="width: 220px">할 일</th>
+              <th>내용</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>C-1</td>
+              <td>주문·결제 도메인</td>
+              <td>
+                협력사 PG 연동. <code>Contribution.status</code>에 <code>PAID·REFUNDED</code> 추가
+                (코드 주석이 이미 "관문 통과 후"로 유보해 둔 지점)
+              </td>
+            </tr>
+            <tr>
+              <td>C-2</td>
+              <td>구매영수증 도메인 + 4단계 추적</td>
+              <td>
+                발행 → 시설 전송 → 시설 확인 → 기부영수증 발급. 기부자 마이페이지 추적 UI 포함.
+                <b>자동 발급으로 읽히는 문구는 전면 금지</b>
+              </td>
+            </tr>
+            <tr>
+              <td>C-3</td>
+              <td>인웹 전환 UX</td>
+              <td>
+                학교매점 화면 디자인 톤 통일, 결제 상단 협력사 안내 문구, 결제 후 즉시 복귀
+              </td>
+            </tr>
+            <tr>
+              <td>C-4</td>
+              <td>소싱사이트 실발주 연동</td>
+              <td>A-1 어댑터에 실제 구현체 주입, 실시간 재고로 품절 옵션 자동 차단</td>
+            </tr>
+            <tr>
+              <td>C-5</td>
+              <td>PurchaseOrder 재설계</td>
+              <td>
+                "물품당 1건 통합구매"(<code>UNIQUE</code>) → "결제 건별 발주"로 전환하는 마이그레이션
+              </td>
+            </tr>
+            <tr>
+              <td>C-6</td>
+              <td>완결 루프 재연결</td>
+              <td>수령확인(검수 사진) → 알림장 → 성적표·학년 점수 → 학급일지(마진 비공개)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Phase D — 시범 운영</h3>
+        <p>
+          소규모 시설 <b>1곳 · 프로젝트 1건</b>으로 제출부터 기부영수증 발급까지 전 과정 점검 후 확대
+          여부 결정. (기획 10장 5~6)
+        </p>
+      </section>
+
+      <!-- 7 -->
+      <section>
+        <h2><span class="no">7</span> 설계 시 놓치면 안 되는 제약</h2>
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 200px">제약</th>
+              <th>구현상 의미</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>플랫폼 법인은 돈을 보관하지 않는다</td>
+              <td>
+                플랫폼 서버는 <b>결제 금액을 정산·보관하는 주체가 아니다</b>. 결제 결과를 참조·기록만
+                한다. 잔액·출금 개념을 플랫폼 도메인에 만들면 안 됨
+              </td>
+            </tr>
+            <tr>
+              <td>마진율 비공개</td>
+              <td>
+                원가·마진 필드는 존재하되 <b>공개 API 응답 DTO에서 원천 배제</b>. 학급일지·완결 리포트
+                에도 마진 수치 미노출
+              </td>
+            </tr>
+            <tr>
+              <td>기부영수증은 자동이 아니다</td>
+              <td>
+                시스템은 <b>시설의 발급 행위를 대행하지 않는다</b>. 상태는 시설의 액션으로만 전진
+              </td>
+            </tr>
+            <tr>
+              <td>시설별 발급 자격이 다름</td>
+              <td>
+                <code>Facility</code>에 기부영수증 발급 자격 플래그 필요. 자격 없는 시설은 4단계 UI를
+                다르게 안내
+              </td>
+            </tr>
+            <tr>
+              <td>재고를 떠안지 않는다</td>
+              <td>
+                플랫폼/협력사 DB에 재고 수량을 <b>소유하지 않고</b> 소싱사이트 조회 결과를 캐시로만
+                취급. 품절은 프로젝트 등록 시점에 차단
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- 8 -->
+      <section>
+        <h2><span class="no">8</span> 한 줄 결론</h2>
+        <div class="box tobe">
+          <p style="margin: 0">
+            <b>A-1 ~ A-6(카탈로그·시설담당자·제출·검수·프로젝트·상세화면)은 지금 착수한다.</b>
+            결제와 영수증(C)은 협력사 구조와 세무 검토(B-1~B-3)가 확정되기 전까지 손대지 않는다.
+            현재 코드의 <code>Contribution.status = RECORDED</code>와 "세액공제 영수증 아님" 주석이
+            바로 그 관문의 위치를 이미 표시해 두고 있다.
+          </p>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

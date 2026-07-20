@@ -4,6 +4,7 @@ import { Store } from "@tanstack/react-store";
 
 export const THEME_COLORS = [
   { id: "default", label: "Default", color: "#18181b" },
+  { id: "haggyo", label: "학교", color: "#2e7d6e" },
   { id: "rose", label: "Rose", color: "#ec4899" },
   { id: "amber", label: "Amber", color: "#f59e0b" },
   { id: "mint", label: "Mint", color: "#10b981" },

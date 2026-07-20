@@ -37,6 +37,8 @@ public class MenuSeeder implements ApplicationRunner {
                 // 후원 여정 = 후원하기(행동) → 내 후원 내역(내 진행) → 통합구매 현황(전체 투명성) 순서로 한 그룹에 묶는다
                 new MenuDef("WEB_MY_DONATIONS",      "WEB_DONATION", "내 후원 내역", "nav.myDonations",  "/my-donations",     "Truck",           null,                    1),
                 new MenuDef("WEB_PURCHASE_MONITORING","WEB_DONATION", "통합구매 현황", "nav.purchaseMonitoring", "/purchase-monitoring", "ShoppingCart", null,             2),
+                // 개발 정보 = 개발·운영 계획(팀 내부 진행 상황). 모든 로그인 사용자에게 공개하되 사이드바 하단에 고정 배치(프론트 Sidebar 처리)
+                new MenuDef("DEV_INFO",               null,    "개발 정보",      "nav.devInfo",         "/dev-info",         "ClipboardList",   null,                    3),
                 new MenuDef("ADMIN",                 null,    "관리",          "nav.admin",            null,                "Settings",        RoleSeeder.ROLE_PLATFORM_ADMIN,   4),
                 new MenuDef("ADMIN_FACILITY",        "ADMIN", "시설 관리",     null,                   null,                "Building2",       RoleSeeder.ROLE_PLATFORM_ADMIN,   0),
                 new MenuDef("ADMIN_DONATION",        "ADMIN", "후원 관리",     null,                   null,                "HandCoins",       RoleSeeder.ROLE_PLATFORM_ADMIN,   1),

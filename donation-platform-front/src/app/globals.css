@@ -10,6 +10,15 @@
     --color-foreground: var(--foreground);
     --font-sans: var(--font-geist-sans);
     --font-mono: var(--font-geist-mono);
+    --font-display: var(--font-gaegu);
+    --color-chalkboard: var(--chalkboard);
+    --color-chalkboard-line: var(--chalkboard-line);
+    --color-chalk: var(--chalk);
+    --color-chalk-yellow: var(--chalk-yellow);
+    --color-chalk-pink: var(--chalk-pink);
+    --color-chalk-sky: var(--chalk-sky);
+    --color-cta: var(--cta);
+    --color-cta-foreground: var(--cta-foreground);
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -88,10 +97,48 @@
 }
 
 /* ──────────────────────────────────────────────────────────────
+   학교 브랜드 고정 토큰 (파일럿 donaschool.ai.studio 추출값)
+   칠판·분필·CTA는 테마와 무관하게 고정 — 마케팅 표면(소개 히어로,
+   로그인 좌측 패널)에서만 사용한다. 데이터/CRUD 화면 사용 금지.
+   ────────────────────────────────────────────────────────────── */
+:root {
+    --chalkboard: oklch(0.3 0.038 158);          /* #1A2F23 칠판 그린 */
+    --chalkboard-line: oklch(1 0 0 / 14%);       /* 칠판 위 괘선/보더 */
+    --chalk: oklch(0.975 0.005 120);             /* 흰 분필 */
+    --chalk-yellow: oklch(0.95 0.1 102);         /* #FFF59D */
+    --chalk-pink: oklch(0.87 0.09 350);          /* #FFC1E3 */
+    --chalk-sky: oklch(0.84 0.08 230);           /* #81D4FA */
+    --cta: oklch(0.7 0.17 40);                   /* #FF7043 코랄 CTA */
+    --cta-foreground: oklch(0.99 0 0);
+}
+
+/* ──────────────────────────────────────────────────────────────
    Brand color themes (salon palette)
    Override shadcn --primary / --ring / --accent per data-theme.
    Applies in both light and dark mode.
    ────────────────────────────────────────────────────────────── */
+/* 학교 브랜드 테마 — primary는 로고 틸그린. CTA 코랄은 위 고정 토큰 사용 */
+:root[data-theme="haggyo"] {
+    --primary: oklch(0.56 0.1 172);
+    --primary-foreground: oklch(0.99 0 0);
+    --ring: oklch(0.56 0.1 172);
+    --accent: oklch(0.962 0.028 172);
+    --accent-foreground: oklch(0.3 0.08 172);
+    --background: oklch(0.998 0.004 160);
+    --page: oklch(0.971 0.010 160);
+    --card: oklch(1 0.002 160);
+    --muted: oklch(0.953 0.018 160);
+    --secondary: oklch(0.96 0.022 160);
+    --border: oklch(0.905 0.025 160);
+    --sidebar: oklch(0.988 0.012 160);
+    --sidebar-primary: oklch(0.56 0.1 172);
+    --sidebar-primary-foreground: oklch(0.99 0 0);
+    --sidebar-ring: oklch(0.56 0.1 172);
+    --sidebar-accent: oklch(0.962 0.028 172);
+    --sidebar-accent-foreground: oklch(0.3 0.08 172);
+    --sidebar-border: oklch(0.905 0.025 160);
+}
+
 :root[data-theme="rose"] {
     --primary: oklch(0.66 0.18 10);
     --primary-foreground: oklch(0.99 0 0);
@@ -216,6 +263,21 @@
     --sidebar-accent: oklch(0.965 0.03 230);
     --sidebar-accent-foreground: oklch(0.36 0.1 230);
     --sidebar-border: oklch(0.905 0.025 230);
+}
+
+.dark[data-theme="haggyo"],
+.dark [data-theme="haggyo"] {
+    --background: oklch(0.21 0.014 160);
+    --page: oklch(0.155 0.012 160);
+    --card: oklch(0.21 0.014 160);
+    --muted: oklch(0.27 0.018 160);
+    --accent: oklch(0.3 0.06 172);
+    --accent-foreground: oklch(0.96 0.03 172);
+    --border: oklch(1 0 0 / 12%);
+    --sidebar: oklch(0.21 0.014 160);
+    --sidebar-accent: oklch(0.3 0.06 172);
+    --sidebar-accent-foreground: oklch(0.96 0.03 172);
+    --sidebar-border: oklch(1 0 0 / 12%);
 }
 
 .dark[data-theme="rose"],
