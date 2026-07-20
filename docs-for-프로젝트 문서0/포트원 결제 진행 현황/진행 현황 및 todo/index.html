@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>진행 현황 및 TODO</title>
+<style>
+  :root{
+    --bg:#f6f7f6; --card:#fff; --fg:#16201b; --muted:#5b6862;
+    --line:#dfe4e1; --brand:#2e7d6e; --bad:#c0392b; --warn:#b45309;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:40px 20px;background:var(--bg);color:var(--fg);
+    font:15px/1.7 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard",sans-serif}
+  .wrap{max-width:940px;margin:0 auto}
+  h1{font-size:26px;margin:0 0 6px;letter-spacing:-.02em}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 24px}
+  section{background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:22px 24px;margin-bottom:18px}
+  h2{font-size:17px;margin:0 0 14px;letter-spacing:-.01em}
+  h3{font-size:14px;margin:20px 0 8px;color:var(--muted)}
+  ul,ol{margin:0;padding-left:18px} li{margin:6px 0}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:600;white-space:nowrap}
+  tr:last-child td{border-bottom:0}
+  code{background:#eef1ef;border-radius:5px;padding:1px 6px;font-size:13px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;word-break:break-all}
+  pre{background:#eef1ef;border-radius:10px;padding:14px 16px;overflow-x:auto;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;margin:0;line-height:1.65}
+  .box{border-radius:10px;padding:14px 16px;margin-top:14px;font-size:14px}
+  .box-bad{background:#fdf1f0;border:1px solid #f3c8c3}
+  .box-warn{background:#fff8ed;border:1px solid #fbd9a5}
+  .box-ok{background:#eef7f3;border:1px solid #bfe0d3}
+  .done{color:var(--brand);font-weight:700}
+  .todo{color:var(--warn);font-weight:700}
+  .blocked{color:var(--bad);font-weight:700}
+  .muted{color:var(--muted)}
+  footer{color:var(--muted);font-size:13px;text-align:center;margin-top:26px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>진행 현황 및 TODO</h1>
+  <p class="sub">milla-pilot · 후원 결제 · 2026-07-21 새벽 기준</p>
+
+  <section>
+    <h2>지금 어디까지 왔나</h2>
+    <p style="margin:0">
+      <b>테스트 채널로 결제가 완전히 동작하고, 운영에도 배포됐다.</b>
+      결제 요청 → 카카오페이 승인 → 서버가 포트원에 직접 조회해 금액 대조 → 후원 확정 →
+      목표 달성 시 잠금까지 실제 결제 6건으로 검증했다. 웹훅도 붙어서 포트원 호출을 수신하고
+      서명 검증을 통과하는 것까지 확인했다.
+    </p>
+    <div class="box box-warn">
+      <b>아직 실결제는 열려 있지 않다.</b> 실연동 채널 키로 바꾸지 않았기 때문이다.
+      그 전에 아래 TODO 의 <b>법무·세무 항목</b>이 먼저 정리돼야 한다.
+    </div>
+  </section>
+
+  <section>
+    <h2>완료 <span class="done">✅</span></h2>
+    <table>
+      <tr><th>결제 연동</th><td>initiate → 결제창 → confirm 3단계. 서버 금액 대조 후에만 확정</td></tr>
+      <tr><th>동시성</th><td>물품 행 락 + <code>잔여 = 목표 − 모금액 − 선점액</code> 으로 초과 모금 차단</td></tr>
+      <tr><th>확정 경로 3중화</th><td>SDK 응답 · 3초 폴링 · 리다이렉트 복귀</td></tr>
+      <tr><th>웹훅</th><td>서명 검증(Standard Webhooks) · fail-closed · 테스트/실연동 시크릿 동시 지원</td></tr>
+      <tr><th>UI</th><td>결제 대기 화면 · 완료 화면(금액·진행률·영수증) · 물품 상세 재구성</td></tr>
+      <tr><th>운영 반영</th><td>백엔드·프론트 배포, DB enum 제약 갱신, API Secret·웹훅 시크릿 설정</td></tr>
+      <tr><th>검증용 시드</th><td><code>[검증] 결제 테스트</code> 시설 — 목표 1,000원 / 500원</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>TODO 1 — 소액 검증 준비 <span class="done">✅ 코드 완료</span></h2>
+    <p style="margin:0 0 12px">
+      실결제 검증을 30만원짜리 물품으로 할 수는 없다. 시더에 <b>검증 전용 시설</b>을 추가했다.
+    </p>
+    <table>
+      <tr><th>시설 코드</th><td><code>verify</code> · 이름 <code>[검증] 결제 테스트</code> · displayOrder 99(목록 맨 뒤)</td></tr>
+      <tr><th>물품</th><td>결제 검증용 A — 목표 <b>1,000원</b> / 결제 검증용 B — 목표 <b>500원</b></td></tr>
+      <tr><th>후원 금액</th><td>프리셋(1만·3만·5만)은 남은 금액 초과 시 자동 비활성.
+        <b>"남은 금액 모두"와 직접 입력</b>으로 소액 결제 가능</td></tr>
+    </table>
+    <div class="box box-warn">
+      <b>남은 일</b> — 배포해야 시드가 반영된다. 또한 운영 공개 전에는 이 시설을 숨기거나 제외해야 한다.
+      기존 시설의 목표액은 <b>일부러 현실 금액(30~60만원)으로 유지</b>했다.
+      시연·기획 검토용 자산이라 "노트북 3대 1,000원"은 설득력이 없기 때문이다.
+    </div>
+  </section>
+
+  <section>
+    <h2>TODO 2 — 실연동 전환 <span class="todo">방법만 정리됨</span></h2>
+    <p style="margin:0 0 12px">
+      <b>코드 수정은 필요 없다.</b> 채널 키를 환경변수로 읽고 있어서 <code>.env</code> 한 줄이면 바뀐다.
+    </p>
+    <pre># EC2 /home/ubuntu/milla/.env 에 추가
+PORTONE_CHANNEL_KEY=channel-key-520f32cd-acfc-4e1b-8909-86f6b5bfa66e
+
+sudo systemctl restart milla-server</pre>
+
+    <h3>전환 직후 검증 절차</h3>
+    <ol>
+      <li><code>[검증] 결제 테스트</code> 시설 → <b>결제 검증용 B(500원)</b> 후원</li>
+      <li>완료 화면이 뜨고 <b>목표 달성 → LOCKED</b> 로 넘어가는지 확인</li>
+      <li>서버 로그에서 웹훅 수신 확인
+        <pre>sudo journalctl -u milla-server --since '5 min ago' --no-pager | grep webhook</pre></li>
+      <li>포트원 콘솔 <code>결제 내역</code> 에서 실제 승인 확인 → <b>바로 취소</b></li>
+    </ol>
+
+    <div class="box box-bad">
+      <b>이 한 줄이 실제 돈이 오가기 시작하는 지점이다.</b>
+      TODO 3 이 정리되기 전에는 바꾸지 않는다. 결제는 기술이 아니라 <b>계약과 법적 자격</b>의 문제다.
+    </div>
+  </section>
+
+  <section>
+    <h2>TODO 3 — 계약 · 법무 · 세무 <span class="blocked">가장 큰 병목</span></h2>
+    <p style="margin:0 0 12px">
+      개발은 거의 끝났고, <b>여기가 실제 일정을 결정한다.</b> 순서대로 확인한다.
+    </p>
+
+    <h3>① PG 계약 명의 <span class="muted">— 가장 먼저</span></h3>
+    <ul>
+      <li>포트원 계약이 <b>사업자/법인 명의인지 개인 명의인지</b> 확인</li>
+      <li>개인 명의면 후원금이 <b>개인 소득</b>으로 잡히고, 횡령 의혹에 구조적으로 노출된다</li>
+      <li>확인 방법 — 포트원 콘솔 <code>상점 관리</code> 또는 계약서의 사업자등록번호</li>
+    </ul>
+
+    <h3>② 기부금품 모집 등록 필요 여부 <span class="muted">— 사업 형태를 바꿀 수 있음</span></h3>
+    <ul>
+      <li>「기부금품의 모집 및 사용에 관한 법률」상 <b>일정 규모 이상 모집은 사전 등록</b>이 필요하고,
+        미등록 모집은 형사처벌 대상이다</li>
+      <li>주 3건 라운드에 고가 물품이 들어가면 기준을 빠르게 넘길 수 있다</li>
+      <li><b>모집·운영비 사용 비율에 법적 상한</b>도 있다 — 창고·인건비 계획을 접은 이유</li>
+      <li>확인처 — 관할 지자체(시·도) 또는 행정안전부. <b>세무사·법무 상담 권장</b></li>
+    </ul>
+
+    <h3>③ 기부금영수증 발급 주체</h3>
+    <ul>
+      <li>시설이 <b>지정기부금단체</b>인지, 아니면 우리가 자격을 받아야 하는지</li>
+      <li>시설 명의로 발급 가능하면 회계·세무가 가장 깔끔해진다</li>
+      <li>자격 없이 발급하면 가산세</li>
+    </ul>
+
+    <h3>④ 계약 조건 숫자</h3>
+    <table>
+      <tr><th>수수료율</th><td>목표액 = 구매가 + <b>수수료</b> + 여유 10% — 공식에 들어간다</td></tr>
+      <tr><th>정산주기 D+N</th><td>모금 완료 시점에 현금이 없다. <b>운영자금(cash float)</b> 규모를 결정</td></tr>
+      <tr><th>비영리·기부 우대</th><td>정률이라 장기 비용 차이가 크다. 반드시 문의</td></tr>
+    </table>
+
+    <div class="box box-warn">
+      법·세무 항목은 최종적으로 <b>전문가 검토</b>가 필요하다. 이 문서는 상담 전에 질문을 정리하기 위한 것이지 법률 자문이 아니다.
+    </div>
+  </section>
+
+  <section>
+    <h2>그 다음 개발 과제</h2>
+    <table>
+      <tr><th>주간 라운드 · 마감 배치</th>
+          <td>주 3물품 · 일요일 마감 · 전액 달성 조건. <code>ItemStatus.FAILED</code> 추가 시
+              <b>Flyway 도입</b>을 함께 (enum 체크 제약이 자동 갱신되지 않음)</td></tr>
+      <tr><th>알림</th><td>모금 완료 / 전달 완료 / 환급 — <code>notification</code> 모듈에 연결</td></tr>
+      <tr><th>환불 · 포인트</th><td>모금 미달 시 포인트 환급. <b>충전 기능은 만들지 않는다</b>(선불수단 규제)</td></tr>
+      <tr><th>배송 추적</th><td>딜리버리트래커 웹훅 — 지금은 운송장 번호만 표시</td></tr>
+      <tr><th>정산 대사 배치</th><td>포트원 PAID 목록 ↔ 우리 DB 대조. 웹훅 유실 대비 최후 방어선</td></tr>
+      <tr><th>상점 분리</th><td>현재 hibot 프로젝트와 포트원 상점 공유 중. 기부금 회계는 분리 필요</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>알려진 한계</h2>
+    <ul>
+      <li><b>결제 직후 브라우저를 닫으면</b> 확정 경로 3개가 모두 무력하다. 웹훅이 이를 막지만,
+        웹훅 자체도 유실될 수 있어 정산 대사가 최후 방어선이다</li>
+      <li><b>확정 실패 사유가 저장되지 않는다</b> — 예외를 던지면 트랜잭션이 롤백되어
+        <code>failReason</code> 기록도 사라진다. 운영 진단이 필요해지면 별도 트랜잭션으로 분리</li>
+      <li><b>실연동 흐름은 미검증</b> — 테스트는 목업이라 앱 전환·복귀가 실제와 다르다</li>
+      <li><b>발주는 수동</b> — 소비자 대신 주문하는 API 는 국내 대형 커머스에 없다. 주 1회 5분 수준</li>
+    </ul>
+  </section>
+
+  <footer>
+    관련 문서 · <code>../index.html</code>(진행 현황) ·
+    <code>../웹훅이 필요한 이유/index.html</code> ·
+    <code>../결제 관련 필수 정보 모음/결제 관련 필수 정보.html</code> ·
+    <code>../카카오 결제로 물품 후원액 결제 하기.mmd</code> ·
+    <code>docs/donation-model.md</code>
+  </footer>
+
+</div>
+</body>
+</html>

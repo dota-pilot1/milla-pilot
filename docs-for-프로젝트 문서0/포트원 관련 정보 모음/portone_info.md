@@ -71,6 +71,18 @@ PORTONE_WEBHOOK_SECRET=  # 🔒
 
 → 확정되면 [`docs/donation-model.md`](../../docs/donation-model.md) 3절에 반영한다.
 
+채널키:
+channel-key-520f32cd-acfc-4e1b-8909-86f6b5bfa66e
+
+mid:
+CA03903902
+
+상점 아이디:
+CA03903902
+
+채널 이름:
+6d12bd86-2d17-4798-91dd-713a8562df66
+
 ## 남은 작업
 
 - [ ] Store ID · 채널 키 발급 확인 (테스트/실결제 각각)

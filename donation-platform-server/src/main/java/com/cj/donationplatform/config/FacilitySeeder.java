@@ -98,6 +98,19 @@ public class FacilitySeeder implements ApplicationRunner {
                         new ItemDef("학용품 종합 세트", ItemCategory.LEARNING, "24명분",
                                 "신학기 개인 학용품 세트를 아동 24명 전원분으로 준비합니다.",
                                 "✏️", 400000, 0, 24, ItemStatus.RECRUITING, today.plusDays(18), 2)
+                )),
+                // 결제 검증 전용 — 실연동 전환 시 소액으로 전체 흐름을 확인하기 위한 시설.
+                // 목표액을 100원 단위로 두어 실제 돈이 나가는 검증을 반복할 수 있게 한다.
+                // 운영 공개 시에는 displayOrder 를 뒤로 두거나 이 시설을 제외한다.
+                new FacilityDef("verify", "[검증] 결제 테스트", "-", FacilityType.CHILD_CENTER,
+                        "실결제 검증용 시설입니다. 후원자에게 노출하지 않습니다.",
+                        FacilityStatus.RECRUITING, false, "검", 99, List.of(
+                        new ItemDef("결제 검증용 A", ItemCategory.LEARNING, "소액 검증",
+                                "실결제 전환 후 결제 → 확정 → 웹훅 → 목표 반영을 확인하기 위한 항목입니다.",
+                                "🧪", 1000, 0, 1, ItemStatus.RECRUITING, today.plusDays(365), 0),
+                        new ItemDef("결제 검증용 B", ItemCategory.LEARNING, "소액 검증",
+                                "목표 달성(LOCKED) 전이를 확인하기 위한 항목입니다.",
+                                "🧪", 500, 0, 1, ItemStatus.RECRUITING, today.plusDays(365), 1)
                 ))
         );
 
