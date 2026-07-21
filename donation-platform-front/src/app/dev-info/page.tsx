@@ -6,11 +6,14 @@ import {
   Bell,
   CheckCircle2,
   ClipboardList,
+  CreditCard,
   ReceiptText,
   RotateCcw,
   Route,
   ShieldCheck,
+  Timer,
   Truck,
+  Webhook,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { RequireAuth } from "@/widgets/guards/RequireAuth";
@@ -22,11 +25,12 @@ import { PageShell } from "@/shared/ui/PageShell";
 import { Tabs, TabPanel, type TabItem } from "@/shared/ui/Tabs";
 import { CompareTable } from "@/shared/ui/CompareTable";
 
-type DevInfoTab = "development" | "operation";
+type DevInfoTab = "development" | "operation" | "payment";
 
 const TABS: readonly TabItem<DevInfoTab>[] = [
   { value: "development", label: "개발 계획", icon: ClipboardList },
   { value: "operation", label: "운영 계획", icon: Route },
+  { value: "payment", label: "결제 흐름", icon: CreditCard },
 ];
 
 const CURRENT_SCOPE = [
@@ -65,7 +69,39 @@ const PRINCIPLES = [
   "아동 실명, 얼굴, 생활공간 등 식별 가능한 정보는 노출하지 않습니다.",
   "목표금액은 추상 모금액이 아니라 실제 구매 총액 기준으로 표시합니다.",
   "구매증빙과 세액공제 기부금영수증은 구분해서 안내합니다.",
-  "실결제는 전문가 검토와 운영 정책 확정 뒤 별도 단계에서 도입합니다.",
+  "실결제는 포트원·카카오페이로 연동을 마쳤습니다. 자세한 내용은 결제 흐름 탭을 참고하세요.",
+];
+
+// 전체 흐름 — 준비(관리자 CRUD) 2단계 + 이행 루프(물품 상태 전이) 6단계.
+// 상태값이 있는 것과 없는 것을 섞어 보여주므로, where 로 어느 화면에서 하는 일인지 구분한다.
+const FULL_FLOW: {
+  phase: string;
+  note: string;
+  tone: React.ComponentProps<typeof Badge>["variant"];
+  steps: { label: string; where: string; status?: string }[];
+}[] = [
+  {
+    phase: "준비",
+    note: "관리자가 등록합니다. 물품 상태값은 아직 없습니다.",
+    tone: "muted",
+    steps: [
+      { label: "시설 등록", where: "Tauri 관리자" },
+      { label: "물품 등록", where: "Tauri 관리자" },
+    ],
+  },
+  {
+    phase: "이행 루프",
+    note: "등록된 물품이 상태를 따라 이동합니다. 후원자 화면에 그대로 보입니다.",
+    tone: "recruiting",
+    steps: [
+      { label: "후원 결제", where: "웹 · 후원자", status: "RECRUITING" },
+      { label: "목표 달성 · 자동 잠금", where: "시스템", status: "LOCKED" },
+      { label: "통합구매", where: "Tauri 관리자", status: "BUYING" },
+      { label: "배송중", where: "판매처 → 시설", status: "SHIPPING" },
+      { label: "수령확인", where: "시설", status: "RECEIVED" },
+      { label: "영수증", where: "Tauri 관리자", status: "RECEIPTED" },
+    ],
+  },
 ];
 
 // 1차 MVP 이행 루프 — 서버 ItemStatus 전이와 1:1 대응 (기획 §5·§8)
@@ -98,7 +134,7 @@ const MVP_STAGES: {
     actor: "운영자 · Tauri",
     description: "판매처, 실구매액, 구매증빙을 한 번만 기록합니다.",
     variant: "buying",
-    guard: "1차 MVP는 실결제 없이 구매를 기록만 함 · 물품당 1건 제약으로 중복구매 차단",
+    guard: "물품당 1건 제약으로 중복구매 차단 · 발주는 수동",
   },
   {
     status: "SHIPPING",
@@ -159,7 +195,7 @@ const SCENARIO_COLUMNS = [
 ];
 
 const SCENARIO_ROWS = [
-  { label: "실결제(PG)", values: ["불필요 — 후원자가 직접 결제", "필수 — 도입 전까지 리허설"], favors: 0 },
+  { label: "실결제(PG)", values: ["불필요 — 후원자가 직접 결제", "필수 — 연동 완료"], favors: 1 },
   { label: "후원금 취급", values: ["플랫폼이 자금을 만지지 않음", "정산 구조 설계 필요"], favors: 0 },
   { label: "환불", values: ["구매처에서 직접 취소·반품", "공동 후원 환불 기준 필요"], favors: 0 },
   { label: "물류센터", values: ["필수 — 집하·검수 공간", "불필요 — 판매처가 시설로 직배송"], favors: 1 },
@@ -181,20 +217,16 @@ const ANALYSIS_POINTS = [
     body: "돈이 플랫폼을 거치느냐입니다. A는 자금을 만지지 않는 대신 물류가 생기고, B는 물류가 없는 대신 결제·환불·정산이 전부 따라옵니다. 결제 복잡도와 물류 복잡도의 맞교환입니다.",
   },
   {
-    title: "A의 강점 — 지금 바로 실서비스",
-    body: "B는 PG를 붙이기 전까지 가상 리허설을 벗어나지 못합니다. A는 결제가 필요 없어 검토 관문을 기다리지 않고 실제 후원을 받을 수 있습니다.",
-  },
-  {
-    title: "A의 강점 — 환불 문제 소멸",
-    body: "공동 후원 환불(구매 착수 후 개별 환불, 목표 미달 일괄 환불)은 현재 가장 까다로운 미해결 과제인데, A에서는 이 문제가 발생하지 않습니다.",
-  },
-  {
     title: "A의 대가 — 공동충당 포기",
     body: "여러 후원자가 금액을 나눠 채우는 모델이 성립하지 않습니다. 물품을 잘게 쪼개 우회할 수는 있지만, 그 순간 목표금액이 필요수량으로 바뀌어 다른 제품이 됩니다.",
   },
   {
-    title: "판단 기준",
-    body: "소액 다수가 함께 채운다는 점이 이 서비스의 정체성이면 B, 지금 당장 실제로 굴러가는 것이 더 급하면 A입니다.",
+    title: "B를 택한 이유",
+    body: "소액 다수가 함께 채운다는 점이 이 서비스의 정체성입니다. A의 강점이던 \"결제 없이 지금 시작\"은 실결제 연동이 끝나면서 의미가 사라졌습니다.",
+  },
+  {
+    title: "남은 숙제는 환불",
+    body: "A였다면 없었을 문제입니다. 구매 착수 후 개별 환불과 목표 미달 일괄 환불 기준이 아직 미확정입니다.",
   },
 ];
 
@@ -209,7 +241,7 @@ const FUTURE_PLAN: {
     tone: "buying",
     note: "본체 기능은 아니지만 실제 운영을 시작하려면 반드시 있어야 합니다.",
     items: [
-      { title: "실결제(PG) 도입", description: "PG 선정과 후원 상태 확장(결제·취소·환불)이 선행되어야 합니다." },
+      { title: "정산 대사 배치", description: "포트원 결제 목록과 우리 DB를 주기적으로 전수 대조합니다." },
       { title: "취소·환불 정합성", description: "구매 착수 이후 개별 환불과 목표 미달 마감 시 일괄 환불 기준을 확정합니다." },
       { title: "관리자 권한 세분화", description: "운영 역할별 접근 범위를 나누고 감사 로그를 남깁니다." },
     ],
@@ -235,6 +267,102 @@ const FUTURE_PLAN: {
       { title: "커뮤니티 · 명예 홍보관", description: "후원자 참여 콘텐츠 영역을 추가합니다." },
     ],
   },
+];
+
+// ─── 결제 흐름 ──────────────────────────────────────────────────────────────
+// 서버 ContributionService 의 initiate → confirm 경로와 1:1 대응한다.
+
+const PAY_PRINCIPLE =
+  "프론트가 보내는 \"결제 성공\"은 위조할 수 있다. 서버가 포트원에 직접 조회해 상태와 금액을 대조한 뒤에만 후원을 확정한다.";
+
+const PAY_STEPS: {
+  step: string;
+  actor: string;
+  result: string;
+  detail: string;
+  variant: React.ComponentProps<typeof Badge>["variant"];
+}[] = [
+  {
+    step: "후원 시작",
+    actor: "후원자",
+    result: "PENDING",
+    detail: "결제 식별자를 발급하고 잔여 금액을 선점한다. 아직 모금액에 반영하지 않는다.",
+    variant: "recruiting",
+  },
+  {
+    step: "결제창",
+    actor: "카카오페이",
+    result: "승인",
+    detail: "실제 돈이 나가는 시점. 이 결과를 그대로 믿지 않는다.",
+    variant: "shipping",
+  },
+  {
+    step: "서버 검증",
+    actor: "서버 → 포트원",
+    result: "금액 대조",
+    detail: "결제 상태가 PAID 인지, 금액이 우리가 만든 금액과 같은지 확인한다.",
+    variant: "buying",
+  },
+  {
+    step: "후원 확정",
+    actor: "시스템",
+    result: "PAID",
+    detail: "모금액에 반영한다. 목표에 도달하면 물품이 LOCKED 로 잠긴다.",
+    variant: "verified",
+  },
+];
+
+// 확정 경로 3중화 — 하나가 끊겨도 다른 경로가 받는다.
+const PAY_ROUTES = [
+  {
+    icon: CreditCard,
+    title: "결제창 복귀",
+    role: "주경로",
+    body: "SDK 응답·3초 폴링·리다이렉트 복귀. 대부분 여기서 끝난다.",
+    weakness: "브라우저를 닫으면 끊긴다",
+  },
+  {
+    icon: Webhook,
+    title: "웹훅",
+    role: "1차 백업",
+    body: "포트원이 서버로 직접 통보한다. 서명을 검증하고 시크릿이 없으면 거절한다.",
+    weakness: "통보 자체가 유실될 수 있다",
+  },
+  {
+    icon: Timer,
+    title: "만료 배치",
+    role: "최후 방어선",
+    body: "1분마다 만료된 건을 포트원에 다시 물어본다. 실제로 결제됐으면 되살린다.",
+    weakness: "확실하지 않으면 만료시키지 않고 보류한다",
+  },
+];
+
+const PAY_GUARD_COLUMNS = [
+  { label: "막는 사고", hint: "무엇이 잘못될 수 있는가" },
+  { label: "장치", hint: "어떻게 막는가" },
+];
+
+const PAY_GUARD_ROWS = [
+  { label: "금액 위조", values: ["후원자가 100원 내고 30만원 참여", "서버가 포트원 조회 금액과 대조"] },
+  { label: "중복 반영", values: ["같은 결제가 두 번 확정", "결제 식별자 UNIQUE · 이미 PAID 면 무시"] },
+  { label: "목표 초과 모금", values: ["동시 결제로 목표액을 넘김", "잔여 = 목표 − 모금액 − 선점액"] },
+  { label: "위조 웹훅", values: ["가짜 결제 통보로 확정", "서명 검증 · 시크릿 없으면 전부 거절"] },
+  { label: "결제 유실", values: ["돈은 냈는데 결제 안 한 사람이 됨", "만료 전 포트원 재확인 후 되살림"] },
+];
+
+const PAY_STATUS = [
+  { code: "PENDING", label: "결제 대기", note: "잔여 금액 선점. 만료 시각이 지나면 선점이 풀린다" },
+  { code: "PAID", label: "확정", note: "모금액에 반영된 유일한 상태" },
+  { code: "FAILED", label: "실패", note: "금액 불일치 등 — 사람이 확인해야 하는 상태" },
+  { code: "CANCELED", label: "취소", note: "후원자가 결제창을 닫아 우리가 그 사실을 알았을 때" },
+  { code: "EXPIRED", label: "만료", note: "결제하지 않은 것을 포트원에 확인하고 정리했을 때" },
+  { code: "REFUNDED", label: "환불", note: "환불 정책 확정 후 사용" },
+];
+
+const PAY_TODO = [
+  { title: "정산 대사 배치", description: "포트원 결제 목록과 우리 DB를 주기적으로 전수 대조합니다." },
+  { title: "환불·차액 처리", description: "목표 미달 일괄 환불과 실구매액 차액 정산 기준을 정합니다." },
+  { title: "기부금영수증", description: "발급 주체와 과세 구분을 세무 검토 후 확정합니다." },
 ];
 
 export default function DevInfoPage() {
@@ -290,8 +418,168 @@ export default function DevInfoPage() {
             </TabPanel>
           ) : null}
 
+          {tab === "payment" ? (
+            <TabPanel value="payment" idPrefix="dev-info" className="space-y-5">
+              <Card className="p-5">
+                <div className="flex gap-3">
+                  <ShieldCheck className="mt-0.5 size-5 shrink-0 text-primary" />
+                  <div>
+                    <h2 className="text-lg font-semibold tracking-tight">한 줄 원칙</h2>
+                    <p className="mt-1 text-sm leading-6 text-muted-foreground">{PAY_PRINCIPLE}</p>
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="p-5">
+                <div className="space-y-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <h2 className="text-lg font-semibold tracking-tight">결제 4단계</h2>
+                    <Badge variant="verified">실연동 검증 완료</Badge>
+                  </div>
+                  <ol className="grid gap-3 lg:grid-cols-4">
+                    {PAY_STEPS.map((item, index) => (
+                      <PayStep key={item.step} index={index} {...item} />
+                    ))}
+                  </ol>
+                </div>
+              </Card>
+
+              <Card className="p-5">
+                <div className="space-y-4">
+                  <div>
+                    <h2 className="text-lg font-semibold tracking-tight">확정 경로 3중화</h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      하나가 끊겨도 다음 경로가 받습니다. 순서대로 방어선입니다.
+                    </p>
+                  </div>
+                  <div className="grid gap-3 lg:grid-cols-3">
+                    {PAY_ROUTES.map((route) => (
+                      <div key={route.title} className="rounded-xl border bg-background p-4">
+                        <div className="flex items-center gap-2">
+                          <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                            <route.icon className="size-4" />
+                          </span>
+                          <h3 className="text-sm font-semibold">{route.title}</h3>
+                          <Badge variant="outline" className="ml-auto">
+                            {route.role}
+                          </Badge>
+                        </div>
+                        <p className="mt-2.5 text-xs leading-5 text-muted-foreground">{route.body}</p>
+                        <p className="mt-2 rounded-lg bg-muted/60 px-2.5 py-1.5 text-xs leading-5 text-muted-foreground">
+                          {route.weakness}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="p-5">
+                <div className="space-y-4">
+                  <div>
+                    <h2 className="text-lg font-semibold tracking-tight">안전장치</h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      각 항목은 실제로 일어날 수 있는 사고 하나씩에 대응합니다.
+                    </p>
+                  </div>
+                  <CompareTable
+                    caption="결제 안전장치"
+                    columns={PAY_GUARD_COLUMNS}
+                    rows={PAY_GUARD_ROWS}
+                  />
+                </div>
+              </Card>
+
+              <Card className="p-5">
+                <div className="space-y-4">
+                  <h2 className="text-lg font-semibold tracking-tight">후원 상태값</h2>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {PAY_STATUS.map((item) => (
+                      <div
+                        key={item.code}
+                        className="flex flex-wrap items-baseline gap-x-2 gap-y-1 rounded-xl border bg-background p-3"
+                      >
+                        <code className="rounded bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground">
+                          {item.code}
+                        </code>
+                        <span className="text-sm font-semibold">{item.label}</span>
+                        <p className="w-full text-xs leading-5 text-muted-foreground">{item.note}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="p-5">
+                <div className="space-y-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <h2 className="text-lg font-semibold tracking-tight">남은 과제</h2>
+                    <Badge variant="shipping">진행 전</Badge>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    {PAY_TODO.map((item) => (
+                      <div key={item.title} className="rounded-xl border bg-background p-3">
+                        <h3 className="text-sm font-semibold">{item.title}</h3>
+                        <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                          {item.description}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </Card>
+            </TabPanel>
+          ) : null}
+
           {tab === "operation" ? (
             <TabPanel value="operation" idPrefix="dev-info" className="space-y-5">
+              <Card className="p-5">
+                <div className="space-y-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <h2 className="text-lg font-semibold tracking-tight">전체 흐름</h2>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        시설 등록부터 영수증까지 한 물품이 거치는 전 과정입니다.
+                      </p>
+                    </div>
+                    <Badge variant="outline">8단계</Badge>
+                  </div>
+
+                  <div className="space-y-4">
+                    {FULL_FLOW.map((group) => (
+                      <div key={group.phase} className="rounded-xl border bg-background p-4">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge variant={group.tone}>{group.phase}</Badge>
+                          <span className="text-xs text-muted-foreground">{group.note}</span>
+                        </div>
+                        <ol className="mt-3 flex flex-wrap items-stretch gap-1.5">
+                          {group.steps.map((step, index) => (
+                            <React.Fragment key={step.label}>
+                              {index > 0 ? (
+                                <li aria-hidden className="flex items-center text-muted-foreground">
+                                  →
+                                </li>
+                              ) : null}
+                              <li className="rounded-lg border bg-card px-3 py-2">
+                                <p className="text-sm font-medium">{step.label}</p>
+                                <p className="mt-0.5 text-[11px] text-muted-foreground">
+                                  {step.where}
+                                </p>
+                                {step.status ? (
+                                  <code className="mt-1 inline-block rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                                    {step.status}
+                                  </code>
+                                ) : null}
+                              </li>
+                            </React.Fragment>
+                          ))}
+                        </ol>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </Card>
+
               <Card className="p-5">
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
@@ -315,10 +603,10 @@ export default function DevInfoPage() {
                     <div>
                       <h2 className="text-lg font-semibold tracking-tight">MVP 후보 시나리오</h2>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        1차 MVP 운영 방식으로 검토 중인 두 안입니다. 아직 확정되지 않았습니다.
+                        실결제 연동으로 B 기준으로 진행 중입니다. A는 검토 기록으로 남깁니다.
                       </p>
                     </div>
-                    <Badge variant="shipping">검토 중 · 미확정</Badge>
+                    <Badge variant="verified">시나리오 B 진행</Badge>
                   </div>
 
                   <div className="grid gap-4 lg:grid-cols-2">
@@ -437,6 +725,31 @@ export default function DevInfoPage() {
         </div>
       </PageShell>
     </RequireAuth>
+  );
+}
+
+function PayStep({
+  index,
+  step,
+  actor,
+  result,
+  detail,
+  variant,
+}: (typeof PAY_STEPS)[number] & { index: number }) {
+  return (
+    <li className="rounded-xl border bg-background p-4">
+      <div className="flex items-center gap-2">
+        <span className="flex size-6 shrink-0 items-center justify-center rounded-full border border-primary bg-primary/10 text-xs font-bold text-primary">
+          {index + 1}
+        </span>
+        <h3 className="text-sm font-semibold">{step}</h3>
+      </div>
+      <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+        <Badge variant={variant}>{result}</Badge>
+        <span className="text-xs text-muted-foreground">{actor}</span>
+      </div>
+      <p className="mt-2 text-xs leading-5 text-muted-foreground">{detail}</p>
+    </li>
   );
 }
 
