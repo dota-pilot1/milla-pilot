@@ -131,7 +131,7 @@ function FacilityDonate() {
 
                 <div className="mt-4">
                   <Progress value={stats.pct} />
-                  <p className="mt-1.5 text-xs text-muted-foreground">
+                  <p className="mt-2.5 text-sm text-muted-foreground">
                     목표 {formatKRW(stats.goal)} 중 {formatKRW(stats.raised)} 모임
                   </p>
                 </div>

@@ -40,14 +40,16 @@ export function StatusTimeline({
             <div className="flex w-full items-center">
               <span
                 className={cn(
-                  "h-0.5 flex-1",
+                  "h-[3px] flex-1",
                   i === 0 ? "opacity-0" : reached ? "bg-primary" : "bg-border",
                 )}
               />
               <span
                 className={cn(
-                  "flex shrink-0 items-center justify-center rounded-full border font-bold transition-colors",
-                  compact ? "size-5 text-[9px]" : "size-6 text-[10px]",
+                  // 단계 노드는 사각(라운드 4px) — 진행바와 같은 각진 언어를 쓴다.
+                  // 라운드는 px 고정: rounded-md 는 --radius 스케일을 따라가 원처럼 보인다.
+                  "flex shrink-0 items-center justify-center rounded-[4px] border font-bold transition-colors",
+                  compact ? "size-8 text-xs" : "size-9 text-sm",
                   done
                     ? "border-primary bg-primary text-primary-foreground"
                     : active
@@ -55,11 +57,11 @@ export function StatusTimeline({
                       : "border-border bg-background text-muted-foreground",
                 )}
               >
-                {done ? <Check className={compact ? "size-3" : "size-3.5"} /> : i + 1}
+                {done ? <Check className={compact ? "size-[18px]" : "size-5"} /> : i + 1}
               </span>
               <span
                 className={cn(
-                  "h-0.5 flex-1",
+                  "h-[3px] flex-1",
                   i === STAGES.length - 1 ? "opacity-0" : done ? "bg-primary" : "bg-border",
                 )}
               />
@@ -67,7 +69,7 @@ export function StatusTimeline({
             <span
               className={cn(
                 "text-center leading-tight",
-                compact ? "text-[10px]" : "text-[11px]",
+                compact ? "text-xs" : "text-sm",
                 active
                   ? "font-semibold text-foreground"
                   : done

@@ -116,12 +116,12 @@ function DonationRowsPanel({
               className="space-y-5 rounded-2xl border bg-card p-5 shadow-sm"
             >
               <div className="flex items-start gap-3">
-                <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-2xl ring-1 ring-primary/10">
+                <span className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-3xl ring-1 ring-primary/10">
                   {ig.item.emoji || "📦"}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="font-semibold leading-tight">{ig.item.name}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">
+                  <p className="text-base font-semibold leading-tight">{ig.item.name}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
                     나의 후원 <b className="text-foreground">{formatKRW(ig.myTotal)}</b>
                     {count > 1 ? ` · ${count}건` : ""}
                   </p>
@@ -131,16 +131,19 @@ function DonationRowsPanel({
                 </Badge>
               </div>
 
+              {/* 금액이 주인공 — 바가 이미 진행을 말하므로 "달성률" 라벨 줄은 두지 않는다 */}
               <div>
-                <div className="mb-1.5 flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">달성률</span>
-                  <span className="font-bold text-primary">{pct}%</span>
+                <div className="mb-2.5 flex items-baseline justify-between gap-3">
+                  <p className="min-w-0 truncate">
+                    <b className="text-lg font-bold tracking-tight">{formatKRW(ig.item.raisedAmount)}</b>
+                    <span className="text-sm text-muted-foreground">
+                      {" / "}
+                      {formatKRW(ig.item.goalAmount)}
+                    </span>
+                  </p>
+                  <span className="shrink-0 text-lg font-bold text-primary">{pct}%</span>
                 </div>
-                <Progress value={pct} complete={full} />
-                <p className="mt-2 text-sm text-muted-foreground">
-                  <b className="text-foreground">{formatKRW(ig.item.raisedAmount)}</b> /{" "}
-                  {formatKRW(ig.item.goalAmount)}
-                </p>
+                <Progress value={pct} complete={full} className="h-5" />
               </div>
 
               <StatusTimeline status={ig.item.status} compact />
@@ -155,7 +158,7 @@ function DonationRowsPanel({
 
               {count > 1 ? (
                 <div className="rounded-xl border border-dashed bg-muted/30 px-4 py-3">
-                  <p className="text-xs font-medium text-muted-foreground">
+                  <p className="text-sm font-medium text-muted-foreground">
                     나의 후원 {count}건
                   </p>
                   <ul className="mt-1 divide-y text-sm">

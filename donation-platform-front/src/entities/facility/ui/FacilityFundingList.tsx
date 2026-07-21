@@ -83,7 +83,7 @@ function FacilityFundingCard({ row }: { row: FacilityFundingSummary }) {
       </div>
 
       <div className="mt-4 space-y-2">
-        <Progress value={progress} complete={complete} className="h-2.5" />
+        <Progress value={progress} complete={complete} />
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span>{formatKRW(raised)} 참여</span>
           <span>목표 {formatKRW(goal)}</span>

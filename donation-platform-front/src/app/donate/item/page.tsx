@@ -142,7 +142,7 @@ function DonationItemDetail() {
                     </span>
                   </div>
                   <div className="mt-3">
-                    <Progress value={pct} complete={full} />
+                    <Progress value={pct} complete={full} className="h-4" />
                   </div>
                 </div>
               </div>

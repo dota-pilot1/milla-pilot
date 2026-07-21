@@ -43,13 +43,18 @@ export default function RootLayout({
 }>) {
   return (
     // 기본 언어는 한국어. i18n 전환 시 lang 을 따라 바꾸는 건 별도 처리.
-    <html lang="ko" data-theme="haggyo" suppressHydrationWarning>
+    // 폰트 변수는 반드시 <html> 에 건다. globals.css 의 --font-sans 가 :root 에서 이 변수를
+    // 참조하는데, <body> 에만 있으면 :root 에서 무효가 되어 Tailwind 기본 폰트로 떨어진다.
+    <html
+      lang="ko"
+      data-theme="haggyo"
+      className={`${geistSans.variable} ${geistMono.variable} ${gaegu.variable}`}
+      suppressHydrationWarning
+    >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeNoFlashScript }} />
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} ${gaegu.variable} antialiased`}
-      >
+      <body className="antialiased">
         <ThemeInitializer />
         <I18nProvider>
           <QueryProvider>

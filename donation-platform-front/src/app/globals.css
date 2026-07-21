@@ -12,7 +12,9 @@
     --color-page: var(--page);
     --color-foreground: var(--foreground);
     /* 한글은 Pretendard, 라틴/숫자는 Geist 가 먼저 잡는다 */
-    --font-sans: var(--font-geist-sans), "Pretendard Variable", Pretendard, system-ui, sans-serif;
+    /* 폴백을 반드시 둔다 — var() 가 비면 값 전체가 무효가 되어 Tailwind 기본 폰트로 떨어진다 */
+    --font-sans: var(--font-geist-sans, ui-sans-serif), "Pretendard Variable", Pretendard,
+        system-ui, sans-serif;
     --font-mono: var(--font-geist-mono);
     --font-display: var(--font-gaegu);
     --color-chalkboard: var(--chalkboard);

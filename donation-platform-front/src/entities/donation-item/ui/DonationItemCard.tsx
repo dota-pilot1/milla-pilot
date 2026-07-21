@@ -63,15 +63,17 @@ export function DonationItemCard({ item, onDonate }: DonationItemCardProps) {
       </div>
 
       <div className="mt-4">
-        <div className="mb-1.5 flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">달성률</span>
-          <span className="font-bold text-primary">{pct}%</span>
+        <div className="mb-2.5 flex items-baseline justify-between gap-3">
+          <p className="min-w-0 truncate">
+            <b className="text-base font-bold tracking-tight">{formatKRW(item.raisedAmount)}</b>
+            <span className="text-sm text-muted-foreground">
+              {" / "}
+              {formatKRW(item.goalAmount)}
+            </span>
+          </p>
+          <span className="shrink-0 text-base font-bold text-primary">{pct}%</span>
         </div>
         <Progress value={pct} complete={full} />
-        <p className="mt-2 text-sm text-muted-foreground">
-          <b className="text-foreground">{formatKRW(item.raisedAmount)}</b> /{" "}
-          {formatKRW(item.goalAmount)}
-        </p>
 
         {canDonate ? (
           <Button
