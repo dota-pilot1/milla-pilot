@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { LoginForm, type DevLoginAccount } from "@/features/auth/login/LoginForm";
 import { SignupForm } from "@/features/auth/signup/SignupForm";
 import { SeedAccountPicker } from "@/features/auth/ui/SeedAccountPicker";
+import { SHOW_SEED_ACCOUNTS } from "@/shared/config/demo";
 import { Button } from "@/shared/ui/Button";
 import {
   Dialog,
@@ -26,7 +27,7 @@ type MobileAuthShellProps = {
   onModeChange: (mode: AuthMode) => void;
 };
 
-const isDev = process.env.NODE_ENV !== "production";
+const showSeedAccounts = SHOW_SEED_ACCOUNTS;
 
 export function MobileAuthShell({
   initialMode,
@@ -56,7 +57,7 @@ export function MobileAuthShell({
             </div>
           </div>
 
-          {isDev ? (
+          {showSeedAccounts ? (
             <Dialog open={seedOpen} onOpenChange={setSeedOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm" className="shrink-0">

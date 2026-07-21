@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 import { loginSchema, type LoginFormValues } from "@/shared/lib/validation/auth.schema";
 import { authActions } from "@/entities/user/model/authStore";
 import { getApiError, isNetworkError } from "@/shared/api/errors";
+import { SHOW_SEED_ACCOUNTS } from "@/shared/config/demo";
 import { Button } from "@/shared/ui/Button";
 import { FormField } from "@/shared/ui/FormField";
 import { TextInput } from "@/shared/ui/TextInput";
@@ -142,7 +143,7 @@ export function LoginForm({
   const { t } = useTranslation("auth");
   const [formError, setFormError] = useState<string | null>(null);
   const [rememberEmail, setRememberEmail] = useState(false);
-  const showDevLoginAccounts = process.env.NODE_ENV !== "production";
+  const showDevLoginAccounts = SHOW_SEED_ACCOUNTS;
 
   const safePath =
     nextPath && nextPath.startsWith("/") && !nextPath.startsWith("//")

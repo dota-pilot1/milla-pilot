@@ -15,6 +15,7 @@ import { SignupForm } from "@/features/auth/signup/SignupForm";
 import { MobileAuthShell } from "@/features/auth/ui/MobileAuthShell";
 import { SeedAccountPicker } from "@/features/auth/ui/SeedAccountPicker";
 import { Button } from "@/shared/ui/Button";
+import { SHOW_SEED_ACCOUNTS } from "@/shared/config/demo";
 import { cn } from "@/shared/lib/utils";
 
 type AuthMode = "login" | "signup";
@@ -24,7 +25,7 @@ type AuthModeShellProps = {
   nextPath?: string;
 };
 
-const isDev = process.env.NODE_ENV !== "production";
+const showSeedAccounts = SHOW_SEED_ACCOUNTS;
 
 export function AuthModeShell({ initialMode, nextPath }: AuthModeShellProps) {
   const { t } = useTranslation("auth");
@@ -80,14 +81,24 @@ export function AuthModeShell({ initialMode, nextPath }: AuthModeShellProps) {
       </div>
 
       <div className="mx-auto w-full max-w-6xl space-y-3">
-        {isDev ? (
+        {showSeedAccounts ? (
           <div className="hidden lg:block">
             <SeedAccountPicker onSelect={selectSeedAccount} selectedEmail={seedAccount?.email} />
           </div>
         ) : null}
 
         <section className="hidden overflow-hidden rounded-xl border bg-card shadow-xl shadow-foreground/5 lg:block">
-          <div className="relative min-h-[540px]">
+          {/*
+            패널이 absolute 라 카드 높이에 기여하지 못한다(슬라이드 애니메이션 때문).
+            높이를 모드별로 잡지 않으면 항목이 더 많은 회원가입 폼이 overflow-hidden 에 잘려
+            가입 버튼이 보이지도, 스크롤되지도 않는다.
+          */}
+          <div
+            className={cn(
+              "relative transition-[min-height] duration-[1100ms] ease-[cubic-bezier(0.45,0,0.2,1)]",
+              isSignup ? "min-h-[680px]" : "min-h-[540px]",
+            )}
+          >
             <div
               className={cn(
                 "absolute inset-y-0 left-0 w-1/2 will-change-transform transition-transform duration-[1100ms] ease-[cubic-bezier(0.45,0,0.2,1)]",
@@ -177,7 +188,8 @@ function AuthFormPanel({
   return (
     <div
       className={cn(
-        "flex h-full flex-col justify-center bg-card px-5 py-6 sm:px-9",
+        // 유효성 에러가 붙어 폼이 예상보다 길어져도 잘려서 못 보는 일이 없게 한다
+        "flex h-full flex-col justify-center overflow-y-auto bg-card px-5 py-6 sm:px-9",
         desktop && "px-12",
       )}
     >
