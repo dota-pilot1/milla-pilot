@@ -110,7 +110,27 @@ public class FacilitySeeder implements ApplicationRunner {
                                 "🧪", 1000, 0, 1, ItemStatus.RECRUITING, today.plusDays(365), 0),
                         new ItemDef("결제 검증용 B", ItemCategory.LEARNING, "소액 검증",
                                 "목표 달성(LOCKED) 전이를 확인하기 위한 항목입니다.",
-                                "🧪", 500, 0, 1, ItemStatus.RECRUITING, today.plusDays(365), 1)
+                                "🧪", 500, 0, 1, ItemStatus.RECRUITING, today.plusDays(365), 1),
+                        // 한 번 LOCKED 된 물품은 되돌릴 수 없어 재사용할 수 없다.
+                        // 검증을 반복하려면 쓰고 버릴 물품이 여러 개 있어야 한다.
+                        new ItemDef("결제 검증용 C", ItemCategory.LEARNING, "소액 검증",
+                                "단건 결제로 즉시 목표를 채우는 확인용입니다.",
+                                "🧪", 500, 0, 1, ItemStatus.RECRUITING, today.plusDays(365), 2),
+                        new ItemDef("결제 검증용 D", ItemCategory.LEARNING, "소액 검증",
+                                "단건 결제로 즉시 목표를 채우는 확인용입니다.",
+                                "🧪", 500, 0, 1, ItemStatus.RECRUITING, today.plusDays(365), 3),
+                        new ItemDef("결제 검증용 E", ItemCategory.LEARNING, "분할 참여 검증",
+                                "500원씩 두 번 참여해 공동 모금과 잔여 계산을 확인하기 위한 항목입니다.",
+                                "🧪", 1000, 0, 1, ItemStatus.RECRUITING, today.plusDays(365), 4),
+                        new ItemDef("결제 검증용 F", ItemCategory.LEARNING, "분할 참여 검증",
+                                "500원씩 두 번 참여해 공동 모금과 잔여 계산을 확인하기 위한 항목입니다.",
+                                "🧪", 1000, 0, 1, ItemStatus.RECRUITING, today.plusDays(365), 5),
+                        new ItemDef("결제 검증용 G", ItemCategory.LEARNING, "취소·만료 검증",
+                                "결제창을 닫거나 승인 직후 이탈했을 때의 처리를 확인하기 위한 항목입니다.",
+                                "🧪", 2000, 0, 1, ItemStatus.RECRUITING, today.plusDays(365), 6),
+                        new ItemDef("결제 검증용 H", ItemCategory.LEARNING, "예비",
+                                "위 항목을 모두 소진했을 때 쓰는 예비 항목입니다.",
+                                "🧪", 500, 0, 1, ItemStatus.RECRUITING, today.plusDays(365), 7)
                 ))
         );
 
@@ -121,16 +141,19 @@ public class FacilitySeeder implements ApplicationRunner {
                             def.status(), def.verified(), def.avatarInitial(), def.displayOrder()
                     )));
 
-            if (!donationItemRepository.existsByFacility_Id(facility.getId())) {
-                for (ItemDef it : def.items()) {
-                    // 진행 상태는 0/RECRUITING 에서 시작 — raisedAmount 는 실제 Contribution 으로만 쌓인다.
-                    // (ItemDef 의 raisedAmount/status 는 참고용, 실제 시드값 아님)
-                    donationItemRepository.save(DonationItem.create(
-                            facility, it.name(), it.category(), it.note(), it.reason(), it.emoji(),
-                            it.goalAmount(), 0L, it.targetQuantity(),
-                            ItemStatus.RECRUITING, it.deadline(), it.displayOrder()
-                    ));
+            // 시설이 아니라 물품 단위로 확인한다. 시설 단위로 막으면 물품이 하나라도 있는 순간
+            // 새로 추가한 ItemDef 가 영영 반영되지 않는다 — 검증용 물품을 계속 늘려야 해서 중요하다.
+            for (ItemDef it : def.items()) {
+                if (donationItemRepository.existsByFacility_IdAndName(facility.getId(), it.name())) {
+                    continue;
                 }
+                // 진행 상태는 0/RECRUITING 에서 시작 — raisedAmount 는 실제 Contribution 으로만 쌓인다.
+                // (ItemDef 의 raisedAmount/status 는 참고용, 실제 시드값 아님)
+                donationItemRepository.save(DonationItem.create(
+                        facility, it.name(), it.category(), it.note(), it.reason(), it.emoji(),
+                        it.goalAmount(), 0L, it.targetQuantity(),
+                        ItemStatus.RECRUITING, it.deadline(), it.displayOrder()
+                ));
             }
         }
 

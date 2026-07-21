@@ -14,6 +14,9 @@ import java.util.Optional;
 public interface DonationItemRepository extends JpaRepository<DonationItem, Long> {
     List<DonationItem> findByFacility_IdOrderByDisplayOrderAscIdAsc(Long facilityId);
     boolean existsByFacility_Id(Long facilityId);
+
+    /** 시더가 이미 넣은 물품인지 확인 — 시설 단위가 아니라 물품 단위로 봐야 나중에 물품만 추가할 수 있다 */
+    boolean existsByFacility_IdAndName(Long facilityId, String name);
     void deleteByFacility_Id(Long facilityId);
 
     /**
