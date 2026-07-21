@@ -75,6 +75,19 @@ public interface ContributionRepository extends JpaRepository<Contribution, Long
             """)
     List<Contribution> findExpiredPending(@Param("now") Instant now);
 
+    /**
+     * 만료된 결제 대기 건의 id — 스케줄러가 <b>건별 트랜잭션</b>으로 처리하기 위해 id 만 먼저 읽는다.
+     * 한 건의 포트원 조회 실패가 나머지 건의 처리를 롤백시키면 안 되기 때문이다.
+     */
+    @Query("""
+            select c.id from Contribution c
+            where c.status = com.cj.donationplatform.contribution.domain.ContributionStatus.PENDING
+              and c.expiresAt is not null
+              and c.expiresAt <= :now
+            order by c.expiresAt asc
+            """)
+    List<Long> findExpiredPendingIds(@Param("now") Instant now);
+
     /** 전체 후원 내역 — 후원자·물품·시설 포함, 최신순 (관리자 모니터링) */
     @Query("""
             select c from Contribution c

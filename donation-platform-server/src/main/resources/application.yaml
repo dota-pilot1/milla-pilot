@@ -63,6 +63,8 @@ portone:
   webhook-secret: ${PORTONE_WEBHOOK_SECRET:}
   # 결제 대기가 잔여 금액을 선점하는 시간(분)
   pending-expire-minutes: ${PORTONE_PENDING_EXPIRE_MINUTES:15}
+  # '아직 승인 전' 상태를 재확인하는 상한(시간). 넘으면 결제 안 된 것으로 보고 만료
+  pending-hard-expire-hours: ${PORTONE_PENDING_HARD_EXPIRE_HOURS:24}
 
 aws:
   s3:

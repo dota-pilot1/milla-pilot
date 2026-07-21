@@ -17,7 +17,12 @@ public record PortOneProperties(
         /** 웹훅 서명 검증용 시크릿 — 없으면 웹훅을 거절한다 */
         String webhookSecret,
         /** 결제 대기(PENDING)가 잔여 금액을 선점하는 시간(분) */
-        int pendingExpireMinutes
+        int pendingExpireMinutes,
+        /**
+         * 포트원이 아직 '승인 전'이라고 답하는 결제 대기를 재확인하는 상한(시간).
+         * 이 시간이 지나면 결제되지 않은 것으로 보고 만료시킨다 — 무한 재조회 방지.
+         */
+        int pendingHardExpireHours
 ) {
     public boolean isConfigured() {
         return apiSecret != null && !apiSecret.isBlank()

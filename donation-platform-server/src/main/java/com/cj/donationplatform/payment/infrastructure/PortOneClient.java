@@ -14,6 +14,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * 포트원 V2 REST 클라이언트.
@@ -83,8 +84,20 @@ public class PortOneClient {
         return issued;
     }
 
-    /** 결제 단건 조회 — 검증에 필요한 값만 뽑아 반환 */
+    /** 결제 단건 조회 — 검증에 필요한 값만 뽑아 반환. 포트원에 기록이 없으면 예외. */
     public PaymentVerification getPayment(String paymentId) {
+        return findPayment(paymentId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_VERIFY_FAILED));
+    }
+
+    /**
+     * 결제 단건 조회 — <b>포트원에 기록이 없으면(404) {@code empty}</b>, 조회 자체가 실패하면 예외.
+     *
+     * <p>둘을 구분하는 이유 — "결제창을 띄웠다가 그냥 닫았다"(404, 정상)와
+     * "포트원이 응답하지 않는다"(장애)는 처리가 정반대다. 전자는 만료시켜도 되지만,
+     * 후자에서 만료시키면 실제로 결제된 건을 잃을 수 있다.
+     */
+    public Optional<PaymentVerification> findPayment(String paymentId) {
         if (!props.isConfigured()) {
             throw new BusinessException(ErrorCode.PAYMENT_NOT_CONFIGURED);
         }
@@ -96,7 +109,12 @@ public class PortOneClient {
                     .retrieve()
                     .body(JSON_MAP);
         } catch (RestClientResponseException e) {
-            // 인증 실패(401)·없는 결제(404) 등 — 원인 파악에 응답 본문이 결정적이다
+            // 결제창까지 가지 않고 이탈하면 포트원에 기록 자체가 없다 — 오류가 아니라 정상 흐름
+            if (e.getStatusCode().value() == 404) {
+                log.debug("[portone] 결제 기록 없음 paymentId={}", paymentId);
+                return Optional.empty();
+            }
+            // 인증 실패(401) 등 — 원인 파악에 응답 본문이 결정적이다
             log.error("[portone] 결제 조회 HTTP 오류 paymentId={} status={} body={}",
                     paymentId, e.getStatusCode(), e.getResponseBodyAsString());
             throw new BusinessException(ErrorCode.PAYMENT_VERIFY_FAILED);
@@ -120,7 +138,7 @@ public class PortOneClient {
                     paymentId, status, amount, body);
         }
 
-        return new PaymentVerification(
+        return Optional.of(new PaymentVerification(
                 str(body, "id"),
                 status,
                 amount,
@@ -128,7 +146,7 @@ public class PortOneClient {
                 str(map(body, "method"), "type"),
                 str(body, "receiptUrl"),
                 instant(str(body, "paidAt"))
-        );
+        ));
     }
 
     @SuppressWarnings("unchecked")
