@@ -14,12 +14,21 @@ const dateFmt = (iso: string | null) =>
 export function PurchaseStatusCard({
   order,
   compact = false,
+  className,
 }: {
   order: PurchaseOrder;
   compact?: boolean;
+  /** 카드 위에 중첩될 때 서피스를 낮추기 위한 오버라이드 (예: bg-muted/40) */
+  className?: string;
 }) {
   return (
-    <div className={cn("rounded-2xl border bg-card shadow-sm", compact ? "p-4" : "p-5")}>
+    <div
+      className={cn(
+        "rounded-2xl border bg-card shadow-sm",
+        compact ? "p-4" : "p-5",
+        className,
+      )}
+    >
       <div className={cn("flex items-center gap-2", compact ? "mb-3" : "mb-4")}>
         <CheckCircle2 className="size-4 text-primary" />
         <p className="text-sm font-medium">통합구매 현황</p>

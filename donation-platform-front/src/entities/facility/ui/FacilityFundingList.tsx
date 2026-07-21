@@ -23,11 +23,11 @@ export function FacilityFundingList({ rows }: { rows: FacilityFundingSummary[] }
   const leading = rows[0];
 
   return (
-    <section className="space-y-5">
+    <section className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h2 className="text-lg font-semibold">시설별 후원 현황</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="mt-1 text-sm text-foreground/75">
             시설마다 필요한 물품과 모금 진행 상황을 비교해 볼 수 있습니다.
           </p>
         </div>

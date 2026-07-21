@@ -36,27 +36,29 @@ export function PageHeader({
         {Icon ? (
           <span
             className={cn(
-              "flex shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary",
+              "flex shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15",
               isHero ? "size-14" : "size-11",
             )}
           >
             <Icon className={isHero ? "size-6" : "size-5"} />
           </span>
         ) : null}
-        <div className="min-w-0 space-y-2">
+        <div className="min-w-0 space-y-1.5">
           <h1
             className={cn(
-              "tracking-tight",
-              isHero ? "text-4xl font-extrabold sm:text-5xl" : "text-2xl font-semibold",
+              "text-foreground tracking-tight",
+              isHero ? "text-4xl font-extrabold sm:text-5xl" : "text-2xl font-bold",
             )}
           >
             {title}
           </h1>
+          {/* 페이지 바닥(--page) 위에 놓이므로 흰 카드 안보다 대비를 한 단 올린다.
+              muted-foreground 는 카드 안 보조 텍스트용. */}
           {description ? (
             <p
               className={cn(
-                "max-w-2xl text-muted-foreground",
-                isHero ? "text-lg leading-7" : "text-sm",
+                "max-w-2xl text-foreground/75",
+                isHero ? "text-lg leading-7" : "text-sm leading-6",
               )}
             >
               {description}

@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 @import "tw-animate-css";
+/* 본문 한글 폰트 — Geist 에는 한글 글리프가 없어 OS 기본 폰트로 폴백됐다(맥/윈도 다르게 보임).
+   Pretendard 로 고정해 OS 무관하게 같은 화면을 보여준다. dynamic-subset 이라 필요한 글자만 받는다. */
+@import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -8,7 +11,8 @@
     --color-background: var(--background);
     --color-page: var(--page);
     --color-foreground: var(--foreground);
-    --font-sans: var(--font-geist-sans);
+    /* 한글은 Pretendard, 라틴/숫자는 Geist 가 먼저 잡는다 */
+    --font-sans: var(--font-geist-sans), "Pretendard Variable", Pretendard, system-ui, sans-serif;
     --font-mono: var(--font-geist-mono);
     --font-display: var(--font-gaegu);
     --color-chalkboard: var(--chalkboard);
@@ -57,13 +61,25 @@
     --radius-4xl: calc(var(--radius) + 16px);
 }
 
+/* 타이포 스케일 — 상거래 화면 가독성 우선.
+   shadcn 기본(sm=14px / xs=12px)은 데스크톱 대시보드 톤이라 본문이 작다.
+   후원자가 금액·물품을 읽고 결제까지 가는 화면이므로 한 단씩 올린다. */
+@theme {
+    --text-xs: 0.8125rem; /* 13px — 캡션·배지 */
+    --text-xs--line-height: 1.125rem;
+    --text-sm: 0.9375rem; /* 15px — 본문 기본 */
+    --text-sm--line-height: 1.5rem;
+    --text-base: 1rem; /* 16px */
+    --text-base--line-height: 1.625rem;
+}
+
 /* 레이어 규칙(design-system.md §5): 페이지 --page → 카드 --card/--background → 보조 영역 --muted.
    --background는 코드 전반에서 입력·다이얼로그·드롭다운의 서피스 색으로 쓰이므로 카드 레벨로 두고,
    페이지 바닥은 --page로 분리한다. 라이트 테마에서 이 둘이 같으면 카드가 배경에 녹는다. */
 :root {
-    --radius: 0.75rem;
+    --radius: 0.875rem;
     --background: oklch(1 0 0);
-    --page: oklch(0.954 0.003 250);
+    --page: oklch(0.968 0.003 250);
     --foreground: oklch(0.145 0 0);
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.145 0 0);
@@ -74,15 +90,16 @@
     --secondary: oklch(0.97 0 0);
     --secondary-foreground: oklch(0.205 0 0);
     --muted: oklch(0.958 0 0);
-    /* 보조 텍스트 — 흰 배경 대비 약 5.7:1 (WCAG AA 4.5:1 충족).
-       0.556 은 약 4.0:1 로 기준 미달이라 화면 전체가 흐려 보였다. */
-    --muted-foreground: oklch(0.47 0 0);
+    /* 보조 텍스트 — 흰 배경 대비 약 6.5:1 (WCAG AA 4.5:1 충족).
+       0.556 은 약 4.0:1 로 기준 미달이라 화면 전체가 흐려 보였다.
+       결제까지 가는 커머스 화면이라 라벨·캡션도 확실히 읽히도록 0.47 → 0.44. */
+    --muted-foreground: oklch(0.44 0 0);
     --accent: oklch(0.97 0 0);
     --accent-foreground: oklch(0.205 0 0);
     --destructive: oklch(0.577 0.245 27.325);
-    /* 카드 경계가 배경에 묻히지 않을 만큼만 진하게 (0.922 → 0.885) */
-    --border: oklch(0.885 0 0);
-    --input: oklch(0.885 0 0);
+    /* 페이지 바닥을 밝게(0.954 → 0.968) 올린 만큼, 카드 경계는 보더가 책임진다 (0.885 → 0.872) */
+    --border: oklch(0.872 0 0);
+    --input: oklch(0.872 0 0);
     --ring: oklch(0.708 0 0);
     --chart-1: oklch(0.646 0.222 41.116);
     --chart-2: oklch(0.6 0.118 184.704);
@@ -130,18 +147,18 @@
     --accent: oklch(0.962 0.028 172);
     --accent-foreground: oklch(0.3 0.08 172);
     --background: oklch(0.998 0.004 160);
-    --page: oklch(0.949 0.003 160);
+    --page: oklch(0.968 0.003 160);
     --card: oklch(1 0.002 160);
     --muted: oklch(0.953 0.018 160);
     --secondary: oklch(0.96 0.022 160);
-    --border: oklch(0.885 0.008 160);
+    --border: oklch(0.872 0.008 160);
     --sidebar: oklch(1 0.002 160);
     --sidebar-primary: oklch(0.56 0.1 172);
     --sidebar-primary-foreground: oklch(0.99 0 0);
     --sidebar-ring: oklch(0.56 0.1 172);
     --sidebar-accent: oklch(0.962 0.028 172);
     --sidebar-accent-foreground: oklch(0.3 0.08 172);
-    --sidebar-border: oklch(0.878 0.008 160);
+    --sidebar-border: oklch(0.872 0.008 160);
 }
 
 :root[data-theme="rose"] {
@@ -151,18 +168,18 @@
     --accent: oklch(0.965 0.03 10);
     --accent-foreground: oklch(0.32 0.1 10);
     --background: oklch(0.998 0.004 10);
-    --page: oklch(0.949 0.003 10);
+    --page: oklch(0.968 0.003 10);
     --card: oklch(1 0.002 10);
     --muted: oklch(0.953 0.018 10);
     --secondary: oklch(0.96 0.022 10);
-    --border: oklch(0.885 0.008 10);
+    --border: oklch(0.872 0.008 10);
     --sidebar: oklch(1 0.002 10);
     --sidebar-primary: oklch(0.66 0.18 10);
     --sidebar-primary-foreground: oklch(0.99 0 0);
     --sidebar-ring: oklch(0.66 0.18 10);
     --sidebar-accent: oklch(0.965 0.03 10);
     --sidebar-accent-foreground: oklch(0.32 0.1 10);
-    --sidebar-border: oklch(0.878 0.008 10);
+    --sidebar-border: oklch(0.872 0.008 10);
 }
 
 :root[data-theme="amber"] {
@@ -172,18 +189,18 @@
     --accent: oklch(0.97 0.04 75);
     --accent-foreground: oklch(0.38 0.1 75);
     --background: oklch(0.998 0.005 75);
-    --page: oklch(0.950 0.003 75);
+    --page: oklch(0.968 0.003 75);
     --card: oklch(1 0.002 75);
     --muted: oklch(0.954 0.02 75);
     --secondary: oklch(0.96 0.024 75);
-    --border: oklch(0.885 0.008 75);
+    --border: oklch(0.872 0.008 75);
     --sidebar: oklch(1 0.002 75);
     --sidebar-primary: oklch(0.74 0.15 75);
     --sidebar-primary-foreground: oklch(0.99 0 0);
     --sidebar-ring: oklch(0.74 0.15 75);
     --sidebar-accent: oklch(0.97 0.04 75);
     --sidebar-accent-foreground: oklch(0.38 0.1 75);
-    --sidebar-border: oklch(0.878 0.008 75);
+    --sidebar-border: oklch(0.872 0.008 75);
 }
 
 :root[data-theme="coral"] {
@@ -193,18 +210,18 @@
     --accent: oklch(0.97 0.03 40);
     --accent-foreground: oklch(0.38 0.09 40);
     --background: oklch(0.998 0.005 40);
-    --page: oklch(0.950 0.003 40);
+    --page: oklch(0.968 0.003 40);
     --card: oklch(1 0.002 40);
     --muted: oklch(0.954 0.02 40);
     --secondary: oklch(0.96 0.024 40);
-    --border: oklch(0.885 0.008 40);
+    --border: oklch(0.872 0.008 40);
     --sidebar: oklch(1 0.002 40);
     --sidebar-primary: oklch(0.70 0.17 40);
     --sidebar-primary-foreground: oklch(0.99 0 0);
     --sidebar-ring: oklch(0.70 0.17 40);
     --sidebar-accent: oklch(0.97 0.03 40);
     --sidebar-accent-foreground: oklch(0.38 0.09 40);
-    --sidebar-border: oklch(0.878 0.008 40);
+    --sidebar-border: oklch(0.872 0.008 40);
 }
 
 :root[data-theme="sky"] {
@@ -214,11 +231,11 @@
     --accent: oklch(0.965 0.03 230);
     --accent-foreground: oklch(0.36 0.1 230);
     --background: oklch(0.998 0.004 230);
-    --page: oklch(0.949 0.003 230);
+    --page: oklch(0.968 0.003 230);
     --card: oklch(1 0.002 230);
     --muted: oklch(0.953 0.018 230);
     --secondary: oklch(0.96 0.022 230);
-    --border: oklch(0.885 0.008 230);
+    --border: oklch(0.872 0.008 230);
     --sidebar: oklch(1 0.002 230);
     --sidebar-primary: oklch(0.70 0.14 230);
     --sidebar-primary-foreground: oklch(0.99 0 0);
@@ -316,7 +333,8 @@
     --secondary: oklch(0.269 0 0);
     --secondary-foreground: oklch(0.985 0 0);
     --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
+    /* 다크에서도 라벨이 묻히지 않게 (0.708 → 0.75) */
+    --muted-foreground: oklch(0.75 0 0);
     --accent: oklch(0.269 0 0);
     --accent-foreground: oklch(0.985 0 0);
     --destructive: oklch(0.704 0.191 22.216);

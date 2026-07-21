@@ -42,7 +42,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-theme="haggyo" suppressHydrationWarning>
+    // 기본 언어는 한국어. i18n 전환 시 lang 을 따라 바꾸는 건 별도 처리.
+    <html lang="ko" data-theme="haggyo" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeNoFlashScript }} />
       </head>

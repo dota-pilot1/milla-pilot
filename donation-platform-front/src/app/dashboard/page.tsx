@@ -2,7 +2,13 @@
 
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { HandCoins, LayoutDashboard, Package, Building2, Target } from "lucide-react";
+import {
+  HandCoins,
+  LayoutDashboard,
+  Package,
+  Building2,
+  Target,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { RequireAuth } from "@/widgets/guards/RequireAuth";
 import { PageHeader } from "@/shared/ui/PageHeader";
@@ -58,7 +64,7 @@ function DashboardInner() {
 
   return (
     <PageShell width="wide">
-      <div className="space-y-6">
+      <div className="space-y-8">
         <PageHeader
           icon={LayoutDashboard}
           title="대시보드"
@@ -73,7 +79,10 @@ function DashboardInner() {
         {isLoading ? (
           <DashboardSkeleton />
         ) : isError ? (
-          <EmptyState icon={LayoutDashboard} title="현황을 불러오지 못했습니다" />
+          <EmptyState
+            icon={LayoutDashboard}
+            title="현황을 불러오지 못했습니다"
+          />
         ) : !data?.facilities.length ? (
           <EmptyState icon={Building2} title="등록된 시설이 없어요" />
         ) : (
@@ -84,7 +93,13 @@ function DashboardInner() {
   );
 }
 
-function Overview({ facilities, items }: { facilities: Facility[]; items: DonationItem[] }) {
+function Overview({
+  facilities,
+  items,
+}: {
+  facilities: Facility[];
+  items: DonationItem[];
+}) {
   const totalGoal = items.reduce((s, it) => s + it.goalAmount, 0);
   const totalRaised = items.reduce((s, it) => s + it.raisedAmount, 0);
 
@@ -106,36 +121,59 @@ function Overview({ facilities, items }: { facilities: Facility[]; items: Donati
     .sort((a, b) => b.raised - a.raised);
 
   return (
-    <div className="space-y-6">
-      {/* 요약 지표 — 자연 접힘: 2열 → 4열 */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard icon={HandCoins} label="총 모금액" value={formatKRW(totalRaised)} />
-        <StatCard
-          icon={Target}
-          label="전체 진행률"
-          value={`${pctOf(totalRaised, totalGoal)}%`}
-          sub={`목표 ${formatKRW(totalGoal)}`}
-        />
-        <StatCard icon={Building2} label="참여 시설" value={`${facilities.length}곳`} />
-        <StatCard icon={Package} label="등록 물품" value={`${items.length}종`} />
-      </div>
+    <div className="space-y-8">
+      {/* 요약 블록 — 지표와 진행 상태는 한 덩어리로 묶는다 */}
+      <div className="space-y-4">
+        {/* 요약 지표 — 자연 접힘: 2열 → 4열 */}
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <StatCard
+            icon={HandCoins}
+            label="총 모금액"
+            value={formatKRW(totalRaised)}
+          />
+          <StatCard
+            icon={Target}
+            label="전체 진행률"
+            value={`${pctOf(totalRaised, totalGoal)}%`}
+            sub={`목표 ${formatKRW(totalGoal)}`}
+          />
+          <StatCard
+            icon={Building2}
+            label="참여 시설"
+            value={`${facilities.length}곳`}
+          />
+          <StatCard
+            icon={Package}
+            label="등록 물품"
+            value={`${items.length}종`}
+          />
+        </div>
 
-      {/* 물품 진행 상태 분포 */}
-      <Card className="p-5">
-        <h2 className="mb-4 text-sm font-semibold text-muted-foreground">물품 진행 상태</h2>
-        {items.length ? (
-          <div className="flex flex-wrap gap-2">
-            {STATUS_ORDER.filter((s) => statusCounts[s]).map((s) => (
-              <Badge key={s} variant={ITEM_STATUS_VARIANT[s]} className="gap-1.5">
-                {ITEM_STATUS_LABEL[s]}
-                <span className="font-bold">{statusCounts[s]}</span>
-              </Badge>
-            ))}
-          </div>
-        ) : (
-          <p className="text-sm text-muted-foreground">등록된 물품이 없습니다.</p>
-        )}
-      </Card>
+        {/* 물품 진행 상태 분포 */}
+        <Card className="p-5">
+          <h2 className="mb-3 text-sm font-semibold text-muted-foreground">
+            물품 진행 상태
+          </h2>
+          {items.length ? (
+            <div className="flex flex-wrap gap-2">
+              {STATUS_ORDER.filter((s) => statusCounts[s]).map((s) => (
+                <Badge
+                  key={s}
+                  variant={ITEM_STATUS_VARIANT[s]}
+                  className="gap-1.5"
+                >
+                  {ITEM_STATUS_LABEL[s]}
+                  <span className="font-bold">{statusCounts[s]}</span>
+                </Badge>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              등록된 물품이 없습니다.
+            </p>
+          )}
+        </Card>
+      </div>
 
       {/* 시설별 현황 */}
       <FacilityFundingList rows={perFacility} />
@@ -162,7 +200,9 @@ function StatCard({
       <div className="min-w-0">
         <p className="truncate text-xs text-muted-foreground">{label}</p>
         <p className="truncate text-lg font-bold tracking-tight">{value}</p>
-        {sub ? <p className="truncate text-xs text-muted-foreground">{sub}</p> : null}
+        {sub ? (
+          <p className="truncate text-xs text-muted-foreground">{sub}</p>
+        ) : null}
       </div>
     </Card>
   );
@@ -173,7 +213,10 @@ function DashboardSkeleton() {
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="h-20 animate-pulse rounded-xl border bg-card" />
+          <div
+            key={i}
+            className="h-20 animate-pulse rounded-xl border bg-card"
+          />
         ))}
       </div>
       <div className="h-64 animate-pulse rounded-xl border bg-card" />
