@@ -190,8 +190,11 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(25, 122, 114, 0.
   .site-header__inner { min-height: 65px; gap: 10px; }
   .brand img { width: 95px; }
   .brand span, .login-link, .header-actions > .button { display: none; }
-  .menu-button { display: grid; }
-  .mobile-menu { position: absolute; top: calc(100% - 3px); right: 0; z-index: 20; display: grid; min-width: 178px; padding: 8px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); box-shadow: 0 12px 26px rgba(24,66,62,.14); }
+  .mobile-menu { display: block; }
+  .mobile-menu > summary { display: grid; width: 38px; height: 38px; place-items: center; border: 0; border-radius: 9px; background: transparent; color: var(--ink); cursor: pointer; list-style: none; }
+  .mobile-menu > summary::-webkit-details-marker { display: none; }
+  .mobile-menu > nav { position: fixed; top: 70px; right: 14px; z-index: 50; display: none; min-width: 178px; padding: 8px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); box-shadow: 0 12px 26px rgba(24,66,62,.14); }
+  .mobile-menu[open] > nav { display: grid; }
   .mobile-menu a { padding: 11px 12px; border-radius: 8px; color: var(--ink); font-size: 13px; font-weight: 800; }
   .mobile-menu a:hover { background: var(--primary-soft); color: var(--primary-strong); }
   .hero__grid { padding: 45px 0; }

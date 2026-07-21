@@ -1,5 +1,4 @@
 import { Menu, UserRound } from "lucide-react";
-import { useState } from "react";
 import Button from "../../shared/ui/Button";
 import logo from "../../../도안/haggyo-logo.png";
 
@@ -17,8 +16,6 @@ const mobileMenuItems = [
 ];
 
 export default function SiteHeader({ onPrimaryAction, onLogin }) {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
   return (
     <header className="site-header">
       <div className="site-header__inner">
@@ -37,23 +34,16 @@ export default function SiteHeader({ onPrimaryAction, onLogin }) {
             <span>로그인</span>
           </Button>
           <Button onClick={onPrimaryAction}>프로젝트 참여하기</Button>
-          <Button
-            aria-controls="mobile-menu"
-            aria-expanded={isMobileMenuOpen}
-            variant="ghost"
-            className="menu-button"
-            aria-label="메뉴 열기"
-            onClick={() => setIsMobileMenuOpen((previous) => !previous)}
-          >
-            <Menu size={22} aria-hidden="true" />
-          </Button>
-          {isMobileMenuOpen && (
-            <nav className="mobile-menu" id="mobile-menu" aria-label="추가 메뉴">
+          <details className="mobile-menu">
+            <summary aria-label="메뉴 열기">
+              <Menu size={22} aria-hidden="true" />
+            </summary>
+            <nav aria-label="추가 메뉴">
               {mobileMenuItems.map(([label, href]) => (
-                <a href={href} key={href} onClick={() => setIsMobileMenuOpen(false)}>{label}</a>
+                <a href={href} key={href}>{label}</a>
               ))}
             </nav>
-          )}
+          </details>
         </div>
       </div>
     </header>
