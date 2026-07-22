@@ -214,6 +214,13 @@ const ISSUE_CARDS: {
     decision:
       "1차 MVP는 관리자 수동 구매와 증빙 입력으로 닫고, 이후 카페24 주문 웹훅/API를 붙여 자동 보강한다.",
   },
+  {
+    question: "사전 신청 페이지는 어디에, 언제 노출할까",
+    answer:
+      "사전 신청은 별도 서비스보다 본 프로젝트의 공개 URL로 두는 편이 자연스럽다. 프로젝트 소개에서 신청으로 이어지는 전환 흐름을 유지하고, 신청자는 로그인 전에 최소 정보만 남겨 진입 장벽을 낮춘다.",
+    decision:
+      "같은 Next.js 프론트에 비로그인 공개 라우트로 만든다. 신청 완료 후 가입·로그인·후원 전환을 선택적으로 연결하고, 신청 조회·결제·관리 화면부터 인증을 요구한다.",
+  },
 ];
 
 // ─── 저장소 · 배포 ──────────────────────────────────────────────────────────
@@ -410,7 +417,7 @@ export default function DevInfoPage() {
                   <div className="min-w-0 flex-1">
                     <h2 className="text-lg font-semibold tracking-tight">핵심 결정 질문</h2>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      아래 다섯 가지가 정리되어야 프로토타입, MVP, 실서비스 범위가 섞이지 않습니다.
+                      아래 여섯 가지가 정리되어야 프로토타입, MVP, 실서비스 범위가 섞이지 않습니다.
                     </p>
 
                     <div className="mt-4 space-y-3">
