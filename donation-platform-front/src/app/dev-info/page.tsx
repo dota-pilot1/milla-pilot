@@ -7,6 +7,7 @@ import {
   ClipboardCheck,
   ClipboardList,
   Folder,
+  ExternalLink,
   Gift,
   GitBranch,
   Globe,
@@ -137,6 +138,36 @@ const CONCLUSION =
 
 const REPO_URL = "https://github.com/dota-pilot1/milla-pilot";
 const DEPLOY_URL = "https://dxline-tallent.com";
+const WEB_RELEASE_URL = "https://github.com/dota-pilot1/milla-pilot/releases/tag/v0.1.0";
+
+const TAURI_RELEASES: {
+  app: string;
+  version: string;
+  status: string;
+  statusVariant: React.ComponentProps<typeof Badge>["variant"];
+  releaseUrl: string;
+  updaterUrl: string;
+  note: string;
+}[] = [
+  {
+    app: "Donation Admin",
+    version: "v0.1.12",
+    status: "정식 릴리즈",
+    statusVariant: "verified",
+    releaseUrl: "https://github.com/dota-pilot1/donation-admin-tauri/releases/latest",
+    updaterUrl: "https://github.com/dota-pilot1/donation-admin-tauri/releases/latest/download/latest.json",
+    note: "운영 관리자 데스크탑 앱. 별도 릴리즈 저장소에서 업데이트 artifact를 제공합니다.",
+  },
+  {
+    app: "Milla Dev Task",
+    version: "0.1.11",
+    status: "릴리즈 없음",
+    statusVariant: "shipping",
+    releaseUrl: "https://github.com/dota-pilot1/milla-dev-task-tauri/releases/latest",
+    updaterUrl: "https://github.com/dota-pilot1/milla-dev-task-tauri/releases/latest/download/latest.json",
+    note: "개발 태스크 관리 앱. updater endpoint는 잡혀 있지만 아직 공개 릴리즈가 없습니다.",
+  },
+];
 
 const INFRA_ROWS = [
   { label: "도메인", value: "dxline-tallent.com (Route 53)" },
@@ -304,19 +335,64 @@ export default function DevInfoPage() {
               <Card className="p-5">
                 <div className="flex gap-3">
                   <Tag className="mt-0.5 size-5 shrink-0 text-primary" />
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <h2 className="text-lg font-semibold tracking-tight">릴리즈</h2>
-                      <Badge variant="muted">아직 없음</Badge>
+                      <Badge variant="verified">v0.1.0</Badge>
                     </div>
                     <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                      웹·백엔드는 GitHub Releases 태그 없이 main 커밋을 그대로 배포하는 방식이라 현재
-                      등록된 릴리즈가 없습니다. Tauri 관리자 앱(데스크탑)은 별도 릴리스 절차를 따릅니다 —{" "}
+                      웹·백엔드는 main 커밋 배포 후 GitHub Release로 기록합니다. Tauri 앱은 데스크탑
+                      업데이트용 별도 릴리즈 주소를 함께 확인합니다 —{" "}
                       <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
                         docs-for-프로젝트 문서1/배포 관련/데스크탑 앱 릴리스 방법 (Tauri).md
                       </code>{" "}
                       참고.
                     </p>
+
+                    <a
+                      href={WEB_RELEASE_URL}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-3 inline-flex items-center gap-1.5 rounded-lg border bg-background px-3 py-1.5 text-sm font-medium text-primary hover:bg-muted"
+                    >
+                      <Tag className="size-4" />
+                      milla-pilot v0.1.0
+                      <ExternalLink className="size-3.5" />
+                    </a>
+
+                    <div className="mt-4 grid gap-3 lg:grid-cols-2">
+                      {TAURI_RELEASES.map((release) => (
+                        <div key={release.app} className="rounded-xl border bg-background p-3">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="text-sm font-semibold">{release.app}</h3>
+                            <Badge variant={release.statusVariant}>{release.status}</Badge>
+                          </div>
+                          <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                            현재 앱 버전 {release.version} · {release.note}
+                          </p>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            <a
+                              href={release.releaseUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1.5 rounded-lg border bg-card px-2.5 py-1.5 text-xs font-medium text-primary hover:bg-muted"
+                            >
+                              최신 릴리즈
+                              <ExternalLink className="size-3.5" />
+                            </a>
+                            <a
+                              href={release.updaterUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1.5 rounded-lg border bg-card px-2.5 py-1.5 text-xs font-medium text-primary hover:bg-muted"
+                            >
+                              latest.json
+                              <ExternalLink className="size-3.5" />
+                            </a>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </Card>
