@@ -52,7 +52,7 @@ export function PageHeader({
           >
             {title}
           </h1>
-          {/* 페이지 바닥(--page) 위에 놓이므로 흰 카드 안보다 대비를 한 단 올린다.
+          {/* 본문 위 설명은 카드 안 보조 텍스트보다 대비를 한 단 올린다.
               muted-foreground 는 카드 안 보조 텍스트용. */}
           {description ? (
             <p

@@ -24,7 +24,7 @@ import { Chip } from "@/shared/ui/Chip";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { PageHeader } from "@/shared/ui/PageHeader";
 import { PageShell } from "@/shared/ui/PageShell";
-import { TextInput } from "@/shared/ui/TextInput";
+import { SearchInput } from "@/shared/ui/SearchInput";
 import { cn } from "@/shared/lib/utils";
 import { formatKRW } from "@/shared/lib/format";
 import { useDebouncedValue } from "@/shared/lib/useDebouncedValue";
@@ -116,15 +116,14 @@ export default function PurchaseMonitoringPage() {
             <Card className="overflow-hidden">
               <div className="border-b p-4">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                  <div className="relative min-w-0 flex-1 lg:max-w-md">
-                    <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                    <TextInput
-                      value={query}
-                      onChange={(event) => setQuery(event.target.value)}
-                      placeholder="물품, 시설, 판매처, 송장 검색"
-                      className="h-9 pl-9"
-                    />
-                  </div>
+                  <SearchInput
+                    wrapperClassName="min-w-0 flex-1 lg:max-w-md"
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                    onClear={() => setQuery("")}
+                    placeholder="물품, 시설, 판매처, 송장 검색"
+                    className="h-9"
+                  />
                   <div className="flex flex-wrap gap-2">
                     {PHASE_FILTERS.map((filter) => (
                       <Chip

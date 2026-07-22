@@ -75,9 +75,8 @@
     --text-base--line-height: 1.625rem;
 }
 
-/* 레이어 규칙(design-system.md §5): 페이지 --page → 카드 --card/--background → 보조 영역 --muted.
-   --background는 코드 전반에서 입력·다이얼로그·드롭다운의 서피스 색으로 쓰이므로 카드 레벨로 두고,
-   페이지 바닥은 --page로 분리한다. 라이트 테마에서 이 둘이 같으면 카드가 배경에 녹는다. */
+/* 레이어 규칙(design-system.md §5): 본문 --background(white) → 카드 --card → 보조 영역 --muted.
+   --page는 인증/마케팅처럼 별도 바닥 톤이 필요한 화면에서만 제한적으로 쓴다. */
 :root {
     --radius: 0.875rem;
     --background: oklch(1 0 0);
@@ -99,7 +98,7 @@
     --accent: oklch(0.97 0 0);
     --accent-foreground: oklch(0.205 0 0);
     --destructive: oklch(0.577 0.245 27.325);
-    /* 페이지 바닥을 밝게(0.954 → 0.968) 올린 만큼, 카드 경계는 보더가 책임진다 (0.885 → 0.872) */
+    /* 흰 본문 위에서 카드 경계는 보더와 shadow-sm이 책임진다. */
     --border: oklch(0.872 0 0);
     --input: oklch(0.872 0 0);
     --ring: oklch(0.708 0 0);
@@ -143,24 +142,24 @@
    ────────────────────────────────────────────────────────────── */
 /* 학교 브랜드 테마 — primary는 로고 틸그린. CTA 코랄은 위 고정 토큰 사용 */
 :root[data-theme="haggyo"] {
-    --primary: oklch(0.56 0.1 172);
+    --primary: oklch(0.58 0.13 172);
     --primary-foreground: oklch(0.99 0 0);
-    --ring: oklch(0.56 0.1 172);
-    --accent: oklch(0.962 0.028 172);
-    --accent-foreground: oklch(0.3 0.08 172);
-    --background: oklch(0.998 0.004 160);
-    --page: oklch(0.968 0.003 160);
+    --ring: oklch(0.58 0.13 172);
+    --accent: oklch(0.97 0.024 172);
+    --accent-foreground: oklch(0.28 0.09 172);
+    --background: oklch(1 0.002 160);
+    --page: oklch(0.978 0.002 160);
     --card: oklch(1 0.002 160);
-    --muted: oklch(0.953 0.018 160);
-    --secondary: oklch(0.96 0.022 160);
-    --border: oklch(0.872 0.008 160);
+    --muted: oklch(0.965 0.012 160);
+    --secondary: oklch(0.968 0.014 160);
+    --border: oklch(0.865 0.01 160);
     --sidebar: oklch(1 0.002 160);
-    --sidebar-primary: oklch(0.56 0.1 172);
+    --sidebar-primary: oklch(0.58 0.13 172);
     --sidebar-primary-foreground: oklch(0.99 0 0);
-    --sidebar-ring: oklch(0.56 0.1 172);
-    --sidebar-accent: oklch(0.962 0.028 172);
-    --sidebar-accent-foreground: oklch(0.3 0.08 172);
-    --sidebar-border: oklch(0.872 0.008 160);
+    --sidebar-ring: oklch(0.58 0.13 172);
+    --sidebar-accent: oklch(0.97 0.024 172);
+    --sidebar-accent-foreground: oklch(0.28 0.09 172);
+    --sidebar-border: oklch(0.865 0.01 160);
 }
 
 :root[data-theme="rose"] {
@@ -364,6 +363,6 @@
     }
 
     body {
-        @apply bg-page text-foreground;
+        @apply bg-background text-foreground;
     }
 }

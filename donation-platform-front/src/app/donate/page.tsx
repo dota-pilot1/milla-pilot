@@ -45,7 +45,7 @@ export default function DonatePage() {
         <PageHeader
           icon={HandCoins}
           title="후원하기"
-          description="시설이 직접 검수해 올린 준비물 목표에 참여합니다. 시설을 선택하면 지금 필요한 물품을 볼 수 있어요."
+          description="시설을 선택하면 지금 필요한 물품과 진행 상황을 볼 수 있어요."
           actions={<DonationGuideDialog />}
         />
 

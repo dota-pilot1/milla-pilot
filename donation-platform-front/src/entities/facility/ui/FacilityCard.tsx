@@ -5,7 +5,6 @@ import { useState, type MouseEvent } from "react";
 import {
   ArrowRight,
   Building2,
-  ChevronRight,
   Loader2,
   MapPin,
   PackageCheck,
@@ -36,24 +35,6 @@ function shouldShowPending(event: MouseEvent<HTMLAnchorElement>) {
   );
 }
 
-const STATUS_HELP: Record<FacilityStatus, string> = {
-  RECRUITING: "지금 필요한 준비물을 고르고 함께 채울 수 있어요.",
-  BUYING: "모인 후원으로 시설별 통합 구매가 진행 중이에요.",
-  SHIPPING: "구매된 물품이 시설로 이동하고 있어요.",
-};
-
-const STATUS_TITLE: Record<FacilityStatus, string> = {
-  RECRUITING: "함께 채우는 중",
-  BUYING: "구매 진행 중",
-  SHIPPING: "배송 이동 중",
-};
-
-const ACTION_LABEL: Record<FacilityStatus, string> = {
-  RECRUITING: "함께 채우기",
-  BUYING: "진행 보기",
-  SHIPPING: "진행 보기",
-};
-
 const STATUS_ICON = {
   RECRUITING: ShoppingBag,
   BUYING: PackageCheck,
@@ -76,14 +57,12 @@ export function FacilityCard({ facility }: { facility: Facility }) {
     >
       <Card
         className={cn(
-          "relative flex h-full min-h-72 flex-col overflow-hidden p-5 transition-all duration-150 group-hover:-translate-y-0.5 group-hover:border-primary/40 group-hover:shadow-md group-active:translate-y-0 group-active:scale-[0.99]",
-          pending && "border-primary/50 bg-muted/20 shadow-md ring-2 ring-ring/25",
+          "flex h-full min-h-72 flex-col overflow-hidden p-0 transition-all duration-150 group-hover:-translate-y-0.5 group-hover:border-primary/40 group-hover:shadow-md group-active:translate-y-0 group-active:scale-[0.99]",
+          pending && "border-primary/50 bg-background shadow-md ring-2 ring-ring/25",
         )}
       >
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-primary/70" />
-
-        <div className="flex items-start gap-3 pt-1">
-          <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-base font-bold text-primary ring-1 ring-primary/10">
+        <div className="flex items-start gap-3 border-b bg-card p-5">
+          <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-base font-bold text-primary ring-1 ring-primary/15">
             <StatusIcon className="size-5" />
           </span>
           <div className="min-w-0 flex-1">
@@ -99,58 +78,42 @@ export function FacilityCard({ facility }: { facility: Facility }) {
             <Badge variant={FACILITY_STATUS_VARIANT[facility.status]} className="h-7 px-3">
               {FACILITY_STATUS_LABEL[facility.status]}
             </Badge>
-            <ChevronRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
           </div>
         </div>
 
-        <div className="mt-4 flex flex-1 flex-col">
+        <div className="flex flex-1 flex-col p-5">
           {facility.description ? (
-            <p className="min-h-10 line-clamp-2 text-sm leading-5 text-muted-foreground">
+            <p className="min-h-10 line-clamp-2 text-sm leading-5 text-foreground/80">
               {facility.description}
             </p>
           ) : (
-            <p className="min-h-10 text-sm leading-5 text-muted-foreground">
-              시설별 준비물 목표를 확인할 수 있습니다.
+            <p className="min-h-10 text-sm leading-5 text-foreground/80">
+              지금 필요한 물품과 진행 상황을 확인할 수 있습니다.
             </p>
           )}
 
-          <div className="mt-5 space-y-3 rounded-xl bg-muted/45 p-3">
-            <div className="flex flex-wrap gap-2">
-              <span className="inline-flex min-h-8 items-center gap-2 rounded-full bg-background px-3 text-xs font-semibold text-foreground/75 shadow-sm">
-                <Building2 className="size-3.5 text-primary" />
-                {FACILITY_TYPE_LABEL[facility.type]}
+          <div className="mt-5 flex flex-wrap gap-2">
+            <span className="inline-flex min-h-8 items-center gap-2 rounded-full border bg-background px-3 text-xs font-semibold text-foreground/75 shadow-sm">
+              <Building2 className="size-3.5 text-primary" />
+              {FACILITY_TYPE_LABEL[facility.type]}
+            </span>
+            {facility.verified ? (
+              <span className="inline-flex min-h-8 items-center gap-2 rounded-full border bg-background px-3 text-xs font-semibold text-foreground/75 shadow-sm">
+                <ShieldCheck className="size-3.5 text-primary" />
+                자격 확인
               </span>
-              {facility.verified ? (
-                <span className="inline-flex min-h-8 items-center gap-2 rounded-full bg-background px-3 text-xs font-semibold text-foreground/75 shadow-sm">
-                  <ShieldCheck className="size-3.5 text-primary" />
-                  자격 확인
-                </span>
-              ) : null}
-            </div>
-
-            <div className="flex items-start gap-3 rounded-xl bg-background p-3 text-sm shadow-sm">
-              <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-background text-primary shadow-sm">
-                <StatusIcon className="size-3.5" />
-              </span>
-              <div>
-                <p className="text-xs font-semibold text-primary">{STATUS_TITLE[facility.status]}</p>
-                <p className="mt-0.5 leading-5 text-foreground/80">{STATUS_HELP[facility.status]}</p>
-              </div>
-            </div>
+            ) : null}
           </div>
         </div>
 
-        <div className="mt-5 flex items-center justify-between gap-3 border-t pt-4">
-          <span className="min-w-0 truncate text-xs font-medium text-foreground/70">
-            시설 준비물 목표
-          </span>
+        <div className="flex items-center justify-end border-t bg-background px-5 py-4">
           <span
             className={cn(
               buttonVariants({ variant: "default", size: "sm" }),
               "min-w-36 shadow-sm",
             )}
           >
-            {pending ? "여는 중" : ACTION_LABEL[facility.status]}
+            {pending ? "여는 중" : "상세 보기"}
             {pending ? (
               <Loader2 className="size-4 animate-spin" />
             ) : (

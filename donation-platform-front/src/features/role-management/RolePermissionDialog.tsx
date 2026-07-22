@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Search } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { permissionApi } from "@/entities/permission/api/permissionApi";
 import type { Permission } from "@/entities/permission/model/types";
 import { roleApi } from "@/entities/user/api/roleApi";
 import type { Role } from "@/entities/user/model/types";
 import { toast, toastError } from "@/shared/lib/toast";
+import { SearchInput } from "@/shared/ui/SearchInput";
 
 type Props = {
   role: Role | null;
@@ -190,15 +190,14 @@ export function RolePermissionDialog({ role, onClose }: Props) {
                   카테고리별 권한을 선택해 {role.name} 롤에 부여합니다.
                 </p>
               </div>
-              <div className="relative w-full sm:w-72">
-                <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  value={keyword}
-                  onChange={(event) => setKeyword(event.target.value)}
-                  placeholder="권한명, 코드 검색"
-                  className="h-9 w-full rounded-md border border-input bg-background pl-8 pr-3 text-sm outline-none focus:border-primary"
-                />
-              </div>
+              <SearchInput
+                wrapperClassName="w-full sm:w-72"
+                value={keyword}
+                onChange={(event) => setKeyword(event.target.value)}
+                onClear={() => setKeyword("")}
+                placeholder="권한명, 코드 검색"
+                className="h-9"
+              />
             </div>
 
             {isLoading ? (

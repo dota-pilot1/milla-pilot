@@ -178,7 +178,7 @@ function FacilityDonate() {
           <EmptyState
             icon={PackageOpen}
             title="등록된 후원 물품이 없습니다"
-            description="이 시설의 준비물 목표가 곧 올라옵니다."
+            description="이 시설의 필요 물품이 곧 올라옵니다."
           />
         ) : (
           <div className="grid gap-5 sm:grid-cols-2">

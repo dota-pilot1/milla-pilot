@@ -1,7 +1,6 @@
 "use client";
 
-import { Search } from "lucide-react";
-import { TextInput } from "@/shared/ui/TextInput";
+import { SearchInput } from "@/shared/ui/SearchInput";
 import { Chip } from "@/shared/ui/Chip";
 import { Card } from "@/shared/ui/Card";
 import {
@@ -50,17 +49,7 @@ export function FacilityFilterBar({
   return (
     <Card className="p-4">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-        <div className="relative lg:w-80">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <TextInput
-            className="h-10 pl-9"
-            placeholder="시설명·지역 검색"
-            value={filters.query}
-            onChange={(e) => onChange({ ...filters, query: e.target.value })}
-          />
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 lg:flex-1">
           <Chip
             active={allActive}
             onClick={() => onChange({ ...filters, status: null, type: null })}
@@ -88,6 +77,14 @@ export function FacilityFilterBar({
             </Chip>
           ))}
         </div>
+
+        <SearchInput
+          wrapperClassName="lg:ml-auto lg:w-80"
+          placeholder="시설명·지역 검색"
+          value={filters.query}
+          onChange={(e) => onChange({ ...filters, query: e.target.value })}
+          onClear={() => onChange({ ...filters, query: "" })}
+        />
       </div>
     </Card>
   );

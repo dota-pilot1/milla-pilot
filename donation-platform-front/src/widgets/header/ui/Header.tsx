@@ -328,13 +328,13 @@ function SidebarLink({ item, depth = 0 }: { item: MenuItem; depth?: number }) {
       href={item.path}
       target={item.isExternal ? "_blank" : undefined}
       rel={item.isExternal ? "noopener noreferrer" : undefined}
-      className={cn(
-        "flex items-center rounded-md transition-colors",
-        depth > 0 ? "h-9 gap-2 px-2 text-[13px]" : "h-10 gap-2.5 px-2.5 text-sm",
-        active
-          ? "bg-primary text-primary-foreground"
-          : "text-muted-foreground hover:bg-accent hover:text-foreground",
-      )}
+        className={cn(
+          "flex items-center rounded-md transition-colors",
+          depth > 0 ? "h-9 gap-2 px-2 text-[13px]" : "h-10 gap-2.5 px-2.5 text-sm",
+          active
+            ? "bg-primary text-primary-foreground"
+            : "text-foreground/65 hover:bg-primary/10 hover:text-primary",
+        )}
       style={{ paddingLeft: depth > 0 ? 14 : undefined }}
     >
       <Icon className="h-4 w-4 shrink-0" />
@@ -369,8 +369,8 @@ function SidebarSection({
         className={cn(
           "flex h-10 w-full items-center gap-2.5 rounded-md px-2.5 text-sm font-semibold transition-colors",
           active
-            ? "text-foreground"
-            : "text-muted-foreground hover:bg-accent hover:text-foreground",
+            ? "text-primary"
+            : "text-foreground/65 hover:bg-primary/10 hover:text-primary",
         )}
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
@@ -385,7 +385,7 @@ function SidebarSection({
         />
       </button>
       {open ? (
-        <div className="ml-3 mt-1 space-y-0.5 border-l border-sidebar-border py-0.5 pl-3">
+        <div className="ml-3 mt-1 space-y-0.5 border-l border-primary/15 py-0.5 pl-3">
           {items.flatMap((child) => (child.children.length > 0 ? child.children : [child])).map((child) => (
             <SidebarLink key={child.id} item={child} depth={1} />
           ))}
@@ -403,8 +403,8 @@ function Sidebar({ tree }: { tree: MenuItem[] }) {
   const sections = normalizeAdminSections(admin);
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-sidebar-border bg-sidebar lg:flex lg:flex-col">
-      <div className="flex h-14 items-center border-b border-sidebar-border bg-sidebar px-4">
+    <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-primary/20 bg-primary/[0.035] lg:flex lg:flex-col">
+      <div className="flex h-14 items-center border-b border-primary/15 bg-primary/[0.055] px-4">
         <Link href="/dashboard" className="flex items-center transition-opacity hover:opacity-80">
           <BrandLogo size="sm" priority />
         </Link>
@@ -434,7 +434,7 @@ function Sidebar({ tree }: { tree: MenuItem[] }) {
         ))}
       </nav>
       {devInfo ? (
-        <div className="border-t border-sidebar-border px-3 py-3">
+        <div className="border-t border-primary/15 px-3 py-3">
           <SidebarLink item={devInfo} />
         </div>
       ) : null}
@@ -608,22 +608,22 @@ function AppShell({
   const title = useMemo(() => getCurrentPageTitle(pathname, tree), [pathname, tree]);
 
   return (
-    <div className="min-h-screen bg-page">
+    <div className="min-h-screen bg-background">
       <Sidebar tree={tree} />
       <div className="min-h-screen lg:pl-64">
-        <header className="fixed left-0 right-0 top-0 z-30 box-border flex h-14 items-center justify-between border-b border-border bg-sidebar px-4 text-sidebar-foreground lg:left-64">
+        <header className="fixed left-0 right-0 top-0 z-30 box-border flex h-14 items-center justify-between border-b border-primary/25 bg-primary/[0.06] px-4 text-foreground shadow-sm shadow-primary/5 lg:left-64">
           <div className="flex min-w-0 items-center gap-2.5">
             <MobileNav tree={tree} />
             <div className="min-w-0 lg:hidden">
               <Link
                 href="/dashboard"
-                className="block truncate text-sm font-bold leading-tight tracking-tight text-sidebar-foreground"
+                className="block truncate text-sm font-bold leading-tight tracking-tight text-primary"
               >
                 Milla
               </Link>
               <p className="truncate text-xs leading-tight text-muted-foreground">{title}</p>
             </div>
-            <p className="hidden truncate text-sm font-semibold text-sidebar-foreground lg:block">{title}</p>
+            <p className="hidden truncate text-sm font-bold text-primary lg:block">{title}</p>
           </div>
           <div className="flex items-center gap-2">
             <LanguageSelect />

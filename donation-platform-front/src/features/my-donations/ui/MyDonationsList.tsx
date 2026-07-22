@@ -102,7 +102,7 @@ function DonationRowsPanel({
       <div
         ref={innerRef}
         className={cn(
-          "space-y-5 border-t bg-muted/30 p-5 transition-[opacity,transform] duration-150 ease-out motion-reduce:transition-none",
+          "space-y-5 border-t bg-background p-5 transition-[opacity,transform] duration-150 ease-out motion-reduce:transition-none",
           expanded ? "translate-y-0 opacity-100" : "-translate-y-1 opacity-0",
         )}
       >
@@ -113,10 +113,10 @@ function DonationRowsPanel({
           return (
             <div
               key={ig.item.id}
-              className="space-y-5 rounded-2xl border bg-card p-5 shadow-sm"
+              className="space-y-5 rounded-2xl border bg-card p-5 shadow-sm ring-1 ring-border/40"
             >
               <div className="flex items-start gap-3">
-                <span className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-3xl ring-1 ring-primary/10">
+                <span className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-accent text-3xl ring-1 ring-primary/15">
                   {ig.item.emoji || "📦"}
                 </span>
                 <div className="min-w-0 flex-1">
@@ -152,12 +152,12 @@ function DonationRowsPanel({
                 <PurchaseStatusCard
                   order={ig.purchaseOrder}
                   compact
-                  className="border-dashed bg-muted/40 shadow-none"
+                  className="border-dashed bg-accent/35 shadow-none"
                 />
               ) : null}
 
               {count > 1 ? (
-                <div className="rounded-xl border border-dashed bg-muted/30 px-4 py-3">
+                <div className="rounded-xl border border-dashed bg-accent/30 px-4 py-3">
                   <p className="text-sm font-medium text-muted-foreground">
                     나의 후원 {count}건
                   </p>
@@ -196,20 +196,20 @@ export function MyDonationsList({ contributions }: { contributions: MyContributi
           <Card
             key={g.facility.id}
             className={cn(
-              "overflow-hidden transition-colors",
-              expanded && "border-primary/25",
+              "overflow-hidden transition-all",
+              expanded && "border-primary/35 shadow-md ring-1 ring-primary/10",
             )}
           >
             <button
               type="button"
               className={cn(
-                "flex w-full items-center gap-4 p-5 text-left transition-colors hover:bg-muted/30",
-                expanded && "bg-muted/25",
+                "flex w-full items-center gap-4 bg-card p-5 text-left transition-colors hover:bg-accent/35",
+                expanded && "bg-accent/30",
               )}
               onClick={() => setOpenId(expanded ? null : g.facility.id)}
               aria-expanded={expanded}
             >
-              <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-base font-bold text-primary ring-1 ring-primary/10">
+              <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-base font-bold text-primary-foreground shadow-sm ring-1 ring-primary/20">
                 {g.facility.avatarInitial || g.facility.name.charAt(0)}
               </span>
               <div className="min-w-0 flex-1">

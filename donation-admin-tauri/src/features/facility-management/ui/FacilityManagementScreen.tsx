@@ -299,13 +299,7 @@ export function FacilityManagementScreen({ token }: { token: string }) {
           }
         />
 
-        <div className="mb-4 grid gap-3 lg:grid-cols-[minmax(260px,1fr)_160px_170px_170px_auto]">
-          <SearchInput
-            value={query}
-            placeholder="시설명·코드·지역 검색"
-            onChange={(e) => setQuery(e.target.value)}
-            onClear={() => setQuery("")}
-          />
+        <div className="mb-4 grid gap-3 lg:grid-cols-[160px_170px_170px_auto_minmax(260px,1fr)]">
           <Select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as FacilityStatus | "ALL")}
@@ -342,6 +336,13 @@ export function FacilityManagementScreen({ token }: { token: string }) {
           <Button size="sm" variant="outline" className="h-10 px-3" onClick={clearFilters}>
             초기화
           </Button>
+          <SearchInput
+            className="min-w-0 lg:ml-auto"
+            value={query}
+            placeholder="시설명·코드·지역 검색"
+            onChange={(e) => setQuery(e.target.value)}
+            onClear={() => setQuery("")}
+          />
         </div>
 
         {error && <p className="text-[13px] font-semibold text-red-600">{error}</p>}
