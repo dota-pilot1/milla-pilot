@@ -283,9 +283,6 @@ export function ContributionsScreen({ token, refreshKey = 0 }: { token: string; 
         <div className="mb-4 flex items-center justify-between gap-4">
           <div className="min-w-0">
             <h2 className="text-[18px] font-extrabold tracking-tight text-zinc-900">후원 내역</h2>
-            <p className="mt-1 text-[12px] font-semibold text-zinc-400">
-              {rows.length ? `${rows.length}건 · ${won(total)} · 최신순` : "플랫폼 전체 후원 기록"}
-            </p>
           </div>
           <div className="shrink-0">
             <Button
