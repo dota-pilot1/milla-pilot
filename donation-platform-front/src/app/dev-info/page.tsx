@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useState } from "react";
 import {
+  AlertTriangle,
   Boxes,
   ClipboardCheck,
   ClipboardList,
@@ -13,9 +14,12 @@ import {
   Globe,
   ListChecks,
   Package,
+  Scale,
   ShieldCheck,
+  ShoppingCart,
   Tag,
   Truck,
+  UserCog,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { RequireAuth } from "@/widgets/guards/RequireAuth";
@@ -27,10 +31,11 @@ import { PageHeader } from "@/shared/ui/PageHeader";
 import { PageShell } from "@/shared/ui/PageShell";
 import { Tabs, TabPanel, type TabItem } from "@/shared/ui/Tabs";
 
-type DevInfoTab = "development" | "resources" | "todo";
+type DevInfoTab = "development" | "issues" | "resources" | "todo";
 
 const TABS: readonly TabItem<DevInfoTab>[] = [
   { value: "development", label: "개발 계획", icon: ClipboardList },
+  { value: "issues", label: "주요 문제", icon: AlertTriangle },
   { value: "resources", label: "저장소 · 배포", icon: GitBranch },
   { value: "todo", label: "할 일", icon: ListChecks },
 ];
@@ -133,6 +138,83 @@ const WORKFLOW_STAGES: {
 
 const CONCLUSION =
   "자사몰·도매몰을 붙이는 목적은 쇼핑몰을 운영하려는 것이 아니라, 시설의 필요 물품을 표준화하고 플랫폼 관리자의 구매·배송·증빙 과정을 관리하기 위한 것이다. 이 서비스의 본질은 커머스가 아니라 \"시설 후원 물품 구매대행 + 투명 증빙 플랫폼\"으로 정의하는 것이 가장 맞다.";
+
+// ─── 주요 문제 ──────────────────────────────────────────────────────────────
+
+const PAYMENT_MODEL_COMPARISON: {
+  title: string;
+  badge: string;
+  variant: React.ComponentProps<typeof Badge>["variant"];
+  icon: LucideIcon;
+  points: string[];
+}[] = [
+  {
+    title: "후원자가 플랫폼 내부에서 직접 결제",
+    badge: "복잡도 높음",
+    variant: "shipping",
+    icon: ShoppingCart,
+    points: [
+      "후원 물품 화면부터 주문 생성, PG 결제, 취소·환불, 현금영수증, 재고 차감까지 플랫폼이 직접 책임진다.",
+      "카페24 상품을 보여주더라도 실제 주문·결제를 우리 화면 안으로 가져오면 카페24는 상품·재고 백오피스에 가까워진다.",
+      "공동 모금, 부분 결제, 목표 미달, 구매 전 환불, 구매 후 환불 기준을 모두 별도로 설계해야 한다.",
+      "실서비스 전 법무·세무·정산 검토 범위가 커지고, MVP 검증보다 결제 운영 리스크가 먼저 커진다.",
+    ],
+  },
+  {
+    title: "모금 완료 후 플랫폼 관리자가 구매",
+    badge: "현실적",
+    variant: "verified",
+    icon: UserCog,
+    points: [
+      "후원자는 물품 필요성과 목표를 확인하고 참여 의사를 남기며, 실제 구매는 관리자 워크플로우에서 처리한다.",
+      "카페24 자사몰을 쓰는 경우 상품·장바구니·결제·주문·영수증·송장 처리는 카페24가 담당한다.",
+      "우리 플랫폼은 주문번호, 상품번호, 송장, 영수증 상태를 웹훅/API로 받아 후원자 화면에 증빙으로 보여준다.",
+      "MVP에서는 관리자 수동 구매·수동 증빙 입력으로 시작하고, 이후 카페24 웹훅/API 연동을 붙일 수 있다.",
+    ],
+  },
+];
+
+const ISSUE_CARDS: {
+  question: string;
+  answer: string;
+  decision: string;
+}[] = [
+  {
+    question: "후원 물품 등록 프로세스는 어떻게?",
+    answer:
+      "시설이 필요한 품목을 요청하거나 표준 품목에서 선택하고, 운영자가 개인정보 노출·목적 적합성·가격 적정성·공급 가능 여부를 검토한 뒤 후원 물품으로 전환한다.",
+    decision:
+      "MVP는 Tauri 관리자에서 시설·품목 등록과 승인 상태를 관리하고, 웹은 승인된 물품만 공개한다.",
+  },
+  {
+    question: "후원 물품 구매 주체는 누가 되어야 하나",
+    answer:
+      "후원자가 직접 결제하면 결제·환불·정산 책임이 커진다. 모금 또는 참여 확정 이후 플랫폼 관리자가 구매하면 구매처 변경, 금액 차이, 증빙 수집을 운영 흐름 안에서 통제할 수 있다.",
+    decision:
+      "1차 MVP 구매 주체는 플랫폼 관리자다. 카페24 자사몰 연동은 구매 결과 수집 자동화로 확장한다.",
+  },
+  {
+    question: "역할별 권한 관리",
+    answer:
+      "플랫폼 관리자, 시설 관리자, 후원자 역할을 분리해야 한다. 시설은 자기 시설의 요청·수령확인만, 플랫폼 관리자는 승인·구매·배송·증빙을, 후원자는 공개 정보와 본인 참여 내역만 접근한다.",
+    decision:
+      "현재 Role/Permission 구조를 유지하되 구매 실행, 송장 등록, 증빙 업로드, 수령확인 권한을 별도 permission으로 쪼갠다.",
+  },
+  {
+    question: "프로토타입은 어디까지",
+    answer:
+      "프로토타입은 실제 저장/결제/외부 주문이 없는 화면 검증 범위다. 상품 카드, 진행 상태, 증빙 타임라인, 관리자 구매 입력 화면의 사용성을 먼저 확인한다.",
+    decision:
+      "프로토타입 화면에는 저장되지 않음 또는 준비 중 상태를 명확히 표시하고, 운영 데이터처럼 오해되는 숫자는 넣지 않는다.",
+  },
+  {
+    question: "MVP는 어디까지",
+    answer:
+      "MVP는 시설·후원 물품 등록, 후원 참여 기록, 목표 달성 잠금, 관리자 구매 실행, 송장 등록, 수령확인, 증빙 노출까지다. 결제 내재화와 완전 자동 배송 추적은 후속이다.",
+    decision:
+      "1차 MVP는 관리자 수동 구매와 증빙 입력으로 닫고, 이후 카페24 주문 웹훅/API를 붙여 자동 보강한다.",
+  },
+];
 
 // ─── 저장소 · 배포 ──────────────────────────────────────────────────────────
 
@@ -271,6 +353,86 @@ export default function DevInfoPage() {
                   <div>
                     <h2 className="text-lg font-semibold tracking-tight">한 줄 결론</h2>
                     <p className="mt-1 text-sm leading-6 text-muted-foreground">{CONCLUSION}</p>
+                  </div>
+                </div>
+              </Card>
+            </TabPanel>
+          ) : null}
+
+          {tab === "issues" ? (
+            <TabPanel value="issues" idPrefix="dev-info" className="space-y-5">
+              <Card className="p-5">
+                <div className="flex gap-3">
+                  <Scale className="mt-0.5 size-5 shrink-0 text-primary" />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h2 className="text-lg font-semibold tracking-tight">구매 방식 비교</h2>
+                      <Badge variant="verified">관리자 구매 우선</Badge>
+                    </div>
+                    <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                      플랫폼 내부 직접 결제는 사용자 경험은 단순해 보이지만 주문·결제·환불·정산 책임이
+                      플랫폼으로 넘어옵니다. 반대로 관리자 구매 방식은 MVP에서 검증해야 할 후원 흐름을 먼저
+                      닫고, 카페24 자사몰 연동은 주문·배송·영수증 자동 수집으로 단계적으로 붙일 수 있습니다.
+                    </p>
+
+                    <div className="mt-4 grid gap-3 lg:grid-cols-2">
+                      {PAYMENT_MODEL_COMPARISON.map((model) => (
+                        <div key={model.title} className="rounded-xl border bg-background p-4">
+                          <div className="flex items-start gap-3">
+                            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                              <model.icon className="size-4" />
+                            </span>
+                            <div className="min-w-0">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <h3 className="text-sm font-semibold">{model.title}</h3>
+                                <Badge variant={model.variant}>{model.badge}</Badge>
+                              </div>
+                              <ul className="mt-3 space-y-2 text-xs leading-5 text-muted-foreground">
+                                {model.points.map((point) => (
+                                  <li key={point} className="flex gap-2">
+                                    <span className="mt-2 size-1.5 shrink-0 rounded-full bg-muted-foreground/50" />
+                                    <span>{point}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="p-5">
+                <div className="flex gap-3">
+                  <AlertTriangle className="mt-0.5 size-5 shrink-0 text-primary" />
+                  <div className="min-w-0 flex-1">
+                    <h2 className="text-lg font-semibold tracking-tight">핵심 결정 질문</h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      아래 다섯 가지가 정리되어야 프로토타입, MVP, 실서비스 범위가 섞이지 않습니다.
+                    </p>
+
+                    <div className="mt-4 space-y-3">
+                      {ISSUE_CARDS.map((item, index) => (
+                        <div key={item.question} className="rounded-xl border bg-background p-4">
+                          <div className="flex gap-3">
+                            <span className="flex size-7 shrink-0 items-center justify-center rounded-full border border-primary bg-primary/10 text-xs font-bold text-primary">
+                              {index + 1}
+                            </span>
+                            <div className="min-w-0">
+                              <h3 className="text-sm font-semibold">{item.question}</h3>
+                              <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                                {item.answer}
+                              </p>
+                              <p className="mt-2 rounded-lg bg-muted/60 px-2.5 py-1.5 text-xs leading-5 text-muted-foreground">
+                                {item.decision}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </Card>
