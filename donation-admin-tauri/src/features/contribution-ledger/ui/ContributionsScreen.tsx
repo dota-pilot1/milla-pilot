@@ -328,7 +328,7 @@ export function ContributionsScreen({ token, refreshKey = 0 }: { token: string; 
               <LedgerMetric icon={Building2} tone="sky" label="참여 시설" value={`${facilityCount}곳`} sub="참여 기관 수" />
             </div>
 
-            <div className="rounded-2xl border border-emerald-100 bg-emerald-50/50 p-3 shadow-sm">
+            <div className="rounded-2xl border border-emerald-100 bg-gradient-to-r from-emerald-50 via-teal-50/70 to-white p-3 shadow-sm">
               <div className="flex w-full min-w-0 gap-2 md:max-w-xl">
                 <Select
                   value={searchField}
@@ -375,24 +375,24 @@ type MetricTone = "violet" | "indigo" | "emerald" | "sky";
 
 const metricToneStyle: Record<MetricTone, { card: string; iconWrap: string; sub: string }> = {
   violet: {
-    card: "border-violet-100 bg-violet-50/55",
-    iconWrap: "bg-gradient-to-br from-violet-100 via-violet-50 to-white text-violet-700 ring-1 ring-violet-200/80",
-    sub: "text-violet-500",
+    card: "border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-teal-50/70",
+    iconWrap: "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200",
+    sub: "text-emerald-700",
   },
   indigo: {
-    card: "border-indigo-100 bg-indigo-50/55",
-    iconWrap: "bg-gradient-to-br from-indigo-100 via-indigo-50 to-white text-indigo-700 ring-1 ring-indigo-200/80",
-    sub: "text-indigo-500",
+    card: "border-emerald-100 bg-gradient-to-br from-teal-50 via-white to-emerald-50/80",
+    iconWrap: "bg-teal-100 text-teal-700 ring-1 ring-teal-200",
+    sub: "text-teal-700",
   },
   emerald: {
-    card: "border-emerald-100 bg-emerald-50/60",
-    iconWrap: "bg-gradient-to-br from-emerald-100 via-emerald-50 to-white text-emerald-700 ring-1 ring-emerald-200/80",
-    sub: "text-emerald-500",
+    card: "border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-emerald-100/50",
+    iconWrap: "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200",
+    sub: "text-emerald-700",
   },
   sky: {
-    card: "border-sky-100 bg-sky-50/60",
-    iconWrap: "bg-gradient-to-br from-sky-100 via-sky-50 to-white text-sky-700 ring-1 ring-sky-200/80",
-    sub: "text-sky-500",
+    card: "border-teal-100 bg-gradient-to-br from-teal-50 via-white to-emerald-50/70",
+    iconWrap: "bg-teal-100 text-teal-700 ring-1 ring-teal-200",
+    sub: "text-teal-700",
   },
 };
 
