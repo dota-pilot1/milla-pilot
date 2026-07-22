@@ -1413,10 +1413,12 @@ button:disabled {
   display: flex;
   min-height: 0;
   flex-direction: column;
-  border-right: 1px solid #d7e2dc;
+  border-right: 1px solid #b7ead1;
   color: #52525b;
-  background: #f8fafc;
-  box-shadow: inset -1px 0 0 rgba(15, 23, 42, 0.03);
+  background: linear-gradient(180deg, #f2fff9 0%, #effcf6 48%, #f8fffc 100%);
+  box-shadow:
+    inset -1px 0 0 rgba(5, 150, 105, 0.06),
+    1px 0 0 rgba(255, 255, 255, 0.65);
 }
 
 .sidebar-brand {
@@ -1426,8 +1428,8 @@ button:disabled {
   gap: 10px;
   min-height: 56px;
   padding: 0 14px;
-  border-bottom: 1px solid #d7e2dc;
-  background: #ffffff;
+  border-bottom: 1px solid #b7ead1;
+  background: linear-gradient(180deg, #eefdf6 0%, #e7faf1 100%);
 }
 
 .sidebar-brand-mark {
@@ -1508,8 +1510,8 @@ button:disabled {
 }
 
 .sidebar-menu button:hover {
-  color: #18181b;
-  border-color: #e4e4e7;
+  color: #065f46;
+  border-color: #b7ead1;
   background: #ffffff;
 }
 
@@ -1556,7 +1558,7 @@ button:disabled {
   overflow: hidden;
   margin: 4px 0 6px 18px;
   padding-left: 14px;
-  border-left: 2px solid #cbd5e1;
+  border-left: 2px solid #b7ead1;
 }
 
 .sidebar-chevron {
@@ -1598,8 +1600,8 @@ button:disabled {
 }
 
 .sidebar-group-title:hover {
-  background: #eef2f7;
-  color: #334155;
+  background: #ecfdf5;
+  color: #047857;
 }
 
 .sidebar-menu span,
@@ -1635,8 +1637,8 @@ button:disabled {
   justify-items: stretch;
   gap: 7px;
   padding: 10px 12px;
-  border-top: 1px solid #d7e2dc;
-  background: #f8fafc;
+  border-top: 1px solid #b7ead1;
+  background: linear-gradient(180deg, rgba(236, 253, 245, 0.45) 0%, #f8fffc 100%);
 }
 
 .sidebar-footer-tools {
