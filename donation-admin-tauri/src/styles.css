@@ -421,20 +421,24 @@ button:disabled {
   max-width: 720px;
 }
 
+/* dense 헤더는 카드가 아니라 페이지 위에 평평하게 — 웹 PageHeader 와 같은 패밀리룩.
+   구분은 박스가 아니라 아래 콘텐츠와의 간격이 담당한다. */
 .workspace-hero.dense {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
   max-width: none;
-  padding: 18px 22px;
-  border-radius: 14px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+  padding: 4px 2px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .workspace-hero.dense .workspace-hero-mark {
-  width: 42px;
-  height: 42px;
-  border-radius: 11px;
+  width: 48px;
+  height: 48px;
+  border-radius: 13px;
 }
 
 .workspace-hero.dense .workspace-hero-copy {
@@ -447,15 +451,15 @@ button:disabled {
 }
 
 .workspace-hero.dense h1 {
-  font-size: 22px;
-  line-height: 28px;
+  font-size: 24px;
+  line-height: 30px;
 }
 
 .workspace-hero.dense p:not(.eyebrow) {
-  margin-top: 4px;
+  margin-top: 5px;
   max-width: none;
-  font-size: 13px;
-  line-height: 19px;
+  font-size: 14px;
+  line-height: 20px;
 }
 
 .workspace-hero-mark {

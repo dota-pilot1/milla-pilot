@@ -17,6 +17,11 @@ import {
   type FacilityFilters,
 } from "@/features/facility-filter/ui/FacilityFilterBar";
 
+/**
+ * 후원하기 — MVP 는 목록이 주인공이다.
+ * 제목 → 필터 → 시설 카드. 요약 지표·추천 스트립·사이드 패널은 필터 칩,
+ * 카드 자체, 안내 다이얼로그와 정보가 겹쳐서 두지 않는다.
+ */
 export default function DonatePage() {
   const { data: facilities, isLoading, isError } = useQuery({
     queryKey: ["facilities"],
@@ -35,18 +40,14 @@ export default function DonatePage() {
   );
 
   return (
-    <PageShell>
-      <div className="space-y-6">
+    <PageShell width="wide">
+      <div className="space-y-8">
         <PageHeader
           icon={HandCoins}
           title="후원하기"
           description="시설이 직접 검수해 올린 준비물 목표에 참여합니다. 시설을 선택하면 지금 필요한 물품을 볼 수 있어요."
           actions={<DonationGuideDialog />}
         />
-
-        {facilities?.length ? (
-          <FacilityFilterBar filters={filters} onChange={setFilters} />
-        ) : null}
 
         {isLoading ? (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -66,17 +67,22 @@ export default function DonatePage() {
             title="후원 가능한 시설이 없습니다"
             description="곧 새로운 시설이 등록됩니다."
           />
-        ) : !visible.length ? (
-          <EmptyState
-            icon={SearchX}
-            title="조건에 맞는 시설이 없습니다"
-            description="검색어나 필터를 바꿔보세요."
-          />
         ) : (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {visible.map((facility) => (
-              <FacilityCard key={facility.id} facility={facility} />
-            ))}
+          <div className="space-y-5">
+            <FacilityFilterBar filters={filters} onChange={setFilters} />
+            {!visible.length ? (
+              <EmptyState
+                icon={SearchX}
+                title="조건에 맞는 시설이 없습니다"
+                description="검색어나 필터를 바꿔보세요."
+              />
+            ) : (
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {visible.map((facility) => (
+                  <FacilityCard key={facility.id} facility={facility} />
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

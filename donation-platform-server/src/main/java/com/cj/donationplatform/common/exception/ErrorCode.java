@@ -47,6 +47,7 @@ public enum ErrorCode {
     PURCHASE_ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "PO_003", "통합구매 기록을 찾을 수 없습니다."),
     SHIPMENT_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "PO_004", "통합구매(구매 진행) 이후에만 송장을 등록할 수 있습니다."),
     RECEIVE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "PO_005", "배송중 물품만 수령확인할 수 있습니다."),
+    PROJECT_TASK_NOT_FOUND(HttpStatus.NOT_FOUND, "PTASK_001", "프로젝트 할 일을 찾을 수 없습니다."),
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "COMMON_999", "서버 오류가 발생했습니다.");
 
     private final HttpStatus status;

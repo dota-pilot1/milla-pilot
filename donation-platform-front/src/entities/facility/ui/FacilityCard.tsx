@@ -2,7 +2,17 @@
 
 import Link from "next/link";
 import { useState, type MouseEvent } from "react";
-import { ArrowRight, ChevronRight, Loader2, MapPin } from "lucide-react";
+import {
+  ArrowRight,
+  Building2,
+  ChevronRight,
+  Loader2,
+  MapPin,
+  PackageCheck,
+  ShieldCheck,
+  ShoppingBag,
+  Truck,
+} from "lucide-react";
 import { Card } from "@/shared/ui/Card";
 import { Badge } from "@/shared/ui/Badge";
 import { buttonVariants } from "@/shared/ui/Button";
@@ -12,6 +22,7 @@ import {
   FACILITY_STATUS_VARIANT,
   FACILITY_TYPE_LABEL,
   type Facility,
+  type FacilityStatus,
 } from "../model/types";
 
 function shouldShowPending(event: MouseEvent<HTMLAnchorElement>) {
@@ -25,8 +36,33 @@ function shouldShowPending(event: MouseEvent<HTMLAnchorElement>) {
   );
 }
 
+const STATUS_HELP: Record<FacilityStatus, string> = {
+  RECRUITING: "지금 필요한 준비물을 고르고 함께 채울 수 있어요.",
+  BUYING: "모인 후원으로 시설별 통합 구매가 진행 중이에요.",
+  SHIPPING: "구매된 물품이 시설로 이동하고 있어요.",
+};
+
+const STATUS_TITLE: Record<FacilityStatus, string> = {
+  RECRUITING: "함께 채우는 중",
+  BUYING: "구매 진행 중",
+  SHIPPING: "배송 이동 중",
+};
+
+const ACTION_LABEL: Record<FacilityStatus, string> = {
+  RECRUITING: "함께 채우기",
+  BUYING: "진행 보기",
+  SHIPPING: "진행 보기",
+};
+
+const STATUS_ICON = {
+  RECRUITING: ShoppingBag,
+  BUYING: PackageCheck,
+  SHIPPING: Truck,
+} satisfies Record<FacilityStatus, typeof ShoppingBag>;
+
 export function FacilityCard({ facility }: { facility: Facility }) {
   const [pending, setPending] = useState(false);
+  const StatusIcon = STATUS_ICON[facility.status];
 
   return (
     <Link
@@ -40,22 +76,31 @@ export function FacilityCard({ facility }: { facility: Facility }) {
     >
       <Card
         className={cn(
-          "relative flex h-full flex-col p-5 transition-all duration-150 group-hover:-translate-y-0.5 group-hover:border-primary/40 group-hover:shadow-md group-active:translate-y-0 group-active:scale-[0.99]",
+          "relative flex h-full min-h-72 flex-col overflow-hidden p-5 transition-all duration-150 group-hover:-translate-y-0.5 group-hover:border-primary/40 group-hover:shadow-md group-active:translate-y-0 group-active:scale-[0.99]",
           pending && "border-primary/50 bg-muted/20 shadow-md ring-2 ring-ring/25",
         )}
       >
-        <div className="flex items-start gap-3">
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-base font-bold text-primary">
-            {facility.avatarInitial || facility.name.charAt(0)}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-primary/70" />
+
+        <div className="flex items-start gap-3 pt-1">
+          <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-base font-bold text-primary ring-1 ring-primary/10">
+            <StatusIcon className="size-5" />
           </span>
           <div className="min-w-0 flex-1">
-            <h3 className="truncate font-semibold">{facility.name}</h3>
+            <div className="flex min-w-0 items-center gap-2">
+              <h3 className="truncate font-semibold">{facility.name}</h3>
+            </div>
             <p className="mt-1 flex min-w-0 items-center gap-1 text-xs text-muted-foreground">
               <MapPin className="size-3.5 shrink-0" />
               <span className="truncate">{facility.region ?? "지역 미정"}</span>
             </p>
           </div>
-          <ChevronRight className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+          <div className="flex shrink-0 items-center gap-2">
+            <Badge variant={FACILITY_STATUS_VARIANT[facility.status]} className="h-7 px-3">
+              {FACILITY_STATUS_LABEL[facility.status]}
+            </Badge>
+            <ChevronRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+          </div>
         </div>
 
         <div className="mt-4 flex flex-1 flex-col">
@@ -69,34 +114,43 @@ export function FacilityCard({ facility }: { facility: Facility }) {
             </p>
           )}
 
-          <div className="mt-5 rounded-lg bg-muted/50 px-3 py-2">
-            <div className="flex min-h-6 flex-wrap items-center gap-1.5">
-              <Badge variant="muted" className="h-6 px-2">
+          <div className="mt-5 space-y-3 rounded-xl bg-muted/45 p-3">
+            <div className="flex flex-wrap gap-2">
+              <span className="inline-flex min-h-8 items-center gap-2 rounded-full bg-background px-3 text-xs font-semibold text-foreground/75 shadow-sm">
+                <Building2 className="size-3.5 text-primary" />
                 {FACILITY_TYPE_LABEL[facility.type]}
-              </Badge>
+              </span>
               {facility.verified ? (
-                <Badge variant="verified" className="h-6 px-2">
-                  ✓ 자격확인
-                </Badge>
+                <span className="inline-flex min-h-8 items-center gap-2 rounded-full bg-background px-3 text-xs font-semibold text-foreground/75 shadow-sm">
+                  <ShieldCheck className="size-3.5 text-primary" />
+                  자격 확인
+                </span>
               ) : null}
-              <Badge variant={FACILITY_STATUS_VARIANT[facility.status]} className="h-6 px-2">
-                {FACILITY_STATUS_LABEL[facility.status]}
-              </Badge>
+            </div>
+
+            <div className="flex items-start gap-3 rounded-xl bg-background p-3 text-sm shadow-sm">
+              <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-background text-primary shadow-sm">
+                <StatusIcon className="size-3.5" />
+              </span>
+              <div>
+                <p className="text-xs font-semibold text-primary">{STATUS_TITLE[facility.status]}</p>
+                <p className="mt-0.5 leading-5 text-foreground/80">{STATUS_HELP[facility.status]}</p>
+              </div>
             </div>
           </div>
         </div>
 
         <div className="mt-5 flex items-center justify-between gap-3 border-t pt-4">
-          <span className="min-w-0 truncate text-xs text-muted-foreground">
-            준비물 목표로 이동
+          <span className="min-w-0 truncate text-xs font-medium text-foreground/70">
+            시설 준비물 목표
           </span>
           <span
             className={cn(
-              buttonVariants({ variant: pending ? "default" : "outline", size: "sm" }),
-              "min-w-28",
+              buttonVariants({ variant: "default", size: "sm" }),
+              "min-w-36 shadow-sm",
             )}
           >
-            {pending ? "여는 중" : "필요 물품 보기"}
+            {pending ? "여는 중" : ACTION_LABEL[facility.status]}
             {pending ? (
               <Loader2 className="size-4 animate-spin" />
             ) : (
