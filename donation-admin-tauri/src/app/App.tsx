@@ -18,7 +18,7 @@ import { RoleManagementScreen } from "../features/role-management/ui/RoleManagem
 import { SiteSettingsScreen } from "../features/site-settings/ui/SiteSettingsScreen";
 import { API_BASE_URL, SERVER_ROOT_PATH } from "../shared/config/server";
 import { AppSidebar } from "../widgets/app-shell/ui/AppSidebar";
-import { AppTopbar } from "../widgets/app-shell/ui/AppTopbar";
+import { AppTopbar, type AdminFrameTheme } from "../widgets/app-shell/ui/AppTopbar";
 import {
   PROFILE_MENU,
   SETTINGS_MENU,
@@ -34,6 +34,13 @@ import {
 const appVersion = "0.1.0";
 const ACCESS_TOKEN_KEY = "donation-admin:access-token";
 const REFRESH_TOKEN_KEY = "donation-admin:refresh-token";
+const FRAME_THEME_KEY = "donation-admin:frame-theme";
+const FRAME_THEMES = new Set<AdminFrameTheme>(["mint", "sky", "violet", "rose"]);
+
+function readFrameTheme(): AdminFrameTheme {
+  const savedTheme = localStorage.getItem(FRAME_THEME_KEY);
+  return FRAME_THEMES.has(savedTheme as AdminFrameTheme) ? (savedTheme as AdminFrameTheme) : "mint";
+}
 
 export function App() {
   const [token, setToken] = useState(() => localStorage.getItem(ACCESS_TOKEN_KEY) || "");
@@ -44,8 +51,14 @@ export function App() {
   const [booting, setBooting] = useState(true);
   const [activeMenu, setActiveMenu] = useState("DASHBOARD");
   const [workspaceRefreshKey, setWorkspaceRefreshKey] = useState(0);
+  const [frameTheme, setFrameTheme] = useState<AdminFrameTheme>(readFrameTheme);
   const appUpdate = useAppUpdate(appVersion);
   const isLoggedIn = Boolean(token && user);
+
+  const changeFrameTheme = useCallback((theme: AdminFrameTheme) => {
+    setFrameTheme(theme);
+    localStorage.setItem(FRAME_THEME_KEY, theme);
+  }, []);
 
   const clearSession = useCallback(() => {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
@@ -162,7 +175,7 @@ export function App() {
   }
 
   return (
-    <div className="app-shell">
+    <div className="app-shell" data-admin-theme={frameTheme}>
       <AppSidebar
         menus={adminMenus}
         activeMenu={activeMenu}
@@ -177,7 +190,12 @@ export function App() {
         onLogout={handleLogout}
       />
       <div className="app-main">
-        <AppTopbar activeWebMenu={activeWebMenu} activeMenu={activeMenu} />
+        <AppTopbar
+          activeWebMenu={activeWebMenu}
+          activeMenu={activeMenu}
+          frameTheme={frameTheme}
+          onFrameThemeChange={changeFrameTheme}
+        />
         <AdminWorkspace
           activeMenu={activeMenu}
           activeWebMenu={activeWebMenu}

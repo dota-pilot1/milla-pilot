@@ -309,28 +309,26 @@ export function ContributionsScreen({ token, refreshKey = 0 }: { token: string; 
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               <LedgerMetric
                 icon={HandCoins}
-                tone="violet"
                 label="누적 후원금"
                 value={won(total)}
                 sub="전체 누적 후원액"
               />
               <LedgerMetric
                 icon={SearchCheck}
-                tone="indigo"
                 label="검색 결과"
                 value={`${gridRows.length}건`}
                 sub={won(filteredTotal)}
               />
-              <LedgerMetric icon={Users} tone="emerald" label="후원자" value={`${donorCount}명`} sub="중복 제외" />
-              <LedgerMetric icon={Building2} tone="sky" label="참여 시설" value={`${facilityCount}곳`} sub="참여 기관 수" />
+              <LedgerMetric icon={Users} label="후원자" value={`${donorCount}명`} sub="중복 제외" />
+              <LedgerMetric icon={Building2} label="참여 시설" value={`${facilityCount}곳`} sub="참여 기관 수" />
             </div>
 
-            <div className="rounded-2xl border border-emerald-100 bg-gradient-to-r from-emerald-50 via-teal-50/70 to-white p-3 shadow-sm">
+            <div className="admin-theme-toolbar rounded-2xl border p-3 shadow-sm">
               <div className="flex w-full min-w-0 gap-2 md:max-w-xl">
                 <Select
                   value={searchField}
                   onChange={(event) => setSearchField(event.target.value as SearchField)}
-                  className="h-10 rounded-xl border-emerald-100 bg-white text-[13px] font-bold"
+                  className="h-10 rounded-xl bg-white text-[13px] font-bold"
                   wrapperClassName="w-32 shrink-0"
                   aria-label="검색 대상"
                 >
@@ -349,7 +347,7 @@ export function ContributionsScreen({ token, refreshKey = 0 }: { token: string; 
               </div>
             </div>
 
-            <div className="overflow-hidden rounded-2xl border border-emerald-100 bg-white shadow-sm ring-1 ring-emerald-50">
+            <div className="admin-theme-table overflow-hidden rounded-2xl border bg-white shadow-sm ring-1">
               <AdminDataGrid<LedgerGridRow>
                 gridRef={gridRef}
                 rowData={gridRows}
@@ -368,55 +366,27 @@ export function ContributionsScreen({ token, refreshKey = 0 }: { token: string; 
   );
 }
 
-type MetricTone = "violet" | "indigo" | "emerald" | "sky";
-
-const metricToneStyle: Record<MetricTone, { card: string; iconWrap: string; sub: string }> = {
-  violet: {
-    card: "border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-teal-50/70",
-    iconWrap: "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200",
-    sub: "text-emerald-700",
-  },
-  indigo: {
-    card: "border-emerald-100 bg-gradient-to-br from-teal-50 via-white to-emerald-50/80",
-    iconWrap: "bg-teal-100 text-teal-700 ring-1 ring-teal-200",
-    sub: "text-teal-700",
-  },
-  emerald: {
-    card: "border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-emerald-100/50",
-    iconWrap: "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200",
-    sub: "text-emerald-700",
-  },
-  sky: {
-    card: "border-teal-100 bg-gradient-to-br from-teal-50 via-white to-emerald-50/70",
-    iconWrap: "bg-teal-100 text-teal-700 ring-1 ring-teal-200",
-    sub: "text-teal-700",
-  },
-};
-
 function LedgerMetric({
   icon: Icon,
-  tone,
   label,
   value,
   sub,
 }: {
   icon: LucideIcon;
-  tone: MetricTone;
   label: string;
   value: string;
   sub?: string;
 }) {
-  const style = metricToneStyle[tone];
   return (
-    <div className={`rounded-2xl border p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${style.card}`}>
+    <div className="admin-theme-kpi rounded-2xl border p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
       <div className="flex items-center gap-2.5">
-        <span className={`flex size-8 items-center justify-center rounded-lg ${style.iconWrap}`}>
+        <span className="admin-theme-kpi-icon flex size-8 items-center justify-center rounded-lg ring-1">
           <Icon size={17} />
         </span>
         <p className="text-[12px] font-bold text-zinc-500">{label}</p>
       </div>
       <p className="mt-2.5 truncate text-[38px] font-extrabold leading-[0.95] tracking-tight text-zinc-950">{value}</p>
-      {sub && <p className={`mt-2 truncate text-[12px] font-semibold ${style.sub}`}>{sub}</p>}
+      {sub && <p className="admin-theme-kpi-sub mt-2 truncate text-[12px] font-semibold">{sub}</p>}
     </div>
   );
 }
