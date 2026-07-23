@@ -8,10 +8,12 @@ import {
   BookOpenCheck,
   CheckCircle2,
   CircleAlert,
+  Building2,
   Download,
   Eye,
   EyeOff,
   GraduationCap,
+  HeartHandshake,
   Info,
   Loader2,
   LogIn,
@@ -27,10 +29,17 @@ import { WindowControls } from "../../../widgets/app-shell/ui/WindowControls";
 import { Button } from "../../../shared/ui/Button";
 import { Input } from "../../../shared/ui/Input";
 import { cn } from "../../../shared/lib/cn";
+import type { SignupAccountType } from "../../../entities/user/model/types";
 
 type LoginScreenProps = {
   onLogin: (email: string, password: string) => Promise<void>;
-  onSignup: (email: string, username: string, phoneNumber: string, password: string) => Promise<void>;
+  onSignup: (
+    accountType: SignupAccountType,
+    email: string,
+    username: string,
+    phoneNumber: string,
+    password: string,
+  ) => Promise<void>;
 };
 
 const PASSWORD_PATTERN = /^(?=.*[A-Za-z])(?=.*\d).{8,100}$/;
@@ -69,6 +78,7 @@ const seedLoginAccounts: SeedLoginAccount[] = [
 export function LoginScreen({ onLogin, onSignup }: LoginScreenProps) {
   const win = getCurrentWindow();
   const [mode, setMode] = useState<"login" | "signup">("login");
+  const [accountType, setAccountType] = useState<SignupAccountType>("DONOR");
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -141,7 +151,7 @@ export function LoginScreen({ onLogin, onSignup }: LoginScreenProps) {
     resetFeedback();
     try {
       if (isSignup) {
-        await onSignup(email.trim(), username.trim(), phoneNumber.trim(), password);
+        await onSignup(accountType, email.trim(), username.trim(), phoneNumber.trim(), password);
         saveRememberedLogin(email.trim(), password);
         setFormMessage("회원가입이 완료되었습니다. 같은 계정으로 로그인하세요.");
         setMode("login");
@@ -279,6 +289,51 @@ export function LoginScreen({ onLogin, onSignup }: LoginScreenProps) {
               </form>
 
               <form className={`login-form auth-form-pane signup ${isSignup ? "active" : ""}`} onSubmit={submitLogin}>
+                <fieldset className="signup-account-type">
+                  <legend>가입 유형</legend>
+                  <div className="signup-account-options">
+                    {[
+                      {
+                        value: "DONOR" as const,
+                        title: "일반 후원자",
+                        description: "시설을 둘러보고 필요한 물품 후원에 참여합니다.",
+                        icon: HeartHandshake,
+                      },
+                      {
+                        value: "FACILITY_MANAGER" as const,
+                        title: "시설 담당자",
+                        description: "시설 등록 신청 후 승인되면 시설 업무를 관리합니다.",
+                        icon: Building2,
+                      },
+                    ].map((option) => {
+                      const Icon = option.icon;
+                      const selected = accountType === option.value;
+
+                      return (
+                        <label
+                          key={option.value}
+                          className={cn("signup-account-option", selected && "active")}
+                        >
+                          <input
+                            checked={selected}
+                            name="accountType"
+                            onChange={() => setAccountType(option.value)}
+                            type="radio"
+                            value={option.value}
+                          />
+                          <span className="signup-account-icon">
+                            <Icon size={16} />
+                          </span>
+                          <span>
+                            <strong>{option.title}</strong>
+                            <small>{option.description}</small>
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </fieldset>
+
                 <label>
                   이메일
                   <Input

@@ -6,6 +6,7 @@ import { useAppUpdate } from "../shared/lib/useAppUpdate";
 import { configureAuthSession } from "../shared/api/client";
 import type { UserSummary } from "../entities/user/model/types";
 import type { TokenResponse } from "../entities/user/model/types";
+import type { SignupAccountType } from "../entities/user/model/types";
 import { login, logout, me, signup } from "../features/auth/api/authApi";
 import { fetchMenus } from "../features/menu/api/menuApi";
 import { FacilityManagementScreen } from "../features/facility-management/ui/FacilityManagementScreen";
@@ -15,6 +16,8 @@ import { UserManagementScreen } from "../features/user-management/ui/UserManagem
 import { DashboardScreen } from "../features/dashboard/ui/DashboardScreen";
 import { AppMenuManagementScreen } from "../features/app-menu-management/ui/AppMenuManagementScreen";
 import { RoleManagementScreen } from "../features/role-management/ui/RoleManagementScreen";
+import { PermissionManagementScreen } from "../features/permission-management/ui/PermissionManagementScreen";
+import { RolePermissionManagementScreen } from "../features/role-permission-management/ui/RolePermissionManagementScreen";
 import { SiteSettingsScreen } from "../features/site-settings/ui/SiteSettingsScreen";
 import { API_BASE_URL, SERVER_ROOT_PATH } from "../shared/config/server";
 import { AppSidebar } from "../widgets/app-shell/ui/AppSidebar";
@@ -140,8 +143,14 @@ export function App() {
     applyTokens(result);
   };
 
-  const handleSignup = async (email: string, username: string, phoneNumber: string, password: string) => {
-    await signup(email.trim(), username.trim(), phoneNumber.trim(), password);
+  const handleSignup = async (
+    accountType: SignupAccountType,
+    email: string,
+    username: string,
+    phoneNumber: string,
+    password: string,
+  ) => {
+    await signup(accountType, email.trim(), username.trim(), phoneNumber.trim(), password);
   };
 
   const handleLogout = async () => {
@@ -285,6 +294,14 @@ function AdminWorkspace({
 
   if (activeMenu === "ADMIN_ROLES") {
     return <RoleManagementScreen token={token} />;
+  }
+
+  if (activeMenu === "ADMIN_PERMISSIONS") {
+    return <PermissionManagementScreen token={token} />;
+  }
+
+  if (activeMenu === "ADMIN_ROLE_PERMISSIONS") {
+    return <RolePermissionManagementScreen token={token} />;
   }
 
   if (activeMenu === "ADMIN_MENU_MANAGEMENT") {

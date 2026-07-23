@@ -1,6 +1,6 @@
 [package]
 name = "donation-admin-tauri"
-version = "0.1.12"
+version = "0.1.13"
 description = "DonationPlatform admin desktop app"
 authors = ["DonationPlatform"]
 edition = "2021"

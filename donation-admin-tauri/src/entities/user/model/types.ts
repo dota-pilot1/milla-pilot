@@ -19,6 +19,8 @@ export type UserSummary = {
   createdAt?: string;
 };
 
+export type SignupAccountType = "DONOR" | "FACILITY_MANAGER";
+
 export type ManagedUser = {
   id: number;
   email: string;

@@ -1,4 +1,12 @@
-import type { HTMLAttributes, ReactNode, TableHTMLAttributes, TdHTMLAttributes, ThHTMLAttributes } from "react";
+import { ArrowUpDown, ChevronUp } from "lucide-react";
+import type {
+  ButtonHTMLAttributes,
+  HTMLAttributes,
+  ReactNode,
+  TableHTMLAttributes,
+  TdHTMLAttributes,
+  ThHTMLAttributes,
+} from "react";
 import { cn } from "../lib/cn";
 
 type DataTableProps = TableHTMLAttributes<HTMLTableElement> & {
@@ -75,6 +83,46 @@ export function DataTableHeaderCell({
     >
       {children}
     </th>
+  );
+}
+
+type DataTableSortDirection = "asc" | "desc";
+
+type DataTableSortableHeaderCellProps = Omit<DataTableHeaderCellProps, "children"> & {
+  children: ReactNode;
+  direction?: DataTableSortDirection | null;
+  onSort: ButtonHTMLAttributes<HTMLButtonElement>["onClick"];
+};
+
+export function DataTableSortableHeaderCell({
+  children,
+  direction = null,
+  onSort,
+  className,
+  ...props
+}: DataTableSortableHeaderCellProps) {
+  return (
+    <DataTableHeaderCell
+      className={className}
+      aria-sort={direction === null ? "none" : direction === "asc" ? "ascending" : "descending"}
+      {...props}
+    >
+      <button
+        type="button"
+        className="inline-flex items-center gap-1.5 rounded-md py-0.5 text-left transition-colors hover:text-zinc-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900/15"
+        onClick={onSort}
+      >
+        <span>{children}</span>
+        {direction ? (
+          <ChevronUp
+            size={13}
+            className={cn("text-zinc-700 transition-transform", direction === "desc" && "rotate-180")}
+          />
+        ) : (
+          <ArrowUpDown size={13} className="text-zinc-400" />
+        )}
+      </button>
+    </DataTableHeaderCell>
   );
 }
 

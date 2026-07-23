@@ -1,4 +1,4 @@
-import type { TokenResponse, UserSummary } from "../../../entities/user/model/types";
+import type { SignupAccountType, TokenResponse, UserSummary } from "../../../entities/user/model/types";
 import { apiRequest } from "../../../shared/api/client";
 
 export function login(email: string, password: string) {
@@ -8,10 +8,16 @@ export function login(email: string, password: string) {
   });
 }
 
-export function signup(email: string, username: string, phoneNumber: string, password: string) {
+export function signup(
+  accountType: SignupAccountType,
+  email: string,
+  username: string,
+  phoneNumber: string,
+  password: string,
+) {
   return apiRequest<UserSummary>("/api/auth/signup", {
     method: "POST",
-    body: { email, username, phoneNumber, password },
+    body: { accountType, email, username, phoneNumber, password },
   });
 }
 
